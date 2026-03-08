@@ -172,6 +172,29 @@ async function main() {
   const pool   = await hre.ethers.getContractAt("LendingPool",     ADDRESSES.lendingPool);
   const oracle = await hre.ethers.getContractAt("PriceOracle",     ADDRESSES.priceOracle);
 
+  // Step 0: refresh oracle price (deployer is the authorized oracle)
+  section("0. Refreshing oracle price...");
+  const COINGECKO = "https://api.coingecko.com/api/v3/simple/price?ids=polkadot&vs_currencies=usd";
+  let vdotPriceUsd;
+  if (process.env.VDOT_PRICE_USD) {
+    vdotPriceUsd = process.env.VDOT_PRICE_USD;
+    log(`Using env override: VDOT_PRICE_USD=${vdotPriceUsd}`);
+  } else {
+    try {
+      const resp = await fetch(COINGECKO);
+      const data = await resp.json();
+      vdotPriceUsd = data.polkadot.usd.toString();
+      log(`CoinGecko DOT price (vDOT proxy): $${vdotPriceUsd}`);
+    } catch (e) {
+      vdotPriceUsd = "8.50";
+      log(`CoinGecko failed, using fallback: $${vdotPriceUsd}`);
+    }
+  }
+  const freshPrice = hre.ethers.parseEther(vdotPriceUsd);
+  const priceTx = await oracle.submitPrice(ADDRESSES.vdot, freshPrice);
+  await priceTx.wait();
+  log(`Oracle price refreshed: $${vdotPriceUsd} | tx: ${priceTx.hash}`);
+
   // Step 1: collect positions
   section("1. Scanning active positions...");
   const activeUsers = await getActiveUsers(vault);
