@@ -64,30 +64,59 @@ log = logging.getLogger("dotlend-oracle")
 
 # ── Price source ──────────────────────────────────────────────────────────────
 
-# Fetch vDOT (bifrost-voucher-dot) directly; fall back to DOT price as proxy
-COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd"
-
 def fetch_vdot_price() -> Decimal:
-    """Fetch vDOT price in USD. Env override takes priority. Falls back to DOT price or $2.45."""
+    """
+    Fetch live vDOT price in USD from multiple sources.
+    Priority: CoinGecko vDOT → Binance DOT/USDT → DIA Oracle → env fallback
+    VDOT_PRICE_USD env var overrides everything.
+    """
     override = os.getenv("VDOT_PRICE_USD")
     if override:
         log.info(f"Using env override: VDOT_PRICE_USD={override}")
         return Decimal(override)
 
+    # Source 1: CoinGecko — vDOT directly, then DOT as proxy
     try:
-        resp = requests.get(COINGECKO_URL, timeout=10)
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd"
+        resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
         if "bifrost-voucher-dot" in data and "usd" in data["bifrost-voucher-dot"]:
             price = Decimal(str(data["bifrost-voucher-dot"]["usd"]))
-            log.info(f"CoinGecko vDOT price: ${price}")
-        else:
+            log.info(f"[price] CoinGecko vDOT: ${price}")
+            return price
+        if "polkadot" in data and "usd" in data["polkadot"]:
             price = Decimal(str(data["polkadot"]["usd"]))
-            log.info(f"CoinGecko DOT price (vDOT proxy): ${price}")
+            log.info(f"[price] CoinGecko DOT (proxy): ${price}")
+            return price
+    except Exception as e:
+        log.warning(f"CoinGecko failed: {e}")
+
+    # Source 2: Binance — DOT/USDT (no auth, high rate limits)
+    try:
+        resp = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()["price"])
+        log.info(f"[price] Binance DOT/USDT (proxy): ${price:.4f}")
         return price
     except Exception as e:
-        log.warning(f"CoinGecko fetch failed: {e} — using fallback $2.45")
-        return Decimal("2.45")
+        log.warning(f"Binance failed: {e}")
+
+    # Source 3: DIA Oracle — vDOT fair value
+    try:
+        resp = requests.get(
+            "https://api.diadata.org/v1/assetQuotation/Bifrost/0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+            timeout=10
+        )
+        resp.raise_for_status()
+        price = Decimal(str(resp.json()["Price"]))
+        log.info(f"[price] DIA vDOT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"DIA failed: {e}")
+
+    log.warning("All price sources failed — using fallback $2.45")
+    return Decimal("2.45")
 
 
 def price_to_wei(price_usd: Decimal) -> int:

@@ -184,29 +184,52 @@ async function main() {
 
   // Step 0: refresh oracle price (deployer is the authorized oracle)
   section("0. Refreshing oracle price...");
-  // Fetch vDOT (bifrost-voucher-dot) directly, fall back to DOT price, then hardcoded fallback
-  const COINGECKO_VDOT = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd";
   let vdotPriceUsd;
+
   if (process.env.VDOT_PRICE_USD) {
     vdotPriceUsd = process.env.VDOT_PRICE_USD;
     log(`Using env override: VDOT_PRICE_USD=${vdotPriceUsd}`);
   } else {
+    vdotPriceUsd = await fetchVdotPrice();
+  }
+
+  async function fetchVdotPrice() {
+    // Source 1: CoinGecko — vDOT directly (bifrost-voucher-dot)
     try {
-      const resp = await fetch(COINGECKO_VDOT);
-      const data = await resp.json();
-      if (data["bifrost-voucher-dot"]?.usd) {
-        vdotPriceUsd = data["bifrost-voucher-dot"].usd.toString();
-        log(`CoinGecko vDOT price: $${vdotPriceUsd}`);
-      } else if (data.polkadot?.usd) {
-        vdotPriceUsd = data.polkadot.usd.toString();
-        log(`CoinGecko DOT price (vDOT proxy): $${vdotPriceUsd}`);
-      } else {
-        throw new Error("no price in response");
+      const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd");
+      const d = await r.json();
+      if (d["bifrost-voucher-dot"]?.usd) {
+        log(`[price] CoinGecko vDOT: $${d["bifrost-voucher-dot"].usd}`);
+        return d["bifrost-voucher-dot"].usd.toString();
       }
-    } catch (e) {
-      vdotPriceUsd = "2.45";
-      log(`CoinGecko failed (${e.message.slice(0, 40)}), using fallback: $${vdotPriceUsd}`);
-    }
+      if (d.polkadot?.usd) {
+        log(`[price] CoinGecko DOT (proxy): $${d.polkadot.usd}`);
+        return d.polkadot.usd.toString();
+      }
+    } catch (_) {}
+
+    // Source 2: Binance — DOT/USDT (no auth, high rate limits)
+    try {
+      const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=DOTUSDT");
+      const d = await r.json();
+      if (d.price) {
+        log(`[price] Binance DOT/USDT (proxy): $${d.price}`);
+        return parseFloat(d.price).toFixed(4);
+      }
+    } catch (_) {}
+
+    // Source 3: DIA Oracle API — vDOT fair value
+    try {
+      const r = await fetch("https://api.diadata.org/v1/assetQuotation/Bifrost/0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF");
+      const d = await r.json();
+      if (d.Price) {
+        log(`[price] DIA vDOT: $${d.Price}`);
+        return d.Price.toFixed(4);
+      }
+    } catch (_) {}
+
+    log("[price] All sources failed — using last known fallback $2.45");
+    return "2.45";
   }
   const freshPrice = hre.ethers.parseEther(vdotPriceUsd);
   const priceTx = await oracle.submitPrice(ADDRESSES.vdot, freshPrice);
