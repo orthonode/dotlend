@@ -129,7 +129,7 @@ export function SolvencyStatus() {
       <div style={styles.badgeRow}>
         <span style={styles.dot(isRecent ? "#22c55e" : "#eab308")} />
         <span style={{ ...styles.badgeText, color: isRecent ? "#22c55e" : "#eab308" }}>
-          {isRecent ? "SOLVENT \u2713" : "PROOF AGING"}
+          {isRecent ? "SOLVENCY LOGGED \u2713" : "PROOF AGING"}
         </span>
       </div>
 
@@ -151,15 +151,19 @@ export function SolvencyStatus() {
 
       {/* Footer */}
       <div style={styles.footer}>
-        <span style={styles.footerText}>Last proven: {hoursAgo}</span>
+        <span style={styles.footerText}>Last logged: {hoursAgo}</span>
         <a
           href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
           style={styles.link}
         >
-          View proof on Blockscout &rarr;
+          View on Blockscout &rarr;
         </a>
+      </div>
+      {/* Honest testnet disclaimer */}
+      <div style={{ marginTop: "10px", fontSize: "11px", color: "#555", borderTop: "1px solid #1a1a1a", paddingTop: "8px" }}>
+        Testnet: MockSolvencyVerifier (accepts all proofs). Real UltraHonk verifier blocked by PolkaVM — BN254 precompiles not yet supported.
       </div>
     </div>
   );

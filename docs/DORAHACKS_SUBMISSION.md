@@ -22,11 +22,15 @@ The first money market on Polkadot Hub. Solvency cryptographically proven every 
 
 Polkadot has $330M in HOLLAR and vDOT at 76% utilization on Hydration — supply cap hit, demand proven. Yet there are **zero native lending markets on Polkadot Hub**. Every dollar of yield-bearing vDOT collateral sitting idle is a failure of the ecosystem. DotLend fixes this.
 
-### The ZK Innovation — Why This Is Different
+### The ZK Layer — What's Built and What's Mocked
 
-**Every 6 hours, a zero-knowledge proof is published on-chain proving DotLend is solvent. DotLend is the first money market anywhere to do this.**
+The ZK solvency circuit is written in Noir (UltraHonk proving system). It constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and per-user positions as private witnesses. The circuit compiles cleanly and generates valid proofs off-chain.
 
-The Noir circuit (UltraHonk proving system) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and individual positions as private witnesses. Protocol solvency becomes a mathematical fact verifiable by anyone on Blockscout — not a trust claim, not an audit, not a dashboard. A ZK proof published via `SolvencyGateway.publishSolvencyProof()` every 6 hours, on-chain, permanently.
+**What works today:** A Railway worker generates a proof every 6 hours and calls `SolvencyGateway.publishSolvencyProof()`. A `SolvencyProven` event is emitted on-chain and visible on Blockscout with collateral/debt totals.
+
+**Honest caveat:** On-chain verification uses `MockSolvencyVerifier`, which accepts all proofs without cryptographic checking. The production `SolvencyVerifier.sol` — the Noir-generated UltraHonk verifier — requires BN254 elliptic curve precompiles (EVM opcodes 0x06/0x07/0x08). PolkaVM does not yet support these precompiles. The real verifier contract is in the repo and will deploy as soon as PolkaVM adds BN254 support.
+
+The architecture, circuit, and proof pipeline are production-ready. The on-chain verification step is blocked by a PolkaVM platform limitation — which we consider worth surfacing rather than obscuring.
 
 ### What DotLend Does
 
