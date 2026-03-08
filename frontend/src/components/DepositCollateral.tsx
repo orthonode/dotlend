@@ -1,21 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther } from "viem";
 import { ADDRESSES, VAULT_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
+import { useRefetch } from "@/src/lib/refetch-context";
 
 export function DepositCollateral() {
   const { address } = useAccount();
   const [amount, setAmount] = useState("");
   const [step, setStep] = useState<"idle" | "approve" | "deposit">("idle");
+  const queryClient = useQueryClient();
+  const { triggerRefetch } = useRefetch();
 
   const { data: vdotBalance } = useReadContract({
     address: ADDRESSES.vdot,
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
   const { data: allowance } = useReadContract({
@@ -23,11 +27,19 @@ export function DepositCollateral() {
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, ADDRESSES.collateralVault] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+
+  // On success: immediately invalidate all wagmi queries + notify other components
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries();
+      triggerRefetch();
+    }
+  }, [isSuccess, queryClient, triggerRefetch]);
 
   const parsedAmount = amount ? parseEther(amount) : 0n;
   const needsApproval = allowance !== undefined && parsedAmount > 0n && parsedAmount > allowance;

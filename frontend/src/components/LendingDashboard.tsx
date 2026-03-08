@@ -52,7 +52,7 @@ export function LendingDashboard() {
       { address: ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "prices",      args: [ADDRESSES.vdot] },
       { address: ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "lastUpdated", args: [ADDRESSES.vdot] },
     ],
-    query: { refetchInterval: 30_000 },
+    query: { refetchInterval: 15_000 },
   });
 
   const { data: userData } = useReadContracts({
@@ -60,7 +60,7 @@ export function LendingDashboard() {
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
     ] : [],
-    query: { refetchInterval: 30_000 },
+    query: { refetchInterval: 15_000 },
   });
 
   const vdotPrice   = oracleData?.[0]?.result ?? 0n;

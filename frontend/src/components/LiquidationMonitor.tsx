@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
 import { formatEther, parseAbiItem } from "viem";
-import { ADDRESSES, VAULT_ABI, POOL_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
+import { ADDRESSES, VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
+import { useRefetch } from "@/src/lib/refetch-context";
 
 interface Position {
   user: `0x${string}`;
@@ -22,6 +24,8 @@ const POOL_ABI_FULL = [
 export function LiquidationMonitor() {
   const { address } = useAccount();
   const client = usePublicClient();
+  const queryClient = useQueryClient();
+  const { refetchCount, triggerRefetch } = useRefetch();
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,45 +33,70 @@ export function LiquidationMonitor() {
   const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
-    if (!client) return;
-
-    async function scanPositions() {
-      try {
-        setLoading(true);
-        const depositLogs = await client!.getLogs({
-          address: ADDRESSES.collateralVault,
-          event: parseAbiItem("event Deposited(address indexed user, uint256 amount)"),
-          fromBlock: 0n,
-          toBlock: "latest",
-        });
-
-        const uniqueUsers = [...new Set(depositLogs.map(l => l.args.user!))];
-        const result: Position[] = [];
-
-        for (const user of uniqueUsers) {
-          const [collateral, debt, hf, collUSD] = await Promise.all([
-            client!.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [user] }),
-            client!.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [user] }),
-            client!.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "getHealthFactor",   args: [user] }),
-            client!.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "getCollateralValue", args: [user] }),
-          ]);
-          if (collateral > 0n && debt > 0n) {
-            result.push({ user, collateral, debt, hf, collUSD });
-          }
-        }
-
-        // Sort by health factor (most at-risk first)
-        result.sort((a, b) => Number(a.hf - b.hf));
-        setPositions(result);
-      } catch (e) {
-        console.error("Scan failed:", e);
-      } finally {
-        setLoading(false);
-      }
+    if (isSuccess) {
+      queryClient.invalidateQueries();
+      triggerRefetch();
     }
+  }, [isSuccess, queryClient, triggerRefetch]);
 
+  const scanPositions = useCallback(async () => {
+    if (!client) return;
+    try {
+      setLoading(true);
+
+      // Fetch all unique depositors from Deposited events
+      const depositLogs = await client.getLogs({
+        address: ADDRESSES.collateralVault,
+        event: parseAbiItem("event Deposited(address indexed user, uint256 amount)"),
+        fromBlock: 0n,
+        toBlock: "latest",
+      });
+
+      const uniqueUsers = [...new Set(depositLogs.map(l => l.args.user!))];
+
+      // Read vDOT price from raw mapping — never reverts (no staleness check)
+      const vdotPrice = await client.readContract({
+        address: ADDRESSES.priceOracle,
+        abi: ORACLE_ABI,
+        functionName: "prices",
+        args: [ADDRESSES.vdot],
+      }) as bigint;
+
+      const result: Position[] = [];
+
+      for (const user of uniqueUsers) {
+        const [collateral, debt] = await Promise.all([
+          client.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [user] }) as Promise<bigint>,
+          client.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [user] }) as Promise<bigint>,
+        ]);
+
+        if (collateral === 0n || debt === 0n) continue;
+
+        // Compute collateralUSD and HF client-side — same formula as CollateralVault.sol
+        // collateralUSD = collateral * price / 1e18
+        // HF = collateralUSD * 80 * 1e18 / (debt * 100)
+        const collUSD = collateral * vdotPrice / BigInt(1e18);
+        const hf = collUSD * 80n * BigInt(1e18) / (debt * 100n);
+
+        result.push({ user, collateral, debt, hf, collUSD });
+      }
+
+      // Sort by health factor ascending (most at-risk first)
+      result.sort((a, b) => (a.hf < b.hf ? -1 : a.hf > b.hf ? 1 : 0));
+      setPositions(result);
+    } catch (e) {
+      console.error("[LiquidationMonitor] scan failed:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [client]);
+
+  // Re-scan on mount, on any tx success (via refetchCount), and every 15 seconds
+  useEffect(() => {
     scanPositions();
-  }, [client, isSuccess]);
+    const interval = setInterval(scanPositions, 15_000);
+    return () => clearInterval(interval);
+  }, [scanPositions, refetchCount]);
 
   function handleLiquidate(borrower: `0x${string}`) {
     writeContract({

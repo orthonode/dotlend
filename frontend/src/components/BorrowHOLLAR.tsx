@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther } from "viem";
 import { ADDRESSES, VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
+import { useRefetch } from "@/src/lib/refetch-context";
 
 const MAX_LTV = 0.70;
 const LIQ_THRESHOLD = 0.80;
@@ -11,6 +13,8 @@ const LIQ_THRESHOLD = 0.80;
 export function BorrowHOLLAR() {
   const { address } = useAccount();
   const [amount, setAmount] = useState("");
+  const queryClient = useQueryClient();
+  const { triggerRefetch } = useRefetch();
 
   // Read raw mappings — never revert regardless of oracle freshness
   const { data } = useReadContracts({
@@ -19,7 +23,7 @@ export function BorrowHOLLAR() {
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI,  functionName: "debtBalance",        args: [address] },
       { address: ADDRESSES.priceOracle,     abi: ORACLE_ABI, functionName: "prices",             args: [ADDRESSES.vdot] },
     ] : [],
-    query: { refetchInterval: 30_000 },
+    query: { refetchInterval: 15_000 },
   });
 
   const collateralRaw = data?.[0]?.result ?? 0n;
@@ -44,6 +48,13 @@ export function BorrowHOLLAR() {
 
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries();
+      triggerRefetch();
+    }
+  }, [isSuccess, queryClient, triggerRefetch]);
 
   function handleBorrow() {
     writeContract({

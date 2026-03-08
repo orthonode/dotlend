@@ -1,15 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther, maxUint256 } from "viem";
 import { ADDRESSES, VAULT_ABI, POOL_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
+import { useRefetch } from "@/src/lib/refetch-context";
 
 export function RepayAndWithdraw() {
   const { address } = useAccount();
   const [repayAmount, setRepayAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [activeTab, setActiveTab] = useState<"repay" | "withdraw">("repay");
+  const queryClient = useQueryClient();
+  const { triggerRefetch } = useRefetch();
 
   const { data } = useReadContracts({
     contracts: address ? [
@@ -18,7 +22,7 @@ export function RepayAndWithdraw() {
       { address: ADDRESSES.hollar,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
       { address: ADDRESSES.hollar,          abi: ERC20_ABI, functionName: "allowance",         args: [address, ADDRESSES.lendingPool] },
     ] : [],
-    query: { refetchInterval: 30_000 },
+    query: { refetchInterval: 15_000 },
   });
 
   const debt       = data?.[0]?.result ?? 0n;
@@ -31,6 +35,13 @@ export function RepayAndWithdraw() {
 
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries();
+      triggerRefetch();
+    }
+  }, [isSuccess, queryClient, triggerRefetch]);
 
   function handleApprove() {
     writeContract({
