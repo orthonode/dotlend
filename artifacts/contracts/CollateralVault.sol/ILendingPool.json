@@ -1,25 +1,19 @@
 {
   "_format": "hh-resolc-artifact-1",
-  "contractName": "IPriceOracle",
-  "sourceName": "contracts/LendingPool.sol",
+  "contractName": "ILendingPool",
+  "sourceName": "contracts/CollateralVault.sol",
   "abi": [
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "token",
+          "name": "user",
           "type": "address"
         }
       ],
-      "name": "getPrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
+      "name": "accrueInterest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],
