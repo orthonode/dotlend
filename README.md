@@ -231,9 +231,14 @@ npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
 ## Oracle
 
 ### Testnet
-`oracle/oracle.py` — Python script, runs every 30 minutes.
-Fetches DOT/USD from CoinGecko → calls `PriceOracle.submitPrice(vdot, price_in_wei)`.
-Environment override: `VDOT_PRICE_USD=8.50 python3 oracle/oracle.py`
+`oracle/oracle.py` — Python script deployed on Railway. The **container runs 24/7**; the script sleeps 30 minutes between price posts. Railway's `restartPolicyType: ALWAYS` auto-restarts the container on any crash.
+
+Loop:
+1. Fetch DOT/USD from CoinGecko (with Binance + DIA fallbacks)
+2. Call `PriceOracle.submitPrice(vdot, price_in_wei)` on-chain
+3. Sleep 30 minutes → repeat
+
+Environment override for local testing: `VDOT_PRICE_USD=8.50 python3 oracle/oracle.py`
 
 ### Mainnet Path — Hyperbridge ISMP
 On mainnet, `PriceOracle` will be replaced with a Hyperbridge ISMP adapter:
@@ -437,21 +442,38 @@ All 76 tests run on local Hardhat — no testnet required. No mocking of chain b
 
 ## Minting Test Tokens
 
-To use the live testnet frontend, mint MockvDOT and MockHOLLAR to your MetaMask wallet:
+MockvDOT and MockHOLLAR both have an unrestricted `mint(address to, uint256 amount)` function — anyone can call it on testnet. This is intentional: it lets judges and testers fund any wallet without needing the deployer key.
+
+**How to mint:**
+
+1. Open `scripts/mint-to-wallet.js` and set `RECIPIENT` to your MetaMask address (or leave it as the default demo address).
+2. Run:
 
 ```bash
-# Mint 1000 MockvDOT + 1000 MockHOLLAR to any address
-RECIPIENT=0xYourAddress npx hardhat run scripts/mint-to-wallet.js --network polkadotHubTestnet
-
-# Or edit scripts/mint-to-wallet.js and set RECIPIENT directly
 npx hardhat run scripts/mint-to-wallet.js --network polkadotHubTestnet
 ```
 
-Add Polkadot Hub TestNet to MetaMask:
-- **Network name:** Polkadot Hub TestNet
-- **RPC URL:** https://eth-rpc-testnet.polkadot.io
-- **Chain ID:** 420420417
-- **Currency symbol:** DOT
+The script mints **1000 MockvDOT + 1000 MockHOLLAR** in two transactions and logs both tx hashes. It uses whichever address is in your `.env` `PRIVATE_KEY` as the signer — the signer pays gas (WND), the tokens go to `RECIPIENT`.
+
+**What the script does internally:**
+
+```js
+vdot.mint(RECIPIENT, parseEther("1000"))    // calls MockvDOT.mint()
+hollar.mint(RECIPIENT, parseEther("1000"))  // calls MockHOLLAR.mint()
+```
+
+**Add Polkadot Hub TestNet to MetaMask:**
+
+| Field | Value |
+|-------|-------|
+| Network name | Polkadot Hub TestNet |
+| RPC URL | https://eth-rpc-testnet.polkadot.io |
+| Chain ID | 420420417 |
+| Currency symbol | DOT |
+
+After adding the network and minting, import the token addresses into MetaMask:
+- MockvDOT: `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA`
+- MockHOLLAR: `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf`
 
 ---
 
