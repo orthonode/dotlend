@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --polkadot: #E6007A;
+}
+
+body {
+  background: #0a0a0a;
+  color: #ffffff;
+  font-family: 'Courier New', Courier, monospace;
+}

@@ -1,0 +1,26 @@
+# Claude files — never push
+.claude/
+CLAUDE.md
+
+# Internal strategy — never push
+WINNING_PLAN.md
+
+# Environment — secrets
+.env
+
+# Hardhat artifacts
+node_modules/
+artifacts/
+cache/
+typechain-types/
+
+# Coverage
+coverage/
+coverage.json
+
+# Build
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
