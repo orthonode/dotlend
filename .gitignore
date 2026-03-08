@@ -21,6 +21,9 @@ coverage.json
 # Build
 dist/
 
+# Oracle venv
+oracle/.venv/
+
 # OS
 .DS_Store
 Thumbs.db
