@@ -19,4 +19,6 @@ export const config = createConfig({
   transports: {
     [polkadotHubTestnet.id]: http(),
   },
+  // Poll for tx receipt every 2s (default is 4s) — faster post-tx UI refresh
+  pollingInterval: 2_000,
 });
