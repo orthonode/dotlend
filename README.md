@@ -435,12 +435,100 @@ All 76 tests run on local Hardhat — no testnet required. No mocking of chain b
 
 ---
 
+## Minting Test Tokens
+
+To use the live testnet frontend, mint MockvDOT and MockHOLLAR to your MetaMask wallet:
+
+```bash
+# Mint 1000 MockvDOT + 1000 MockHOLLAR to any address
+RECIPIENT=0xYourAddress npx hardhat run scripts/mint-to-wallet.js --network polkadotHubTestnet
+
+# Or edit scripts/mint-to-wallet.js and set RECIPIENT directly
+npx hardhat run scripts/mint-to-wallet.js --network polkadotHubTestnet
+```
+
+Add Polkadot Hub TestNet to MetaMask:
+- **Network name:** Polkadot Hub TestNet
+- **RPC URL:** https://eth-rpc-testnet.polkadot.io
+- **Chain ID:** 420420417
+- **Currency symbol:** DOT
+
+---
+
+## Oracle Setup (Manual Price Refresh)
+
+The oracle runs automatically on Railway every 30 minutes. To submit a price manually:
+
+```bash
+# Submit $2.45 vDOT price to PriceOracle on-chain
+npx hardhat run scripts/set-price.js --network polkadotHubTestnet
+
+# Override price
+VDOT_PRICE=3.10 npx hardhat run scripts/set-price.js --network polkadotHubTestnet
+```
+
+---
+
+## PolkaVM Compatibility
+
+DotLend was built with PolkaVM's execution constraints as hard requirements from day one.
+
+**Explicitly avoided:**
+
+| Pattern | Why Avoided |
+|---------|-------------|
+| `selfdestruct()` | Not supported by PolkaVM |
+| `EXTCODECOPY` | Not supported by PolkaVM |
+| `CREATE2` / factory patterns | Not supported by PolkaVM |
+| `assembly {}` blocks | Bypasses PolkaVM safety model |
+| `block.prevrandao` / `block.difficulty` | Unreliable on PolkaVM |
+| OpenZeppelin v5.x | Import patterns incompatible with resolc |
+
+**Safe patterns used:**
+- All math in 1e18 fixed-point — no floating point
+- Interest accrual via `block.timestamp` — safe on PolkaVM
+- OpenZeppelin v4.9.6: `ReentrancyGuard`, `Ownable`, `ERC20`, `SafeERC20`
+- Compiler: `resolc 0.5.0` via `@parity/hardhat-polkadot`
+- Artifact format: `hh-resolc-artifact-1` with `0x50564d00` PolkaVM bytecode prefix
+
+---
+
+## Mainnet Roadmap
+
+| Phase | Timeline | Milestone |
+|-------|----------|-----------|
+| **1 — Testnet** | March 2026 | 7 contracts on Polkadot Hub TestNet, 76 tests ✓ |
+| **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
+| **3 — Mainnet** | Q2–Q3 2026 | Deploy with Hyperbridge ISMP oracle; real SolvencyVerifier (BN254 precompile) |
+| **4 — Bifrost** | Q3 2026 | SLPx one-click: mint vDOT + post as collateral in one tx |
+| **5 — Scale** | Q3 2026 | Velocity Labs DeFi Builders Cohort 2; target $10M TVL |
+
+**Hyperbridge ISMP oracle (mainnet):**
+Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOracle.onAccept()` → CollateralVault + LendingPool. No Chainlink. No bridge. 100% Polkadot-native.
+
+---
+
 ## Docs
 
 - [docs/WHITEPAPER.md](./docs/WHITEPAPER.md) — protocol mechanics, math, ZK circuit, oracle design, mainnet roadmap
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — full system diagrams: contract interactions, user flows, ZK pipeline, deployment topology
+- [docs/PITCH_DECK.md](./docs/PITCH_DECK.md) — 12-slide pitch deck (markdown source)
+- [docs/DORAHACKS_SUBMISSION.md](./docs/DORAHACKS_SUBMISSION.md) — DoraHacks submission text
+- [docs/JUDGE_OUTREACH.md](./docs/JUDGE_OUTREACH.md) — judge DM templates
 - [PHASES.md](./PHASES.md) — project phases with completion criteria and deployed addresses
 - [docs/ROADMAP.md](./docs/ROADMAP.md) — sprint milestones
+
+---
+
+## Team
+
+**Orthonode Infrastructure Labs**
+Bhopal, India
+
+Building verification and governance infrastructure across multiple chains.
+
+research@orthonode.xyz | orthonode.xyz | nexucore.xyz
+github.com/orthonode
 
 ---
 
@@ -449,8 +537,6 @@ All 76 tests run on local Hardhat — no testnet required. No mocking of chain b
 **Polkadot Solidity Hackathon 2026** — EVM Track — DeFi/Stablecoin-enabled dApps
 **Submission deadline:** March 20, 2026 23:59
 **Demo Day:** March 24–25, 2026
-
-Built by **Orthonode Systems** — Arhant Barmate
 
 ---
 
