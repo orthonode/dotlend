@@ -71,15 +71,9 @@ export function MintTokens() {
             themselves are free.
           </p>
           <p className="text-gray-500">
-            Need testnet DOT for gas?{" "}
-            <a
-              href="https://faucet.polkadot.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#E6007A] hover:underline"
-            >
-              Get it from the Polkadot faucet →
-            </a>
+            Gas is paid in testnet DOT (the native token of Polkadot Hub TestNet).
+            If your wallet has no DOT, ask in the Polkadot Discord{" "}
+            <span className="text-white font-mono">#faucet</span> channel.
           </p>
         </div>
       </div>

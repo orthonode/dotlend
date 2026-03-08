@@ -453,7 +453,7 @@ This section is written for judges and testers who want to interact with the liv
 | Chain ID | `420420417` |
 | Currency symbol | `DOT` |
 
-You will need a small amount of testnet DOT (WND) for gas. Get it from the [Polkadot faucet](https://faucet.polkadot.io) or ask in the Polkadot Discord `#faucet` channel.
+You will need a small amount of testnet DOT for gas (the native token of Polkadot Hub TestNet). Ask in the Polkadot Discord `#faucet` channel if your wallet has none.
 
 ### Step 2 — Mint MockvDOT and MockHOLLAR to your wallet
 
