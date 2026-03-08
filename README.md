@@ -1,6 +1,7 @@
 # DotLend
 ### The first money market on Polkadot Hub. Borrow HOLLAR against vDOT.
 
+[![CI](https://github.com/orthonode/dotlend/actions/workflows/ci.yml/badge.svg)](https://github.com/orthonode/dotlend/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Chain: Polkadot Hub TestNet](https://img.shields.io/badge/Chain-Polkadot%20Hub%20TestNet-E6007A)](https://blockscout-testnet.polkadot.io)
 [![Tests: 76 passing](https://img.shields.io/badge/Tests-76%20passing-brightgreen)]()
