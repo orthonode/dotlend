@@ -105,20 +105,19 @@ availability. Local tests pass using MockSolvencyVerifier (no pairing overhead).
 
 ---
 
-## Phase 5 — Submission
-**Goal:** Project documented, video recorded, submitted on DoraHacks before Mar 20 23:59.
+## Phase 5 — Submission ✅ COMPLETE (docs)
 
 ### Deliverables
-- [ ] `README.md` — full: what it is, how to run, deployed addresses, architecture, Subscan links
-- [ ] `docs/WHITEPAPER.md` — mechanism, math, interest model, mainnet Hyperbridge ISMP path
-- [ ] `docs/ARCHITECTURE.md` — contract diagram, oracle flow, frontend architecture
+- [x] `README.md` — full: what it is, how to run, deployed addresses, architecture diagrams, security
+- [x] `docs/WHITEPAPER.md` — 965 lines: mechanism, math, ZK circuit, interest model, mainnet Hyperbridge ISMP path
+- [x] `docs/ARCHITECTURE.md` — 985 lines: full ASCII diagrams, all user flows, ZK pipeline, deployment topology, security model
 - [ ] Demo video (3 min, YouTube unlisted): problem → live demo → architecture → why Polkadot
 - [ ] DoraHacks submission (before Mar 20 23:59)
 - [ ] DM Victor (Bifrost judge) on X about vDOT + DeFi Singularity
 - [ ] Demo Day prep: 3-min script memorized, camera tested, nexucore.xyz live
 
 ### Done Criteria
-DoraHacks submission confirmed. README has all Subscan links. Video uploaded. Demo rehearsed 3×.
+DoraHacks submission confirmed. README has all deployed addresses. Video uploaded. Demo rehearsed 3×.
 
 ---
 
