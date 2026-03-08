@@ -440,40 +440,86 @@ All 76 tests run on local Hardhat — no testnet required. No mocking of chain b
 
 ---
 
-## Minting Test Tokens
+## Testing the Protocol — Step by Step
 
-MockvDOT and MockHOLLAR both have an unrestricted `mint(address to, uint256 amount)` function — anyone can call it on testnet. This is intentional: it lets judges and testers fund any wallet without needing the deployer key.
+This section is written for judges and testers who want to interact with the live deployment on Polkadot Hub TestNet.
 
-**How to mint:**
+### Step 1 — Add the network to MetaMask
 
-1. Open `scripts/mint-to-wallet.js` and set `RECIPIENT` to your MetaMask address (or leave it as the default demo address).
-2. Run:
+| Field | Value |
+|-------|-------|
+| Network name | Polkadot Hub TestNet |
+| RPC URL | `https://eth-rpc-testnet.polkadot.io` |
+| Chain ID | `420420417` |
+| Currency symbol | `DOT` |
+
+You will need a small amount of testnet DOT (WND) for gas. Get it from the [Polkadot faucet](https://faucet.polkadot.io) or ask in the Polkadot Discord `#faucet` channel.
+
+### Step 2 — Mint MockvDOT and MockHOLLAR to your wallet
+
+Both tokens have a **public, permissionless `mint()` function** — no deployer key required. Anyone can mint to any address on testnet. Two ways to do it:
+
+#### Option A — Script (recommended, takes 30 seconds)
+
+```bash
+git clone https://github.com/orthonode/dotlend
+cd dotlend
+npm install --legacy-peer-deps
+cp .env.example .env
+# Add your wallet's PRIVATE_KEY to .env
+```
+
+Edit `scripts/mint-to-wallet.js` line 3 — change `RECIPIENT` to your MetaMask address:
+
+```js
+const RECIPIENT = "0xYourMetaMaskAddressHere";
+```
+
+Then run:
 
 ```bash
 npx hardhat run scripts/mint-to-wallet.js --network polkadotHubTestnet
 ```
 
-The script mints **1000 MockvDOT + 1000 MockHOLLAR** in two transactions and logs both tx hashes. It uses whichever address is in your `.env` `PRIVATE_KEY` as the signer — the signer pays gas (WND), the tokens go to `RECIPIENT`.
-
-**What the script does internally:**
-
-```js
-vdot.mint(RECIPIENT, parseEther("1000"))    // calls MockvDOT.mint()
-hollar.mint(RECIPIENT, parseEther("1000"))  // calls MockHOLLAR.mint()
+Output:
+```
+Signer: 0x...
+Minting 1000 MockvDOT...   vDOT tx: 0x...
+Minting 1000 MockHOLLAR... HOLLAR tx: 0x...
+Done. 1000 vDOT + 1000 HOLLAR minted to 0xYourAddress
 ```
 
-**Add Polkadot Hub TestNet to MetaMask:**
+Your wallet now has 1000 vDOT and 1000 HOLLAR. Gas (WND) is deducted from the signer, not from the recipient.
 
-| Field | Value |
-|-------|-------|
-| Network name | Polkadot Hub TestNet |
-| RPC URL | https://eth-rpc-testnet.polkadot.io |
-| Chain ID | 420420417 |
-| Currency symbol | DOT |
+#### Option B — Blockscout (no code, no setup)
 
-After adding the network and minting, import the token addresses into MetaMask:
-- MockvDOT: `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA`
-- MockHOLLAR: `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf`
+1. Go to [MockvDOT on Blockscout](https://blockscout-testnet.polkadot.io/address/0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA)
+2. Click **Write Contract** → connect MetaMask → call `mint(to, amount)`
+   - `to`: your MetaMask address
+   - `amount`: `1000000000000000000000` (1000 tokens in wei)
+3. Repeat for [MockHOLLAR](https://blockscout-testnet.polkadot.io/address/0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf)
+
+### Step 3 — Import tokens into MetaMask
+
+In MetaMask → Import tokens → add each address:
+
+| Token | Contract Address |
+|-------|-----------------|
+| MockvDOT | `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA` |
+| MockHOLLAR | `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf` |
+
+### Step 4 — Use the frontend
+
+Go to **[nexucore.xyz](https://nexucore.xyz)** and connect your MetaMask wallet (switch to Polkadot Hub TestNet if prompted).
+
+Full user flow:
+1. **Deposit vDOT** — approve + deposit as collateral (CollateralVault)
+2. **Borrow HOLLAR** — borrow up to 70% of your collateral USD value
+3. **Monitor health factor** — watch it move as vDOT price updates every 30 min
+4. **Repay HOLLAR** — use "Full debt" button to clear the entire balance including accrued interest
+5. **Withdraw vDOT** — withdraws collateral once debt is fully cleared
+
+> The oracle posts a fresh price every 30 minutes. All UI values update automatically after every confirmed transaction.
 
 ---
 
@@ -549,8 +595,13 @@ Bhopal, India
 
 Building verification and governance infrastructure across multiple chains.
 
-research@orthonode.xyz | orthonode.xyz | nexucore.xyz
-github.com/orthonode
+| | |
+|-|-|
+| **On-chain identity** | Display name: **Orthonode Labs** · Legal name: **Arhant Barmate** |
+| **Deployer wallet** | `0xb947dF17869fAB2DF223a38F28f38b40ca636d4e` — [view on Blockscout](https://blockscout-testnet.polkadot.io/address/0xb947dF17869fAB2DF223a38F28f38b40ca636d4e) |
+| **Contact** | research@orthonode.xyz |
+| **Website** | orthonode.xyz · nexucore.xyz |
+| **GitHub** | github.com/orthonode |
 
 ---
 
