@@ -65,6 +65,7 @@ export default function Home() {
         <div className="flex justify-center gap-4 mt-2">
           <a href="https://blockscout-testnet.polkadot.io/address/0xA8b36339C55c664BBe7C59d2d59Abf91f472C8d0" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">LendingPool</a>
           <a href="https://blockscout-testnet.polkadot.io/address/0xff58177D585b5dB022B0773405a40bEC443E512a" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">CollateralVault</a>
+          <a href="https://youtu.be/WYxeeyrQLWc" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">Demo Video</a>
           <a href="https://github.com/orthonode/dotlend" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">GitHub</a>
         </div>
       </div>

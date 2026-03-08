@@ -135,7 +135,8 @@ https://github.com/orthonode/dotlend
 
 ## Demo
 
-https://nexucore.xyz
+- **Live frontend:** https://nexucore.xyz
+- **Demo video:** https://youtu.be/WYxeeyrQLWc
 
 ---
 
