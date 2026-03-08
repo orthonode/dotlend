@@ -2,7 +2,8 @@ providers = ["python", "node"]
 
 [phases.install]
 cmds = [
-  "pip3 install -r oracle/requirements.txt",
+  "python3 -m ensurepip --upgrade",
+  "python3 -m pip install -r oracle/requirements.txt",
   "npm install --legacy-peer-deps"
 ]
 

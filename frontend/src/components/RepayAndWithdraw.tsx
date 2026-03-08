@@ -110,7 +110,12 @@ export function RepayAndWithdraw() {
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Repay Amount</span>
-              <button onClick={() => setRepayAmount(formatEther(debt))} className="text-[#E6007A] hover:underline">
+              <button onClick={() => {
+                // Add 1% buffer to cover interest that accrues between read and tx execution.
+                // repay() caps at actual debt (min(sent, debt)), so the extra stays in your wallet.
+                const buffered = debt + debt / 100n;
+                setRepayAmount(formatEther(buffered));
+              }} className="text-[#E6007A] hover:underline">
                 Full debt
               </button>
             </div>
@@ -118,7 +123,7 @@ export function RepayAndWithdraw() {
               placeholder="0.00" disabled={busy}
               className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50" />
           </div>
-          <div className="text-xs text-gray-500">Stability fee: 0.5%/yr. Repay slightly more than principal to clear fully.</div>
+          <div className="text-xs text-gray-500">Stability fee accrues each second. &quot;Full debt&quot; adds a 1% buffer — you&apos;re only charged the exact on-chain debt.</div>
           {needsApproval ? (
             <button onClick={handleApprove} disabled={busy}
               className="w-full py-3 rounded-lg font-bold text-sm bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition">
