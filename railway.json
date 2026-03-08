@@ -5,7 +5,7 @@
     "buildCommand": "npm install --legacy-peer-deps"
   },
   "deploy": {
-    "startCommand": "npx hardhat --config hardhat.config.cjs run scripts/generate-solvency-proof.js --network polkadotHubTestnet",
+    "startCommand": "npx hardhat --config hardhat.config.cjs run scripts/generate-solvency-proof.js --network polkadotHubTestnet --no-compile",
     "restartPolicyType": "NEVER"
   }
 }

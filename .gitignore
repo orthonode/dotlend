@@ -8,9 +8,9 @@ WINNING_PLAN.md
 # Environment — secrets
 .env
 
-# Hardhat artifacts
+# Hardhat artifacts — committed so Railway skips resolc compilation
 node_modules/
-artifacts/
+# artifacts/ — intentionally tracked
 cache/
 typechain-types/
 
