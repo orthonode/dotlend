@@ -33,6 +33,43 @@ describe("CollateralVault", function () {
     return ctx;
   }
 
+  // Full protocol fixture — vault wired to actual LendingPool (needed for withdraw+debt tests)
+  async function fullProtocolDepositFixture() {
+    const [owner, user, other] = await ethers.getSigners();
+
+    const MockvDOT = await ethers.getContractFactory("MockvDOT");
+    const vdot = await MockvDOT.deploy();
+    await vdot.waitForDeployment();
+
+    const MockHOLLAR = await ethers.getContractFactory("MockHOLLAR");
+    const hollar = await MockHOLLAR.deploy();
+    await hollar.waitForDeployment();
+
+    const PriceOracle = await ethers.getContractFactory("PriceOracle");
+    const oracle = await PriceOracle.deploy();
+    await oracle.waitForDeployment();
+    await oracle.setAuthorizedOracle(owner.address);
+    await oracle.submitPrice(vdot.target, ethers.parseEther("10")); // $10/vDOT
+
+    const CollateralVault = await ethers.getContractFactory("CollateralVault");
+    const vault = await CollateralVault.deploy(vdot.target, oracle.target);
+    await vault.waitForDeployment();
+
+    const LendingPool = await ethers.getContractFactory("LendingPool");
+    const pool = await LendingPool.deploy(vault.target, hollar.target, oracle.target, vdot.target);
+    await pool.waitForDeployment();
+
+    await vault.setLendingPool(pool.target);
+    await hollar.transferOwnership(pool.target);
+
+    await vdot.mint(user.address, ethers.parseEther("100"));
+    await vdot.connect(user).approve(vault.target, ethers.parseEther("100"));
+
+    await vault.connect(user).deposit(ethers.parseEther("10"));
+
+    return { vault, vdot, hollar, oracle, pool, owner, user, other };
+  }
+
   describe("setLendingPool", function () {
     it("owner can set lending pool", async function () {
       const { vault, lendingPool } = await loadFixture(deployFixture);
@@ -46,9 +83,22 @@ describe("CollateralVault", function () {
     });
 
     it("reverts on zero address", async function () {
-      const { vault } = await loadFixture(deployFixture);
-      await expect(vault.setLendingPool(ethers.ZeroAddress))
+      // Deploy a fresh vault (pool not yet set) to test zero-address guard
+      const [owner] = await ethers.getSigners();
+      const MockvDOT = await ethers.getContractFactory("MockvDOT");
+      const vdot = await MockvDOT.deploy();
+      const PriceOracle = await ethers.getContractFactory("PriceOracle");
+      const oracle = await PriceOracle.deploy();
+      const CollateralVault = await ethers.getContractFactory("CollateralVault");
+      const freshVault = await CollateralVault.deploy(vdot.target, oracle.target);
+      await expect(freshVault.setLendingPool(ethers.ZeroAddress))
         .to.be.revertedWith("Vault: zero pool");
+    });
+
+    it("reverts if lending pool already set", async function () {
+      const { vault, other } = await loadFixture(deployFixture);
+      await expect(vault.setLendingPool(other.address))
+        .to.be.revertedWith("Vault: pool already set");
     });
   });
 
@@ -103,17 +153,19 @@ describe("CollateralVault", function () {
     });
 
     it("reverts if withdrawal breaches LTV", async function () {
-      const { vault, user, lendingPool } = await loadFixture(depositFixture);
-      // 10 vDOT * $10 = $100. Debt=$70. Withdraw 5 vDOT → new collateral=$50, max debt=$35 → FAIL
-      await vault.connect(lendingPool).setDebt(user.address, ethers.parseEther("70"));
+      const { vault, pool, hollar, user } = await loadFixture(fullProtocolDepositFixture);
+      // 10 vDOT * $10 = $100. Borrow $70 (max LTV). Withdraw 5 vDOT → new collateral=$50, max debt=$35 → FAIL
+      await hollar.connect(user).approve(pool.target, ethers.MaxUint256);
+      await pool.connect(user).borrow(ethers.parseEther("70"));
       await expect(vault.connect(user).withdraw(ethers.parseEther("5")))
         .to.be.revertedWith("Vault: below LTV after withdrawal");
     });
 
     it("allows partial withdrawal within LTV", async function () {
-      const { vault, user, lendingPool } = await loadFixture(depositFixture);
-      // Debt=$10. Withdraw 5 vDOT → new collateral=$50, max debt=$35. $10 < $35 → OK
-      await vault.connect(lendingPool).setDebt(user.address, ethers.parseEther("10"));
+      const { vault, pool, hollar, user } = await loadFixture(fullProtocolDepositFixture);
+      // Borrow $10. Withdraw 5 vDOT → new collateral=$50, max debt=$35. $10 < $35 → OK
+      await hollar.connect(user).approve(pool.target, ethers.MaxUint256);
+      await pool.connect(user).borrow(ethers.parseEther("10"));
       await vault.connect(user).withdraw(ethers.parseEther("5"));
       expect(await vault.collateralBalance(user.address)).to.equal(ethers.parseEther("5"));
     });

@@ -10,6 +10,10 @@ interface IPriceOracle {
     function getPrice(address token) external view returns (uint256);
 }
 
+interface ILendingPool {
+    function accrueInterest(address user) external;
+}
+
 /// @title CollateralVault — vDOT deposit and health factor management
 /// @notice Users deposit MockvDOT as collateral. LendingPool updates debt balances.
 ///         Health factor = (collateralUSD * LIQUIDATION_THRESHOLD * 1e18) / (debtUSD * 100)
@@ -50,8 +54,9 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         oracle = IPriceOracle(_oracle);
     }
 
-    /// @notice Set the LendingPool address — owner only, called once after deployment
+    /// @notice Set the LendingPool address — owner only, set-once after deployment
     function setLendingPool(address pool) external onlyOwner {
+        require(lendingPool == address(0), "Vault: pool already set");
         require(pool != address(0), "Vault: zero pool");
         lendingPool = pool;
         emit LendingPoolSet(pool);
@@ -75,6 +80,10 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         uint256 newCollateral = collateralBalance[msg.sender] - amount;
 
         if (debtBalance[msg.sender] > 0) {
+            // Accrue interest first so LTV check uses up-to-date debt
+            if (lendingPool != address(0)) {
+                ILendingPool(lendingPool).accrueInterest(msg.sender);
+            }
             uint256 vdotPrice = oracle.getPrice(address(vdot));
             uint256 newCollateralUSD = (newCollateral * vdotPrice) / 1e18;
             // Enforce LTV: debt <= collateral * LTV / 100
