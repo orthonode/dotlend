@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 import { Providers } from "@/src/components/Providers";
 import { ConnectButton } from "@/src/components/ConnectButton";
@@ -24,7 +25,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Polkadot Hub TestNet
                 </span>
               </div>
-              <ConnectButton />
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/mint"
+                  className="text-xs px-3 py-1.5 rounded-lg border border-yellow-600/50 text-yellow-400 hover:bg-yellow-600/10 transition"
+                >
+                  Get tokens
+                </Link>
+                <ConnectButton />
+              </div>
             </div>
             <TxBanner />
           </header>

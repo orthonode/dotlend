@@ -57,6 +57,13 @@ export const ORACLE_ABI = [
     inputs: [{ name: "token", type: "address" }], outputs: [{ type: "uint256" }] },
 ] as const;
 
+export const MOCK_ABI = [
+  { name: "mint", type: "function", stateMutability: "nonpayable",
+    inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }], outputs: [] },
+  { name: "balanceOf", type: "function", stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }] },
+] as const;
+
 export const ERC20_ABI = [
   { name: "balanceOf", type: "function", stateMutability: "view",
     inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }] },

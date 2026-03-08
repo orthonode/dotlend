@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { LendingDashboard } from "@/src/components/LendingDashboard";
 import { DepositCollateral } from "@/src/components/DepositCollateral";
 import { BorrowHOLLAR } from "@/src/components/BorrowHOLLAR";
@@ -9,6 +10,32 @@ import { LiquidationMonitor } from "@/src/components/LiquidationMonitor";
 export default function Home() {
   return (
     <div className="space-y-8">
+      {/* Testnet notice */}
+      <div className="bg-yellow-950/40 border border-yellow-600/40 rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1 text-sm text-yellow-200">
+          <span className="font-bold text-yellow-400">Testnet deployment.</span>{" "}
+          This uses <span className="font-mono text-yellow-300">MockvDOT</span> and{" "}
+          <span className="font-mono text-yellow-300">MockHOLLAR</span> — not real assets.
+          You need to mint test tokens before you can deposit or borrow.
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <Link
+            href="/mint"
+            className="px-4 py-2 rounded-lg text-sm font-bold bg-yellow-500 text-black hover:bg-yellow-400 transition whitespace-nowrap"
+          >
+            Mint tokens →
+          </Link>
+          <a
+            href="https://github.com/orthonode/dotlend#testing-the-protocol--step-by-step"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-yellow-500 hover:underline whitespace-nowrap"
+          >
+            GitHub guide
+          </a>
+        </div>
+      </div>
+
       {/* Hero */}
       <div>
         <h1 className="text-3xl font-bold">
