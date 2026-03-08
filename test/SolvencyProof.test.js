@@ -1,5 +1,5 @@
 // test/SolvencyProof.test.js
-// Tests for ZK solvency proof integration in LendingPool.
+// Tests for ZK solvency proof integration via SolvencyGateway.
 // Uses MockSolvencyVerifier — no actual ZK pairing in local tests.
 
 const { expect } = require("chai");
@@ -19,7 +19,7 @@ const VALID_PUBLIC_INPUTS = [
 async function deployFixture() {
   const [owner, alice, bob] = await ethers.getSigners();
 
-  // Deploy mocks
+  // Deploy protocol
   const PriceOracle = await ethers.getContractFactory("PriceOracle");
   const oracle = await PriceOracle.deploy();
   await oracle.waitForDeployment();
@@ -37,13 +37,14 @@ async function deployFixture() {
   await vault.waitForDeployment();
 
   const LendingPool = await ethers.getContractFactory("LendingPool");
-  const pool = await LendingPool.deploy(
-    vault.target, hollar.target, oracle.target, vdot.target
-  );
+  const pool = await LendingPool.deploy(vault.target, hollar.target, oracle.target, vdot.target);
   await pool.waitForDeployment();
-
-  // Wire vault to pool
   await vault.setLendingPool(pool.target);
+
+  // Deploy SolvencyGateway
+  const SolvencyGateway = await ethers.getContractFactory("SolvencyGateway");
+  const gateway = await SolvencyGateway.deploy();
+  await gateway.waitForDeployment();
 
   // Deploy ACCEPTING mock verifier
   const MockVerifier = await ethers.getContractFactory("MockSolvencyVerifier");
@@ -54,7 +55,7 @@ async function deployFixture() {
   const rejectingVerifier = await MockVerifier.deploy(false);
   await rejectingVerifier.waitForDeployment();
 
-  return { pool, vault, oracle, vdot, hollar, acceptingVerifier, rejectingVerifier, owner, alice, bob };
+  return { pool, vault, oracle, vdot, hollar, gateway, acceptingVerifier, rejectingVerifier, owner, alice, bob };
 }
 
 describe("SolvencyProof", function () {
@@ -62,31 +63,31 @@ describe("SolvencyProof", function () {
 
   describe("setSolvencyVerifier", function () {
     it("owner can set verifier once", async function () {
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
-      expect(await pool.solvencyVerifier()).to.equal(acceptingVerifier.target);
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
+      expect(await gateway.solvencyVerifier()).to.equal(acceptingVerifier.target);
     });
 
     it("non-owner cannot set verifier", async function () {
-      const { pool, acceptingVerifier, alice } = await loadFixture(deployFixture);
+      const { gateway, acceptingVerifier, alice } = await loadFixture(deployFixture);
       await expect(
-        pool.connect(alice).setSolvencyVerifier(acceptingVerifier.target)
+        gateway.connect(alice).setSolvencyVerifier(acceptingVerifier.target)
       ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("cannot set verifier twice", async function () {
-      const { pool, acceptingVerifier, rejectingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+      const { gateway, acceptingVerifier, rejectingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
       await expect(
-        pool.setSolvencyVerifier(rejectingVerifier.target)
-      ).to.be.revertedWith("Pool: verifier already set");
+        gateway.setSolvencyVerifier(rejectingVerifier.target)
+      ).to.be.revertedWith("Gateway: verifier already set");
     });
 
     it("reverts on zero address", async function () {
-      const { pool } = await loadFixture(deployFixture);
+      const { gateway } = await loadFixture(deployFixture);
       await expect(
-        pool.setSolvencyVerifier(ethers.ZeroAddress)
-      ).to.be.revertedWith("Pool: zero verifier");
+        gateway.setSolvencyVerifier(ethers.ZeroAddress)
+      ).to.be.revertedWith("Gateway: zero verifier");
     });
   });
 
@@ -94,32 +95,32 @@ describe("SolvencyProof", function () {
 
   describe("publishSolvencyProof — valid proof", function () {
     it("accepts valid proof and emits SolvencyProven", async function () {
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
 
-      await expect(pool.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS))
-        .to.emit(pool, "SolvencyProven")
+      await expect(gateway.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS))
+        .to.emit(gateway, "SolvencyProven")
         .withArgs(VALID_PUBLIC_INPUTS[0], VALID_PUBLIC_INPUTS[1], VALID_PUBLIC_INPUTS[2]);
     });
 
     it("anyone can call publishSolvencyProof (permissionless)", async function () {
-      const { pool, acceptingVerifier, alice } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+      const { gateway, acceptingVerifier, alice } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
 
       await expect(
-        pool.connect(alice).publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
-      ).to.emit(pool, "SolvencyProven");
+        gateway.connect(alice).publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
+      ).to.emit(gateway, "SolvencyProven");
     });
 
     it("emits correct collateral and debt values", async function () {
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
 
       const totalCollateral = ethers.parseEther("5000");
       const totalDebt = ethers.parseEther("2000");
       const timestamp = 1741435200n;
 
-      const tx = await pool.publishSolvencyProof(DUMMY_PROOF, [totalCollateral, totalDebt, timestamp]);
+      const tx = await gateway.publishSolvencyProof(DUMMY_PROOF, [totalCollateral, totalDebt, timestamp]);
       const receipt = await tx.wait();
       const event = receipt.logs.find(l => l.fragment?.name === "SolvencyProven");
 
@@ -129,108 +130,80 @@ describe("SolvencyProof", function () {
     });
   });
 
-  // ── publishSolvencyProof — invalid proof (insolvent state) ───────────────
+  // ── publishSolvencyProof — invalid proof ─────────────────────────────────
 
   describe("publishSolvencyProof -- invalid proof", function () {
     it("reverts when verifier rejects proof", async function () {
-      const { pool, rejectingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(rejectingVerifier.target);
+      const { gateway, rejectingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(rejectingVerifier.target);
 
       await expect(
-        pool.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
-      ).to.be.revertedWith("Pool: invalid solvency proof");
+        gateway.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
+      ).to.be.revertedWith("Gateway: invalid solvency proof");
     });
 
     it("reverts when verifier not set", async function () {
-      const { pool } = await loadFixture(deployFixture);
-      // No setSolvencyVerifier call
+      const { gateway } = await loadFixture(deployFixture);
       await expect(
-        pool.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
-      ).to.be.revertedWith("Pool: verifier not set");
+        gateway.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
+      ).to.be.revertedWith("Gateway: verifier not set");
     });
 
     it("reverts with wrong number of public inputs", async function () {
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
 
-      const badInputs = [ethers.parseEther("1000"), ethers.parseEther("500")]; // missing timestamp
+      const badInputs = [ethers.parseEther("1000"), ethers.parseEther("500")];
       await expect(
-        pool.publishSolvencyProof(DUMMY_PROOF, badInputs)
-      ).to.be.revertedWith("Pool: wrong input count");
+        gateway.publishSolvencyProof(DUMMY_PROOF, badInputs)
+      ).to.be.revertedWith("Gateway: wrong input count");
     });
 
-    it("insolvent proof rejected by verifier (collateral < debt)", async function () {
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
-
-      // Set verifier to reject this specific proof
+    it("insolvent proof rejected by verifier", async function () {
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
       await acceptingVerifier.setShouldAccept(false);
 
-      const insolventInputs = [
-        ethers.parseEther("100"),   // $100 collateral
-        ethers.parseEther("200"),   // $200 debt -- INSOLVENT
-        1741435200n,
-      ];
-
       await expect(
-        pool.publishSolvencyProof(DUMMY_PROOF, insolventInputs)
-      ).to.be.revertedWith("Pool: invalid solvency proof");
+        gateway.publishSolvencyProof(DUMMY_PROOF, VALID_PUBLIC_INPUTS)
+      ).to.be.revertedWith("Gateway: invalid solvency proof");
     });
   });
 
   // ── Stale oracle timestamp ─────────────────────────────────────────────────
 
   describe("publishSolvencyProof -- stale oracle timestamp", function () {
-    it("accepts proof with recent timestamp (mock verifier)", async function () {
-      // Stale timestamp enforcement is in the circuit constraints.
-      // The on-chain contract trusts the proof. The JS prover checks staleness.
-      // This test confirms the contract itself passes through the timestamp.
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+    it("accepts proof with any timestamp (staleness enforced by circuit)", async function () {
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
 
-      const staleTimestamp = 0n; // epoch -- clearly stale
-      const inputs = [ethers.parseEther("1000"), ethers.parseEther("500"), staleTimestamp];
-
-      // Contract does NOT enforce staleness on-chain (circuit does off-chain).
-      // If verifier accepts, it goes through.
+      const inputs = [ethers.parseEther("1000"), ethers.parseEther("500"), 0n];
       await expect(
-        pool.publishSolvencyProof(DUMMY_PROOF, inputs)
-      ).to.emit(pool, "SolvencyProven").withArgs(inputs[0], inputs[1], inputs[2]);
+        gateway.publishSolvencyProof(DUMMY_PROOF, inputs)
+      ).to.emit(gateway, "SolvencyProven");
     });
 
     it("stale proof rejected at verifier level", async function () {
-      // In production, the real verifier enforces: oracle_timestamp > block.timestamp - 1 hour
-      // Here we simulate verifier rejection for stale timestamps.
-      const { pool, acceptingVerifier } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
-
-      await acceptingVerifier.setShouldAccept(false); // Simulate staleness rejection
-
-      const staleInputs = [
-        ethers.parseEther("1000"),
-        ethers.parseEther("500"),
-        0n, // stale timestamp
-      ];
+      const { gateway, acceptingVerifier } = await loadFixture(deployFixture);
+      await gateway.setSolvencyVerifier(acceptingVerifier.target);
+      await acceptingVerifier.setShouldAccept(false);
 
       await expect(
-        pool.publishSolvencyProof(DUMMY_PROOF, staleInputs)
-      ).to.be.revertedWith("Pool: invalid solvency proof");
+        gateway.publishSolvencyProof(DUMMY_PROOF, [ethers.parseEther("1000"), ethers.parseEther("500"), 0n])
+      ).to.be.revertedWith("Gateway: invalid solvency proof");
     });
   });
 
-  // ── Existing tests still pass ──────────────────────────────────────────────
+  // ── Existing borrow/repay unaffected ──────────────────────────────────────
 
   describe("existing borrow/repay unaffected", function () {
-    it("can borrow after verifier is set", async function () {
-      const { pool, vault, oracle, vdot, acceptingVerifier, alice } = await loadFixture(deployFixture);
-      await pool.setSolvencyVerifier(acceptingVerifier.target);
+    it("can borrow independently of gateway", async function () {
+      const { pool, vault, oracle, vdot, alice } = await loadFixture(deployFixture);
 
-      // Seed oracle
-      await oracle.setAuthorizedOracle(await ethers.provider.getSigner(0).then(s => s.address));
       const [deployer] = await ethers.getSigners();
+      await oracle.setAuthorizedOracle(deployer.address);
       await oracle.connect(deployer).submitPrice(vdot.target, ethers.parseEther("8.50"));
 
-      // Deposit and borrow
       const amount = ethers.parseEther("10");
       await vdot.mint(alice.address, amount);
       await vdot.connect(alice).approve(vault.target, amount);

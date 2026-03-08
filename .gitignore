@@ -24,6 +24,10 @@ dist/
 # Oracle venv
 oracle/.venv/
 
+# Lock files — using npm only, ignore pnpm/yarn lockfiles
+pnpm-lock.yaml
+yarn.lock
+
 # OS
 .DS_Store
 Thumbs.db

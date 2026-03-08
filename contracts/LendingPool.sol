@@ -23,9 +23,6 @@ interface IMintBurn {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
-interface ISolvencyVerifier {
-    function verifySolvency(bytes calldata proof, uint256[] calldata publicInputs) external view returns (bool);
-}
 
 /// @title LendingPool — borrow, repay, and liquidate HOLLAR against vDOT collateral
 /// @notice Stability fee accrues on every interaction via block.timestamp.
@@ -45,9 +42,6 @@ contract LendingPool is Ownable, ReentrancyGuard {
     IPriceOracle public immutable oracle;
     address public immutable vdot;
 
-    /// @notice Solvency verifier — set once, immutable after deployment
-    ISolvencyVerifier public solvencyVerifier;
-
     /// @notice Timestamp of last interest accrual per user
     mapping(address => uint256) public lastAccrualTime;
 
@@ -60,11 +54,6 @@ contract LendingPool is Ownable, ReentrancyGuard {
         uint256 collateralSeized
     );
     event InterestAccrued(address indexed user, uint256 interest);
-    event SolvencyProven(
-        uint256 totalCollateral,
-        uint256 totalDebt,
-        uint256 timestamp
-    );
 
     constructor(
         address _vault,
@@ -80,31 +69,6 @@ contract LendingPool is Ownable, ReentrancyGuard {
         hollar = IMintBurn(_hollar);
         oracle = IPriceOracle(_oracle);
         vdot = _vdot;
-    }
-
-    /// @notice Set the solvency verifier — owner only, can only be set once
-    function setSolvencyVerifier(address _verifier) external onlyOwner {
-        require(address(solvencyVerifier) == address(0), "Pool: verifier already set");
-        require(_verifier != address(0), "Pool: zero verifier");
-        solvencyVerifier = ISolvencyVerifier(_verifier);
-    }
-
-    /// @notice Publish a ZK solvency proof — permissionless, anyone can call
-    /// @param proof        Raw proof bytes from Noir/barretenberg
-    /// @param publicInputs [total_collateral_value, total_debt, oracle_timestamp]
-    function publishSolvencyProof(
-        bytes calldata proof,
-        uint256[] calldata publicInputs
-    ) external {
-        require(address(solvencyVerifier) != address(0), "Pool: verifier not set");
-        require(publicInputs.length == 3, "Pool: wrong input count");
-
-        require(
-            solvencyVerifier.verifySolvency(proof, publicInputs),
-            "Pool: invalid solvency proof"
-        );
-
-        emit SolvencyProven(publicInputs[0], publicInputs[1], publicInputs[2]);
     }
 
     /// @notice Accrue stability fee interest for a user

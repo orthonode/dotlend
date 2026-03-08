@@ -30,8 +30,8 @@ RPC_URL   = "https://eth-rpc-testnet.polkadot.io"
 CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60  # 30 minutes
 
-PRICE_ORACLE_ADDRESS = Web3.to_checksum_address("0x92eA8D8AF88a744c70fA3A6dd700819f2E606759")
-VDOT_ADDRESS         = Web3.to_checksum_address("0x086Bd622eB3880f0eCCb8B86E0eB97f69b8dbD63")
+PRICE_ORACLE_ADDRESS = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
+VDOT_ADDRESS         = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
 
 PRICE_ORACLE_ABI = json.loads("""[
   {

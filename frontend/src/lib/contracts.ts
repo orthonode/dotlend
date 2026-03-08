@@ -1,9 +1,10 @@
 export const ADDRESSES = {
-  priceOracle:     "0x92eA8D8AF88a744c70fA3A6dd700819f2E606759" as `0x${string}`,
-  vdot:            "0x086Bd622eB3880f0eCCb8B86E0eB97f69b8dbD63" as `0x${string}`,
-  hollar:          "0xe5a9ea3dDEFfD3fC4C98b6B338abC0930f34C727" as `0x${string}`,
-  collateralVault: "0xff58177D585b5dB022B0773405a40bEC443E512a" as `0x${string}`,
-  lendingPool:     "0xA8b36339C55c664BBe7C59d2d59Abf91f472C8d0" as `0x${string}`,
+  priceOracle:     "0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D" as `0x${string}`,
+  vdot:            "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA" as `0x${string}`,
+  hollar:          "0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf" as `0x${string}`,
+  collateralVault: "0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c" as `0x${string}`,
+  lendingPool:     "0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b" as `0x${string}`,
+  solvencyGateway: "0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0" as `0x${string}`,
 };
 
 export const EXPLORER = "https://blockscout-testnet.polkadot.io";
@@ -32,6 +33,11 @@ export const POOL_ABI = [
     inputs: [{ name: "hollarAmount", type: "uint256" }], outputs: [] },
   { name: "liquidate", type: "function", stateMutability: "nonpayable",
     inputs: [{ name: "borrower", type: "address" }], outputs: [] },
+] as const;
+
+export const GATEWAY_ABI = [
+  { name: "publishSolvencyProof", type: "function", stateMutability: "nonpayable",
+    inputs: [{ name: "proof", type: "bytes" }, { name: "publicInputs", type: "uint256[]" }], outputs: [] },
   { name: "SolvencyProven", type: "event",
     inputs: [
       { name: "totalCollateral", type: "uint256", indexed: false },

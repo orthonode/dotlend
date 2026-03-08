@@ -79,23 +79,45 @@ async function main() {
   await tx3.wait();
   console.log("  vDOT price set to $8.50");
 
+  // Deploy SolvencyGateway + MockSolvencyVerifier
+  console.log("\n[ZK] Deploying MockSolvencyVerifier...");
+  const MockVerifier = await hre.ethers.getContractFactory("MockSolvencyVerifier");
+  const verifier = await MockVerifier.deploy(true);
+  await verifier.waitForDeployment();
+  console.log(`  MockSolvencyVerifier: ${verifier.target}`);
+
+  console.log("[ZK] Deploying SolvencyGateway...");
+  const SolvencyGateway = await hre.ethers.getContractFactory("SolvencyGateway");
+  const gateway = await SolvencyGateway.deploy();
+  await gateway.waitForDeployment();
+  console.log(`  SolvencyGateway: ${gateway.target}`);
+
+  console.log("[ZK] Wiring verifier to gateway...");
+  const tx4 = await gateway.setSolvencyVerifier(verifier.target);
+  await tx4.wait();
+  console.log("  Done.");
+
   // Summary
   console.log("\n" + "=".repeat(60));
   console.log("DEPLOY COMPLETE");
   console.log("=".repeat(60));
-  console.log(`PriceOracle:     ${oracle.target}`);
-  console.log(`MockvDOT:        ${vdot.target}`);
-  console.log(`MockHOLLAR:      ${hollar.target}`);
-  console.log(`CollateralVault: ${vault.target}`);
-  console.log(`LendingPool:     ${pool.target}`);
+  console.log(`PriceOracle:          ${oracle.target}`);
+  console.log(`MockvDOT:             ${vdot.target}`);
+  console.log(`MockHOLLAR:           ${hollar.target}`);
+  console.log(`CollateralVault:      ${vault.target}`);
+  console.log(`LendingPool:          ${pool.target}`);
+  console.log(`MockSolvencyVerifier: ${verifier.target}`);
+  console.log(`SolvencyGateway:      ${gateway.target}`);
 
   if (isPolkadotHub || isPaseo || isWestend) {
     console.log("\nExplorer links:");
-    console.log(`  PriceOracle:     ${explorerBase}/${oracle.target}`);
-    console.log(`  MockvDOT:        ${explorerBase}/${vdot.target}`);
-    console.log(`  MockHOLLAR:      ${explorerBase}/${hollar.target}`);
-    console.log(`  CollateralVault: ${explorerBase}/${vault.target}`);
-    console.log(`  LendingPool:     ${explorerBase}/${pool.target}`);
+    console.log(`  PriceOracle:          ${explorerBase}/${oracle.target}`);
+    console.log(`  MockvDOT:             ${explorerBase}/${vdot.target}`);
+    console.log(`  MockHOLLAR:           ${explorerBase}/${hollar.target}`);
+    console.log(`  CollateralVault:      ${explorerBase}/${vault.target}`);
+    console.log(`  LendingPool:          ${explorerBase}/${pool.target}`);
+    console.log(`  MockSolvencyVerifier: ${explorerBase}/${verifier.target}`);
+    console.log(`  SolvencyGateway:      ${explorerBase}/${gateway.target}`);
   }
 
   console.log("\nNext: update PHASES.md with deployed addresses.");

@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
   "contractName": "ISolvencyVerifier",
-  "sourceName": "contracts/LendingPool.sol",
+  "sourceName": "contracts/SolvencyGateway.sol",
   "abi": [
     {
       "inputs": [
