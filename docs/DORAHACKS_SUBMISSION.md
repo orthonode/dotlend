@@ -18,25 +18,33 @@ The first money market on Polkadot Hub. Solvency cryptographically proven every 
 
 ## Project Description
 
-### The Gap
+### The Ecosystem Gap
 
-vDOT — Bifrost's liquid staking derivative — has hit a 76% utilization cap on Hydration with no additional supply room. HOLLAR, Hydration's USD-pegged stablecoin, has grown to $330M TVL since launching in September 2025, making it the largest stablecoin in the Polkadot ecosystem. Despite this demand, there are zero native lending markets on Polkadot Hub — no protocol where vDOT holders can use their yield-bearing assets as collateral to borrow HOLLAR.
+Polkadot has $330M in HOLLAR and vDOT at 76% utilization on Hydration — supply cap hit, demand proven. Yet there are **zero native lending markets on Polkadot Hub**. Every dollar of yield-bearing vDOT collateral sitting idle is a failure of the ecosystem. DotLend fixes this.
+
+### The ZK Innovation — Why This Is Different
+
+**Every 6 hours, a zero-knowledge proof is published on-chain proving DotLend is solvent. DotLend is the first money market anywhere to do this.**
+
+The Noir circuit (UltraHonk proving system) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and individual positions as private witnesses. Protocol solvency becomes a mathematical fact verifiable by anyone on Blockscout — not a trust claim, not an audit, not a dashboard. A ZK proof published via `SolvencyGateway.publishSolvencyProof()` every 6 hours, on-chain, permanently.
 
 ### What DotLend Does
 
 DotLend is a non-custodial money market protocol where users deposit vDOT as collateral and borrow HOLLAR at up to 70% LTV, while continuing to earn Bifrost staking yield on their deposited assets. The protocol tracks each user's health factor — (Collateral Value × 0.80) / Debt — and opens the position to liquidation when it falls below 1.0, with a 5% bonus to incentivize liquidators. Interest accrues continuously at 0.5% per year via a lazy timestamp-based model, keeping gas costs low and the accounting trustless. Every component — deposit, borrow, repay, liquidate, accrue interest — is handled by four auditable Solidity contracts deployed on Polkadot Hub.
 
+### Why Not Hydration?
+
+Hydration is an AMM. DotLend is a collateralized debt position engine. **They are complementary, not competing.**
+
+A vDOT holder on Hydration can supply to a pool — but cannot borrow against their position. DotLend unlocks that: deposit vDOT, borrow HOLLAR, deploy that HOLLAR into Hydration's pools or anywhere in the ecosystem. DotLend is a liquidity source for Hydration, not a competitor. Victor Xu (Bifrost) confirmed vDOT lending is the #1 requested feature from the vDOT community — Hydration's AMM model cannot provide it.
+
 ### Why It's Only Possible on Polkadot
 
-vDOT and HOLLAR are native Polkadot assets: vDOT exists on Bifrost parachain, HOLLAR is issued by Hydration. On any other chain, building a lending market for these assets would require bridges — introducing trust assumptions and counterparty risk that a lending protocol cannot safely absorb. On Polkadot Hub, XCM makes vDOT and HOLLAR natively composable, and on mainnet, Hyperbridge ISMP will deliver trustless cross-chain price feeds from Hydration's Omnipool directly to the PriceOracle — no Chainlink dependency, no centralized oracle, 100% Polkadot-native architecture.
-
-### The ZK Innovation
-
-Every 6 hours, a zero-knowledge proof is published on-chain via `SolvencyGateway.publishSolvencyProof()`, cryptographically proving that total collateral value exceeds total debt without revealing any individual position. The Noir circuit (UltraHonk proving system) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs — turning protocol solvency from a trust claim into a mathematical fact verifiable by anyone on Blockscout. DotLend is the first money market anywhere to do this.
+vDOT and HOLLAR are native Polkadot assets. On any other chain, building a lending market for these assets would require bridges — introducing trust assumptions and counterparty risk that a lending protocol cannot safely absorb. On Polkadot Hub, XCM makes vDOT and HOLLAR natively composable, and on mainnet, Hyperbridge ISMP will deliver trustless cross-chain price feeds from Hydration's Omnipool directly to the PriceOracle — no Chainlink dependency, no centralized oracle, 100% Polkadot-native architecture.
 
 ### Traction
 
-Seven contracts are deployed and verified on Polkadot Hub TestNet (Chain ID 420420417), 76 tests pass with 0 failures covering every state transition including a complete price-crash liquidation cycle, and the live frontend at nexucore.xyz connects directly to on-chain state with no backend or subgraph. The oracle publishes vDOT prices every 30 minutes and the ZK proof pipeline runs automatically on Railway every 6 hours.
+Seven contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 76 tests pass with 0 failures covering every state transition including a complete price-crash liquidation cycle. Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts vDOT prices every 30 minutes. ZK proof pipeline runs automatically on Railway every 6 hours.
 
 ### Next Steps
 

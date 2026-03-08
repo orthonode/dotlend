@@ -9,11 +9,31 @@
 
 ---
 
-## What is DotLend?
+## The Problem
 
-DotLend is a non-custodial lending protocol deployed on **Polkadot Hub** — the EVM-compatible system parachain at the center of the Polkadot ecosystem. Users deposit **vDOT** (Bifrost's liquid staking token) as collateral and borrow **HOLLAR** (Hydration's over-collateralized stablecoin) against it. Every 6 hours, a zero-knowledge proof is published on-chain proving the protocol is solvent without revealing any individual position.
+Polkadot has **$330M in HOLLAR** and **vDOT at 76% utilization** on Hydration — supply cap hit, demand proven, capital waiting. Yet there are **zero native lending markets on Polkadot Hub**. Every dollar of yield-bearing vDOT collateral sitting idle is a failure of the ecosystem. DotLend fixes this.
 
-> **DotLend is the first money market on Polkadot Hub where solvency is cryptographically proven, not assumed.**
+---
+
+## The ZK Breakthrough
+
+> **Every 6 hours, a zero-knowledge proof is published on-chain proving DotLend is solvent. First money market anywhere to do this.**
+
+The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs. Individual positions stay private. Solvency becomes a mathematical fact verifiable by anyone on Blockscout — not a trust claim.
+
+---
+
+## What DotLend Does
+
+DotLend is a non-custodial money market protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) as collateral and borrow **HOLLAR** (Hydration's stablecoin) at up to 70% LTV — while continuing to earn Bifrost staking yield (~15% APY) on their deposited assets. The core value proposition: **stake, collateralize, borrow — all natively on Polkadot Hub**.
+
+---
+
+## Why Not Hydration?
+
+Judges will ask. The answer: **Hydration is an AMM. DotLend is a collateralized debt position engine. They are complementary, not competing.**
+
+A vDOT holder on Hydration can supply to a pool — but cannot borrow against their position. DotLend unlocks that: deposit vDOT, borrow HOLLAR, deploy that HOLLAR into Hydration's pools. DotLend is a **liquidity source for Hydration**, not a competitor. Victor Xu (Bifrost) confirmed vDOT lending is the #1 requested feature from the community — Hydration cannot provide it.
 
 ---
 
@@ -25,8 +45,6 @@ DotLend is a non-custodial lending protocol deployed on **Polkadot Hub** — the
 | HOLLAR TVL | **$330M** — largest stablecoin in the Polkadot ecosystem |
 | Native lending market on Polkadot Hub | **Zero** — DotLend is the first |
 | Polkadot Hub EVM launch | **2026** — first mover window is now |
-
-Bifrost's vDOT earns staking yield (~15% APY) while locked as collateral. Borrowers get HOLLAR liquidity without forfeiting yield. This is the core value proposition: **stake, collateralize, borrow — all natively on Polkadot Hub**.
 
 ---
 
