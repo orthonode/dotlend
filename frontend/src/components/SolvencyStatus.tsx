@@ -112,8 +112,10 @@ export function SolvencyStatus() {
   const ageHours = ageMs / (1000 * 60 * 60);
   const isRecent = ageHours < 12;
 
-  const ratio = Number(data.totalCollateral) / Math.max(Number(data.totalDebt), 1);
-  const ratioDisplay = isFinite(ratio) ? ratio.toFixed(2) + "x" : "inf";
+  const collateralF = Number(formatEther(data.totalCollateral));
+  const debtF = Number(formatEther(data.totalDebt));
+  const ratio = debtF > 0 ? collateralF / debtF : null;
+  const ratioDisplay = ratio !== null ? ratio.toFixed(2) + "x" : "∞";
 
   const hoursAgo = ageHours < 1
     ? `${Math.round(ageMs / 60000)} min ago`
