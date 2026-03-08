@@ -184,20 +184,28 @@ async function main() {
 
   // Step 0: refresh oracle price (deployer is the authorized oracle)
   section("0. Refreshing oracle price...");
-  const COINGECKO = "https://api.coingecko.com/api/v3/simple/price?ids=polkadot&vs_currencies=usd";
+  // Fetch vDOT (bifrost-voucher-dot) directly, fall back to DOT price, then hardcoded fallback
+  const COINGECKO_VDOT = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd";
   let vdotPriceUsd;
   if (process.env.VDOT_PRICE_USD) {
     vdotPriceUsd = process.env.VDOT_PRICE_USD;
     log(`Using env override: VDOT_PRICE_USD=${vdotPriceUsd}`);
   } else {
     try {
-      const resp = await fetch(COINGECKO);
+      const resp = await fetch(COINGECKO_VDOT);
       const data = await resp.json();
-      vdotPriceUsd = data.polkadot.usd.toString();
-      log(`CoinGecko DOT price (vDOT proxy): $${vdotPriceUsd}`);
+      if (data["bifrost-voucher-dot"]?.usd) {
+        vdotPriceUsd = data["bifrost-voucher-dot"].usd.toString();
+        log(`CoinGecko vDOT price: $${vdotPriceUsd}`);
+      } else if (data.polkadot?.usd) {
+        vdotPriceUsd = data.polkadot.usd.toString();
+        log(`CoinGecko DOT price (vDOT proxy): $${vdotPriceUsd}`);
+      } else {
+        throw new Error("no price in response");
+      }
     } catch (e) {
-      vdotPriceUsd = "8.50";
-      log(`CoinGecko failed, using fallback: $${vdotPriceUsd}`);
+      vdotPriceUsd = "2.45";
+      log(`CoinGecko failed (${e.message.slice(0, 40)}), using fallback: $${vdotPriceUsd}`);
     }
   }
   const freshPrice = hre.ethers.parseEther(vdotPriceUsd);

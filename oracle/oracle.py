@@ -64,11 +64,11 @@ log = logging.getLogger("dotlend-oracle")
 
 # ── Price source ──────────────────────────────────────────────────────────────
 
-# vDOT ≈ DOT price (Bifrost liquid staking, ~1:1 with DOT)
-COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=polkadot&vs_currencies=usd"
+# Fetch vDOT (bifrost-voucher-dot) directly; fall back to DOT price as proxy
+COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd"
 
 def fetch_vdot_price() -> Decimal:
-    """Fetch vDOT price in USD. Env override takes priority. Falls back to DOT price or $8.50."""
+    """Fetch vDOT price in USD. Env override takes priority. Falls back to DOT price or $2.45."""
     override = os.getenv("VDOT_PRICE_USD")
     if override:
         log.info(f"Using env override: VDOT_PRICE_USD={override}")
@@ -78,12 +78,16 @@ def fetch_vdot_price() -> Decimal:
         resp = requests.get(COINGECKO_URL, timeout=10)
         resp.raise_for_status()
         data = resp.json()
-        price = Decimal(str(data["polkadot"]["usd"]))
-        log.info(f"CoinGecko DOT price (proxy for vDOT): ${price}")
+        if "bifrost-voucher-dot" in data and "usd" in data["bifrost-voucher-dot"]:
+            price = Decimal(str(data["bifrost-voucher-dot"]["usd"]))
+            log.info(f"CoinGecko vDOT price: ${price}")
+        else:
+            price = Decimal(str(data["polkadot"]["usd"]))
+            log.info(f"CoinGecko DOT price (vDOT proxy): ${price}")
         return price
     except Exception as e:
-        log.warning(f"CoinGecko fetch failed: {e} — using fallback $8.50")
-        return Decimal("8.50")
+        log.warning(f"CoinGecko fetch failed: {e} — using fallback $2.45")
+        return Decimal("2.45")
 
 
 def price_to_wei(price_usd: Decimal) -> int:
