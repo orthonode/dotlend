@@ -163,7 +163,7 @@ export function SolvencyStatus() {
       </div>
       {/* Honest testnet disclaimer */}
       <div style={{ marginTop: "10px", fontSize: "11px", color: "#555", borderTop: "1px solid #1a1a1a", paddingTop: "8px" }}>
-        Testnet: MockSolvencyVerifier (accepts all proofs). Real UltraHonk verifier blocked by PolkaVM — BN254 precompiles not yet supported.
+        Testnet: MockSolvencyVerifier (accepts all proofs). Real UltraHonk verifier requires BN254 elliptic curve precompiles (EIP-196/197). PolkaVM&apos;s resolc compiler does not yet support these opcodes. Architecture is mainnet-ready pending PolkaVM roadmap.
       </div>
     </div>
   );
