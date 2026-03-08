@@ -43,7 +43,7 @@ export function ConnectButton() {
       onClick={() => connect({ connector: injected(), chainId: polkadotHubTestnet.id })}
       className="px-4 py-2 rounded-lg text-sm font-bold bg-[#E6007A] text-white hover:bg-[#c4006a] transition"
     >
-      Connect MetaMask
+      Connect Wallet
     </button>
   );
 }

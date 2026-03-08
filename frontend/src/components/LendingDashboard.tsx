@@ -113,7 +113,7 @@ export function LendingDashboard() {
         </div>
       ) : (
         <div className="bg-[#111] border border-[#222] rounded-xl p-8 text-center text-gray-500">
-          Connect MetaMask to see your position
+          Connect wallet to see your position
         </div>
       )}
     </div>
