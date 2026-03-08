@@ -41,13 +41,19 @@ async function main() {
   const pool   = await hre.ethers.getContractAt("LendingPool",      ADDRESSES.lendingPool);
   const oracle = await hre.ethers.getContractAt("PriceOracle",      ADDRESSES.priceOracle);
 
-  const VDOT_DEPOSIT  = hre.ethers.parseEther("5");    // 5 vDOT = $42.50 @ $8.50
-  const HOLLAR_BORROW = hre.ethers.parseEther("25");   // $25 HOLLAR (< 70% of $42.50)
+  const VDOT_DEPOSIT = hre.ethers.parseEther("5"); // 5 vDOT
 
   // ── Step 1: Check price ────────────────────────────────────────────────────
   console.log("\n[1] Checking oracle price...");
   const price = await oracle.getPrice(ADDRESSES.vdot);
   console.log(`  vDOT price: $${hre.ethers.formatEther(price)}`);
+
+  // Collateral value in HOLLAR-wei: 5 vDOT * price / 1e18
+  // Borrow at 60% LTV (leaves 10% headroom under the 70% cap)
+  const collateralValue = (VDOT_DEPOSIT * price) / hre.ethers.parseEther("1");
+  const HOLLAR_BORROW = (collateralValue * 60n) / 100n;
+  console.log(`  Collateral value: $${hre.ethers.formatEther(collateralValue)}`);
+  console.log(`  Borrow target (60% LTV): $${hre.ethers.formatEther(HOLLAR_BORROW)}`);
 
   // ── Step 2: Mint vDOT ──────────────────────────────────────────────────────
   console.log("\n[2] Minting 5 vDOT to deployer...");
@@ -68,7 +74,7 @@ async function main() {
 
   // ── Step 4: Borrow ─────────────────────────────────────────────────────────
   console.log(`\n[4] Borrowing $${hre.ethers.formatEther(HOLLAR_BORROW)} HOLLAR...`);
-  await waitAndLog("LendingPool.borrow(25 HOLLAR)", pool.borrow(HOLLAR_BORROW));
+  await waitAndLog(`LendingPool.borrow(${hre.ethers.formatEther(HOLLAR_BORROW)} HOLLAR)`, pool.borrow(HOLLAR_BORROW));
 
   const debt = await vault.debtBalance(deployer.address);
   const hf   = await vault.getHealthFactor(deployer.address);
@@ -80,10 +86,12 @@ async function main() {
   // ── Step 5: Repay ──────────────────────────────────────────────────────────
   console.log("\n[5] Repaying debt (mint buffer + approve + repay)...");
   // Mint 1 extra HOLLAR so deployer has enough to cover principal + accrued interest
-  await waitAndLog("MockHOLLAR.mint(deployer, 1 HOLLAR buffer)", hollar.mint(deployer.address, hre.ethers.parseEther("1")));
-  const repayAmount = hre.ethers.parseEther("26");
-  await waitAndLog("MockHOLLAR.approve(pool, 26 HOLLAR)", hollar.approve(ADDRESSES.lendingPool, repayAmount));
-  await waitAndLog("LendingPool.repay(26 HOLLAR)", pool.repay(repayAmount));
+  // Buffer = 1% of borrow to cover any accrued interest
+  const buffer = HOLLAR_BORROW / 100n;
+  await waitAndLog("MockHOLLAR.mint(deployer, interest buffer)", hollar.mint(deployer.address, buffer));
+  const repayAmount = HOLLAR_BORROW + buffer;
+  await waitAndLog(`MockHOLLAR.approve(pool, ${hre.ethers.formatEther(repayAmount)} HOLLAR)`, hollar.approve(ADDRESSES.lendingPool, repayAmount));
+  await waitAndLog(`LendingPool.repay(${hre.ethers.formatEther(repayAmount)} HOLLAR)`, pool.repay(repayAmount));
 
   const debtAfter = await vault.debtBalance(deployer.address);
   console.log(`  Debt after repay: $${hre.ethers.formatEther(debtAfter)} HOLLAR`);
