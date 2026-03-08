@@ -1,2 +1,10 @@
+providers = ["python", "node"]
+
 [phases.install]
-cmds = ["npm install --legacy-peer-deps"]
+cmds = [
+  "pip install -r oracle/requirements.txt",
+  "npm install --legacy-peer-deps"
+]
+
+[phases.build]
+cmds = []
