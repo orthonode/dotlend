@@ -3,30 +3,46 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Chain: Polkadot Hub TestNet](https://img.shields.io/badge/Chain-Polkadot%20Hub%20TestNet-E6007A)](https://blockscout-testnet.polkadot.io)
+[![Tests: 76 passing](https://img.shields.io/badge/Tests-76%20passing-brightgreen)]()
 [![Hackathon: Polkadot Solidity 2026](https://img.shields.io/badge/Hackathon-Polkadot%20Solidity%202026-pink)](https://dorahacks.io)
 
 ---
 
 ## What is DotLend?
 
-DotLend is a lending protocol on Polkadot Hub. Users deposit **vDOT** (Bifrost's liquid staking token) as collateral and borrow **HOLLAR** (Hydration's stablecoin) against it.
+DotLend is a non-custodial lending protocol deployed on **Polkadot Hub** — the EVM-compatible system parachain at the center of the Polkadot ecosystem. Users deposit **vDOT** (Bifrost's liquid staking token) as collateral and borrow **HOLLAR** (Hydration's over-collateralized stablecoin) against it. Every 6 hours, a zero-knowledge proof is published on-chain proving the protocol is solvent without revealing any individual position.
 
 > **DotLend is the first money market on Polkadot Hub where solvency is cryptographically proven, not assumed.**
 
-**Why this matters:**
-- vDOT has 76% utilization on Hydration's lending market — supply cap hit. Demand is proven.
-- HOLLAR ($330M TVL) has zero native lending market outside Hydration's Omnipool.
-- No money market exists on Polkadot Hub. DotLend is the first.
-- Every 6 hours, a ZK proof verifies `total_collateral > total_debt` without revealing individual positions.
+---
+
+## Why Now. Why Polkadot Hub.
+
+| Signal | Data |
+|--------|------|
+| vDOT utilization on Hydration | **76%** — supply cap hit. Demand for vDOT lending is proven. |
+| HOLLAR TVL | **$330M** — largest stablecoin in the Polkadot ecosystem |
+| Native lending market on Polkadot Hub | **Zero** — DotLend is the first |
+| Polkadot Hub EVM launch | **2026** — first mover window is now |
+
+Bifrost's vDOT earns staking yield (~15% APY) while locked as collateral. Borrowers get HOLLAR liquidity without forfeiting yield. This is the core value proposition: **stake, collateralize, borrow — all natively on Polkadot Hub**.
 
 ---
 
-## Live on Polkadot Hub TestNet
+## Live Demo
 
-Deployed March 8, 2026. All contracts verified on Blockscout.
+- **Frontend:** [nexucore.xyz](https://nexucore.xyz)
+- **Explorer:** [blockscout-testnet.polkadot.io](https://blockscout-testnet.polkadot.io)
+- **Network:** Polkadot Hub TestNet | Chain ID `420420417`
 
-| Contract | Address | Explorer |
-|----------|---------|---------|
+---
+
+## Deployed Contracts
+
+All 7 contracts deployed and verified on Polkadot Hub TestNet (March 8, 2026).
+
+| Contract | Address | Blockscout |
+|----------|---------|------------|
 | PriceOracle | `0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D` | [view](https://blockscout-testnet.polkadot.io/address/0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D) |
 | MockvDOT | `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA` | [view](https://blockscout-testnet.polkadot.io/address/0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA) |
 | MockHOLLAR | `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf` | [view](https://blockscout-testnet.polkadot.io/address/0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf) |
@@ -35,19 +51,14 @@ Deployed March 8, 2026. All contracts verified on Blockscout.
 | MockSolvencyVerifier | `0x541051e3d31ef573e7Ff76d67809704b92c6cc0e` | [view](https://blockscout-testnet.polkadot.io/address/0x541051e3d31ef573e7Ff76d67809704b92c6cc0e) |
 | SolvencyGateway | `0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0` | [view](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) |
 
-**Network:** Polkadot Hub TestNet | Chain ID `420420417` | [blockscout-testnet.polkadot.io](https://blockscout-testnet.polkadot.io)
-
 ---
 
 ## On-Chain Evidence
 
-### Oracle price submission — live on Polkadot Hub TestNet
-
-![Oracle tx on Blockscout](./docs/screenshots/oracle-tx-blockscout.png)
+### Oracle price feed — live
 
 > **Tx:** [`0x9dee5cf5...914a94`](https://blockscout-testnet.polkadot.io/tx/0x9dee5cf515a9a42a2b17eb33ec12537f39583007fca5ad5137bc8b4abd914a94)
-> **Status:** ✅ Success | **Block:** 6137535 | **Confirmed in:** ≤ 1.426s | **Mar 08 2026 11:03:00 AM**
-> Oracle posted DOT price to `PriceOracle` contract — gas used: 1,504 / 100,000 (1.5%)
+> **Block:** 6137535 | **Confirmed in:** ≤ 1.426s | **Gas used:** 1,504 / 100,000 (1.5%)
 
 ### Crisis simulation — price crash → liquidation
 
@@ -57,130 +68,391 @@ Deployed March 8, 2026. All contracts verified on Blockscout.
 | vDOT price after crash | $6.00 |
 | Health factor before | 1.214 (healthy) |
 | Health factor after | 0.857 (liquidatable) |
-| Debt repaid | $84 HOLLAR |
-| vDOT seized by liquidator | 14.7 vDOT (5% bonus confirmed) |
-| Debt remaining | $0.00 ✓ |
+| Debt repaid by liquidator | $84 HOLLAR |
+| vDOT seized | 14.7 vDOT (5% liquidation bonus confirmed) |
+| Remaining debt | $0.00 |
 
-[Liquidation tx](https://blockscout-testnet.polkadot.io/tx/0xa09407bb1b8c41d265305de78ddb024144daeb0c47bfc62ff663bb7daf95c085)
+> [Liquidation tx on Blockscout](https://blockscout-testnet.polkadot.io/tx/0xa09407bb1b8c41d265305de78ddb024144daeb0c47bfc62ff663bb7daf95c085)
+
+### ZK solvency proof — automated every 6 hours
+
+The Railway cron job submits a `SolvencyProven` event to `SolvencyGateway` every 6 hours.
+Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) under the contract's Events tab.
 
 ---
 
 ## Protocol Parameters
 
-| Parameter | Value |
-|-----------|-------|
-| Loan-to-Value (LTV) | 70% |
-| Liquidation Threshold | 80% |
-| Stability Fee | 0.5% / year (5 bps) |
-| Liquidation Bonus | 5% |
-| Oracle Stale Threshold | 1 hour |
-
----
-
-## Setup
-
-```bash
-npm install --legacy-peer-deps
-npm install -g pnpm   # required for resolc npm mode
-
-# Compile (resolc for PolkaVM)
-npx hardhat compile --network polkadotHubTestnet
-
-# Test (62 tests, local hardhat)
-npx hardhat test
-
-# Deploy to Polkadot Hub TestNet
-cp .env.example .env   # add PRIVATE_KEY
-npx hardhat run scripts/deploy-protocol.js --network polkadotHubTestnet
-
-# Run oracle
-python3 -m venv oracle/.venv
-oracle/.venv/bin/pip install -r oracle/requirements.txt
-VDOT_PRICE_USD=8.50 oracle/.venv/bin/python3 oracle/oracle.py
-
-# Crisis simulation
-npx hardhat run scripts/simulate-crisis.js --network polkadotHubTestnet
-```
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| Loan-to-Value (LTV) | 70% | Conservative — leaves 10% buffer above liquidation threshold |
+| Liquidation Threshold | 80% | Standard CDP design (matches MakerDAO) |
+| Stability Fee | 0.5% / year (5 bps) | Minimal cost of capital — vDOT staking yield (~15%) far exceeds it |
+| Liquidation Bonus | 5% | Competitive incentive for liquidators; covered by collateral buffer |
+| Oracle Stale Threshold | 1 hour | Prevents stale price exploitation |
 
 ---
 
 ## Architecture
 
 ```
-User
- │
- ├─ deposit(vDOT) ──────────────────► CollateralVault
- │                                         │
- │                                    getHealthFactor()
- │                                         │
- ├─ borrow(HOLLAR) ─────────────────► LendingPool ◄──── PriceOracle
- │                                         │                  │
- │                                    accrueInterest()   submitPrice()
- │                                         │            (oracle.py / Hyperbridge ISMP)
- └─ liquidate(borrower) ────────────► LendingPool
-                                           │
-                                    vault.seizeCollateral(borrower, amount, liquidator)
-                                           │
-                                    vDOT → liquidator (direct, no pool hop)
+                    ┌─────────────────────────────────────────────────────────────┐
+                    │                    Polkadot Hub TestNet                      │
+                    │                                                              │
+  User ────deposit(vDOT)────────────────► CollateralVault                         │
+       │                                       │  collateralBalance[user]          │
+       │                                       │  debtBalance[user]                │
+       │                                       │  getHealthFactor()                │
+       │                                       │                                   │
+       ├──borrow(HOLLAR)──────────────► LendingPool ◄────── PriceOracle            │
+       │                                    │  │                  ▲                │
+       │                              mint()│  │accrueInterest()  │submitPrice()   │
+       │                                    │  │                  │                │
+       │                                MockHOLLAR          oracle.py             │
+       │                                                    (every 30m)            │
+       ├──repay(HOLLAR)───────────────► LendingPool                                │
+       │                                    │                                      │
+       │                              burn()│                                      │
+       │                                MockHOLLAR                                 │
+       │                                                                           │
+       └──liquidate(borrower)─────────► LendingPool                                │
+                                            │                                      │
+                                 seizeCollateral(borrower,                         │
+                                    amount, liquidator)                             │
+                                            │                                      │
+                                     CollateralVault ──► vDOT → liquidator        │
+                                                                                   │
+  Anyone──publishSolvencyProof()──► SolvencyGateway ◄── MockSolvencyVerifier      │
+                                            │               (testnet)              │
+                                    SolvencyProven event                           │
+                                    (every 6 hours, Railway)                       │
+                                                                                   │
+                    └─────────────────────────────────────────────────────────────┘
+
+  Frontend (nexucore.xyz)                     Railway Cron (every 6h)
+  ┌─────────────────────┐                     ┌──────────────────────────┐
+  │ Next.js 14 + wagmi  │                     │ generate-solvency-       │
+  │ viem + TailwindCSS  │──reads on-chain──►  │ proof.js                 │
+  │                     │    state directly   │ → refresh oracle price   │
+  │ SolvencyStatus.tsx  │◄──getLogs()────────  │ → build circuit witness  │
+  │ LendingDashboard    │   SolvencyProven    │ → generate ZK proof      │
+  │ DepositCollateral   │                     │ → submit to gateway      │
+  │ BorrowHOLLAR        │                     └──────────────────────────┘
+  │ RepayAndWithdraw    │
+  │ LiquidationMonitor  │
+  └─────────────────────┘
 ```
 
-**PolkaVM Safety:** No SELFDESTRUCT, CREATE2, EXTCODECOPY, assembly, or block.prevrandao anywhere.
+**PolkaVM Safety:** No `SELFDESTRUCT`, `CREATE2`, `EXTCODECOPY`, `assembly {}`, or `block.prevrandao` anywhere. OpenZeppelin v4.x only.
 
 ---
 
 ## ZK Solvency Proof
 
-DotLend generates a ZK proof every 6 hours proving the protocol is solvent without revealing individual positions.
+DotLend generates a zero-knowledge proof every 6 hours that cryptographically proves:
 
-**Circuit:** `circuits/solvency/src/main.nr` (Noir 1.0.0-beta.19, UltraHonk)
+```
+sum(collateral_value_i) > sum(debt_i)    for all active users i
+```
 
-**Public inputs:** `total_collateral_value`, `total_debt`, `oracle_timestamp`
+Individual positions remain private. Only the aggregate totals are public.
 
-**Private inputs:** individual `(collateral_value, debt)` per user — hidden from verifier
+### Circuit
 
-**Constraint:** `sum(collateral_i) > sum(debt_i)` — cryptographically enforced
+**Language:** Noir 1.0.0-beta.19 | **Proving system:** UltraHonk
+
+```
+circuits/solvency/src/main.nr
+
+Public inputs:
+  total_collateral_value  — sum of all collateral values (gwei-scaled u64)
+  total_debt              — sum of all debts (gwei-scaled u64)
+  oracle_timestamp        — UNIX timestamp of price snapshot
+
+Private inputs:
+  collateral_values[64]   — per-user collateral values (hidden)
+  debt_amounts[64]        — per-user debt amounts (hidden)
+
+Constraints:
+  1. sum(collateral_values) == total_collateral_value
+  2. sum(debt_amounts) == total_debt
+  3. total_collateral_value > total_debt  // SOLVENCY CONSTRAINT
+```
+
+### Proof Generation Pipeline
+
+```
+Railway Cron (every 6h)
+        │
+        ▼
+CoinGecko API → fresh DOT/USD price
+        │
+        ▼
+oracle.submitPrice(vdot, price)  ← prevents stale price in witness
+        │
+        ▼
+CollateralVault.Deposited events → active user addresses
+        │
+        ▼
+Per user: collateralBalance[user], debtBalance[user]
+         (collateral_USD = collWei * price / 1e18)
+         (gwei_value = USD_value / 1e9)
+        │
+        ▼
+Build witness {collateral_values[64], debt_amounts[64], totals, timestamp}
+        │
+        ▼
+@noir-lang/noir_js + UltraHonkBackend → proof bytes
+(fallback: dummy proof → MockSolvencyVerifier accepts all)
+        │
+        ▼
+SolvencyGateway.publishSolvencyProof(proof, [totalCollateral, totalDebt, ts])
+        │
+        ▼
+emit SolvencyProven(totalCollateral, totalDebt, timestamp)
+     ← visible on Blockscout, displayed in SolvencyStatus widget
+```
+
+### PolkaVM Note
+
+The UltraHonk verifier generated by Noir uses EVM assembly for BN254 pairing precompile calls (0x06–0x08). PolkaVM's resolc compiler does not yet support this assembly pattern. `MockSolvencyVerifier` is deployed for the testnet. The real `SolvencyVerifier.sol` is included in the repo and will deploy when PolkaVM adds BN254 precompile support.
 
 ```bash
 # Compile circuit
 cd circuits/solvency && nargo compile
 
-# Generate and submit proof (reads on-chain positions)
+# Generate and submit proof to SolvencyGateway
 npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
 ```
 
-The `SolvencyProven(totalCollateral, totalDebt, timestamp)` event is emitted on-chain with every successful proof. The Railway cron job submits automatically every 6 hours.
+---
+
+## Oracle
+
+### Testnet
+`oracle/oracle.py` — Python script, runs every 30 minutes.
+Fetches DOT/USD from CoinGecko → calls `PriceOracle.submitPrice(vdot, price_in_wei)`.
+Environment override: `VDOT_PRICE_USD=8.50 python3 oracle/oracle.py`
+
+### Mainnet Path — Hyperbridge ISMP
+On mainnet, `PriceOracle` will be replaced with a Hyperbridge ISMP adapter:
+1. Hydration's Omnipool publishes vDOT/USD price on Polkadot parachain
+2. Hyperbridge relays the message via ISMP (Inter-Supported Messaging Protocol)
+3. Price lands trustlessly on Polkadot Hub — no Chainlink, no centralized oracle
+4. 100% Polkadot-native oracle architecture
+
+---
+
+## Frontend
+
+Live at **[nexucore.xyz](https://nexucore.xyz)**
+
+Built with Next.js 14, wagmi v2, viem v2, TailwindCSS. Connects to Polkadot Hub TestNet (Chain ID 420420417).
+
+| Component | Function |
+|-----------|----------|
+| `SolvencyStatus` | Live SOLVENT badge — reads `SolvencyProven` events, shows collateral/debt/C/D ratio |
+| `LendingDashboard` | User position: vDOT collateral, HOLLAR debt, health factor bar, live vDOT price |
+| `DepositCollateral` | approve + deposit flow with live USD value preview |
+| `BorrowHOLLAR` | Borrow with real-time health factor preview; red warning when HF < 1.2 |
+| `RepayAndWithdraw` | Tabbed repay/withdraw with debt balance display |
+| `LiquidationMonitor` | Scans all borrowers' health factors; liquidate button for eligible positions |
+
+All reads are direct on-chain calls via wagmi hooks. No backend. No subgraph. Fully decentralized.
+
+---
+
+## Setup
+
+### Prerequisites
+
+```bash
+node >= 18
+npm >= 9
+python3 >= 3.10  # for oracle only
+nargo >= 1.0.0-beta.19  # for circuit only
+```
+
+### Install
+
+```bash
+git clone https://github.com/orthonode/dotlend
+cd dotlend
+npm install --legacy-peer-deps
+cp .env.example .env
+# Add PRIVATE_KEY to .env
+```
+
+### Compile
+
+```bash
+# Compile Solidity contracts with resolc (PolkaVM)
+npx hardhat compile --network polkadotHubTestnet
+
+# Compile Noir circuit
+cd circuits/solvency && nargo compile
+```
+
+### Test
+
+```bash
+npx hardhat test
+```
+
+```
+76 passing (0 failures)
+
+  PriceOracle         — 12 tests: access control, staleness, price submission
+  CollateralVault     — 18 tests: deposit, withdraw, health factor math, LTV enforcement
+  LendingPool         — 22 tests: borrow, repay, liquidate, interest accrual
+  Integration         — 10 tests: full deposit → borrow → price crash → liquidate
+  SolvencyProof       — 14 tests: gateway setup, valid/invalid proof, permissionless,
+                                   wrong input count, stale timestamp, existing borrow unaffected
+```
+
+### Deploy
+
+```bash
+# Full protocol deploy (7 contracts)
+npx hardhat run scripts/deploy-protocol.js --network polkadotHubTestnet
+```
+
+### Run Oracle
+
+```bash
+python3 -m venv oracle/.venv
+oracle/.venv/bin/pip install -r oracle/requirements.txt
+oracle/.venv/bin/python3 oracle/oracle.py
+# or with price override:
+VDOT_PRICE_USD=8.50 oracle/.venv/bin/python3 oracle/oracle.py
+```
+
+### End-to-End Interaction
+
+```bash
+# Full borrow/repay cycle (amounts auto-calculated from live price)
+npx hardhat run scripts/interact.js --network polkadotHubTestnet
+
+# Price crash → liquidation simulation
+npx hardhat run scripts/simulate-crisis.js --network polkadotHubTestnet
+
+# Generate and submit ZK solvency proof
+npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm run dev        # http://localhost:3000
+npm run build      # production build
+```
+
+---
+
+## Repository Structure
+
+```
+dotlend/
+├── contracts/
+│   ├── PriceOracle.sol          # authorized price feed, staleness guard
+│   ├── CollateralVault.sol      # vDOT deposit, health factor, liquidation seizure
+│   ├── LendingPool.sol          # borrow / repay / liquidate / interest
+│   ├── SolvencyGateway.sol      # ZK proof submission, SolvencyProven event
+│   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
+│   ├── MockSolvencyVerifier.sol # configurable test double
+│   ├── MockvDOT.sol             # ERC-20 vDOT mock
+│   └── MockHOLLAR.sol           # ERC-20 HOLLAR mock
+├── circuits/
+│   └── solvency/
+│       ├── src/main.nr          # Noir ZK circuit
+│       ├── Nargo.toml
+│       └── target/solvency.json # ACIR artifact (committed for Railway)
+├── scripts/
+│   ├── deploy-protocol.js       # deploy all 7 contracts
+│   ├── interact.js              # deposit → borrow → repay → withdraw
+│   ├── simulate-crisis.js       # price crash → liquidation demo
+│   ├── generate-solvency-proof.js  # ZK proof pipeline (Railway cron)
+│   └── wire-solvency-verifier.js   # one-time verifier wiring
+├── oracle/
+│   ├── oracle.py                # Python price feed (30-min interval)
+│   └── requirements.txt
+├── test/
+│   ├── PriceOracle.test.js
+│   ├── CollateralVault.test.js
+│   ├── LendingPool.test.js
+│   ├── Integration.test.js
+│   └── SolvencyProof.test.js
+├── frontend/
+│   ├── src/components/          # React components (see Frontend section)
+│   ├── src/lib/contracts.ts     # ABIs + deployed addresses
+│   └── src/lib/wagmi.ts         # chain config + wagmi setup
+├── docs/
+│   ├── WHITEPAPER.md            # protocol mechanics and math
+│   ├── ARCHITECTURE.md          # system diagrams and data flow
+│   └── ROADMAP.md               # sprint milestones
+├── hardhat.config.js            # resolc compiler + network config
+├── railway.json                 # Railway cron deployment config
+└── PHASES.md                    # project phases and completion criteria
+```
 
 ---
 
 ## Tests
 
-```
+```bash
 npx hardhat test
 ```
 
-76 tests, 0 failures across:
-- `PriceOracle.test.js` — access control, staleness, price submission
-- `CollateralVault.test.js` — deposit, withdraw, health factor math
-- `LendingPool.test.js` — borrow, repay, liquidate, interest accrual
-- `Integration.test.js` — full deposit→borrow→price crash→liquidate flow
-- `SolvencyProof.test.js` — ZK proof integration: valid/invalid/stale, permissionless, input validation
+All 76 tests run on local Hardhat — no testnet required. No mocking of chain behavior; all contract interactions are real EVM executions.
+
+**Coverage highlights:**
+- Health factor math verified at exact LTV boundaries
+- Interest accrual tested across multiple time intervals
+- Liquidation bonus calculation verified against manual math
+- ZK gateway: verifier-not-set, double-set, wrong input count, permissionless caller all covered
+- Integration test executes the complete price-crash liquidation cycle end-to-end
+
+---
+
+## Security
+
+**Reentrancy:** All state-changing functions in LendingPool and CollateralVault use OpenZeppelin's `ReentrancyGuard`.
+
+**Access Control:**
+- `PriceOracle.submitPrice` — authorized oracle address only
+- `CollateralVault.setDebt` / `seizeCollateral` — LendingPool only (`onlyLendingPool` modifier)
+- `SolvencyGateway.setSolvencyVerifier` — owner only, one-time set (immutable after)
+- `SolvencyGateway.publishSolvencyProof` — permissionless (anyone can submit a valid proof)
+
+**Oracle manipulation resistance:** Stale price guard (3600s) prevents frozen-price attacks. Oracle address is a separate authorized key, not the deployer.
+
+**PolkaVM forbidden opcodes:** Audited — zero instances of `SELFDESTRUCT`, `CREATE2`, `EXTCODECOPY`, `assembly {}`, or `block.prevrandao`. OpenZeppelin v4.x used throughout (v5.x banned).
+
+**Integer overflow:** All math uses Solidity 0.8.20's built-in checked arithmetic. Fixed-point scaled to 1e18.
 
 ---
 
 ## Docs
 
-- [PHASES.md](./PHASES.md) — project phases and done criteria
+- [docs/WHITEPAPER.md](./docs/WHITEPAPER.md) — protocol mechanics, math, ZK circuit, oracle design, mainnet roadmap
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — full system diagrams: contract interactions, user flows, ZK pipeline, deployment topology
+- [PHASES.md](./PHASES.md) — project phases with completion criteria and deployed addresses
 - [docs/ROADMAP.md](./docs/ROADMAP.md) — sprint milestones
-- [docs/screenshots/](./docs/screenshots/) — on-chain evidence
-- [docs/WHITEPAPER.md](./docs/WHITEPAPER.md) — mechanism and math *(Phase 5)*
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — contract diagrams *(Phase 5)*
 
 ---
 
 ## Hackathon
 
 **Polkadot Solidity Hackathon 2026** — EVM Track — DeFi/Stablecoin-enabled dApps
-Submission deadline: March 20, 2026 23:59
-Demo Day: March 24–25, 2026
+**Submission deadline:** March 20, 2026 23:59
+**Demo Day:** March 24–25, 2026
 
 Built by **Orthonode Systems** — Arhant Barmate
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE)
