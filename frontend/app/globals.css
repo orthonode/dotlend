@@ -11,3 +11,12 @@ body {
   color: #ffffff;
   font-family: 'Courier New', Courier, monospace;
 }
+
+@keyframes valueFlash {
+  0%   { color: #E6007A; }
+  100% { color: inherit; }
+}
+
+.flash {
+  animation: valueFlash 0.6s ease-out forwards;
+}
