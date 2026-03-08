@@ -12,16 +12,22 @@ export function BorrowHOLLAR() {
   const { address } = useAccount();
   const [amount, setAmount] = useState("");
 
+  // Read raw mappings — never revert regardless of oracle freshness
   const { data } = useReadContracts({
     contracts: address ? [
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "getCollateralValue", args: [address] },
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",        args: [address] },
-      { address: ADDRESSES.priceOracle,     abi: ORACLE_ABI, functionName: "getPrice",          args: [ADDRESSES.vdot] },
+      { address: ADDRESSES.collateralVault, abi: VAULT_ABI,  functionName: "collateralBalance", args: [address] },
+      { address: ADDRESSES.collateralVault, abi: VAULT_ABI,  functionName: "debtBalance",        args: [address] },
+      { address: ADDRESSES.priceOracle,     abi: ORACLE_ABI, functionName: "prices",             args: [ADDRESSES.vdot] },
     ] : [],
+    query: { refetchInterval: 30_000 },
   });
 
-  const collUSD = data?.[0]?.result ?? 0n;
-  const currentDebt = data?.[1]?.result ?? 0n;
+  const collateralRaw = data?.[0]?.result ?? 0n;
+  const currentDebt   = data?.[1]?.result ?? 0n;
+  const vdotPrice     = data?.[2]?.result ?? 0n;
+
+  // Compute collateral USD client-side — same formula as CollateralVault.sol
+  const collUSD = collateralRaw * vdotPrice / BigInt(1e18);
 
   const collUSDNum = Number(formatEther(collUSD));
   const currentDebtNum = Number(formatEther(currentDebt));

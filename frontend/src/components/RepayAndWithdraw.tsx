@@ -18,6 +18,7 @@ export function RepayAndWithdraw() {
       { address: ADDRESSES.hollar,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
       { address: ADDRESSES.hollar,          abi: ERC20_ABI, functionName: "allowance",         args: [address, ADDRESSES.lendingPool] },
     ] : [],
+    query: { refetchInterval: 30_000 },
   });
 
   const debt       = data?.[0]?.result ?? 0n;

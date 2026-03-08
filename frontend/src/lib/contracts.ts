@@ -47,7 +47,13 @@ export const GATEWAY_ABI = [
 ] as const;
 
 export const ORACLE_ABI = [
+  // getPrice reverts when stale — only use for on-chain transactions
   { name: "getPrice", type: "function", stateMutability: "view",
+    inputs: [{ name: "token", type: "address" }], outputs: [{ type: "uint256" }] },
+  // Raw mapping getters — never revert, safe for UI display
+  { name: "prices", type: "function", stateMutability: "view",
+    inputs: [{ name: "token", type: "address" }], outputs: [{ type: "uint256" }] },
+  { name: "lastUpdated", type: "function", stateMutability: "view",
     inputs: [{ name: "token", type: "address" }], outputs: [{ type: "uint256" }] },
 ] as const;
 

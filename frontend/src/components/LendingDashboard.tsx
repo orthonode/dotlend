@@ -41,30 +41,43 @@ function HealthBar({ hf }: { hf: bigint }) {
   );
 }
 
+const LIQ_THRESHOLD = 0.80;
+
 export function LendingDashboard() {
   const { address } = useAccount();
 
-  const { data: price } = useReadContract({
-    address: ADDRESSES.priceOracle,
-    abi: ORACLE_ABI,
-    functionName: "getPrice",
-    args: [ADDRESSES.vdot],
+  // Read raw prices mapping — never reverts regardless of oracle freshness
+  const { data: oracleData } = useReadContracts({
+    contracts: [
+      { address: ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "prices",      args: [ADDRESSES.vdot] },
+      { address: ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "lastUpdated", args: [ADDRESSES.vdot] },
+    ],
+    query: { refetchInterval: 30_000 },
   });
 
   const { data: userData } = useReadContracts({
     contracts: address ? [
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "getHealthFactor",   args: [address] },
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "getCollateralValue", args: [address] },
     ] : [],
+    query: { refetchInterval: 30_000 },
   });
 
-  const collateral = userData?.[0]?.result ?? 0n;
-  const debt      = userData?.[1]?.result ?? 0n;
-  const hf        = userData?.[2]?.result ?? 0n;
-  const collUSD   = userData?.[3]?.result ?? 0n;
-  const vdotPrice = price ?? 0n;
+  const vdotPrice   = oracleData?.[0]?.result ?? 0n;
+  const lastUpdated = oracleData?.[1]?.result ?? 0n;
+  const collateral  = userData?.[0]?.result ?? 0n;
+  const debt        = userData?.[1]?.result ?? 0n;
+
+  // Compute collateral USD and health factor client-side — same formula as CollateralVault.sol
+  // collateralUSD = collateral * price / 1e18
+  // healthFactor  = (collateralUSD * 80 * 1e18) / (debt * 100)
+  const collUSD = collateral * vdotPrice / BigInt(1e18);
+  const hf = debt > 0n
+    ? collUSD * 80n * BigInt(1e18) / (debt * 100n)
+    : 0n;
+
+  const nowSec = BigInt(Math.floor(Date.now() / 1000));
+  const isStale = lastUpdated > 0n && (nowSec - lastUpdated) > 3600n;
 
   const ltv = collUSD > 0n
     ? Math.min(Number(formatEther(debt)) / Number(formatEther(collUSD)) * 100, 100)
@@ -80,7 +93,7 @@ export function LendingDashboard() {
         <StatCard
           label="vDOT Price"
           value={vdotPrice > 0n ? `$${Number(formatEther(vdotPrice)).toFixed(2)}` : "--"}
-          sub="via PriceOracle on-chain"
+          sub={isStale ? "⚠ oracle stale — last known price" : "via PriceOracle on-chain"}
         />
         <StatCard
           label="LTV Ratio"
