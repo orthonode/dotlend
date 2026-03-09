@@ -36,18 +36,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero */}
-      <div>
-        <h1 className="text-3xl font-bold">
-          The First Money Market on{" "}
-          <span className="text-[#E6007A]">Polkadot Hub</span>
-        </h1>
-        <p className="text-gray-400 mt-2 text-sm">
-          Deposit vDOT. Borrow HOLLAR. Solvency cryptographically proven every 6 hours.
-        </p>
-      </div>
-
-      {/* Dashboard */}
+      {/* Dashboard — Hero is rendered inside LendingDashboard */}
       <LendingDashboard />
 
       {/* Action grid */}
