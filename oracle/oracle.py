@@ -32,8 +32,8 @@ CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
 SOLVENCY_INTERVAL = 6 * 60 * 60  # 6 hours between solvency proofs
 
-PRICE_ORACLE_ADDRESS   = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
-VDOT_ADDRESS           = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
+PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
+VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
 COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c")
 SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address("0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0")
 
@@ -111,6 +111,19 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 log = logging.getLogger("dotlend-oracle")
+
+# ── web3 version-agnostic transaction sender ──────────────────────────────────
+
+def send_signed(w3, signed):
+    """
+    Compatible with web3.py v5, v6, and v7.
+    v5 + v6: signed.rawTransaction
+    v7:      signed.raw_transaction
+    """
+    raw = getattr(signed, "raw_transaction", None) or getattr(signed, "rawTransaction", None)
+    if raw is None:
+        raise AttributeError(f"Cannot find raw transaction bytes on SignedTransaction object. Attrs: {dir(signed)}")
+    return w3.eth.send_raw_transaction(raw)
 
 # ── Price source ──────────────────────────────────────────────────────────────
 
@@ -195,7 +208,6 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
             coll = vault_contract.functions.collateralBalance(user).call()
             debt = vault_contract.functions.debtBalance(user).call()
             if coll > 0:
-                # Get current vDOT price to compute USD value
                 try:
                     vdot_price = w3.eth.contract(
                         address=PRICE_ORACLE_ADDRESS, abi=PRICE_ORACLE_ABI
@@ -210,7 +222,6 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
 
     timestamp = int(time.time())
 
-    # Heartbeat values when no active positions
     if total_collateral == 0:
         total_collateral = 1
         total_debt = 0
@@ -239,7 +250,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
         })
 
         signed = w3.eth.account.sign_transaction(tx, private_key)
-        tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+        tx_hash = send_signed(w3, signed)  # ← version-agnostic
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
 
         status = "OK" if receipt["status"] == 1 else "FAIL"
@@ -252,6 +263,9 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
 # ── Oracle loop ───────────────────────────────────────────────────────────────
 
 def main():
+    import web3 as _web3
+    log.info(f"web3.py version: {_web3.__version__}")
+
     private_key = os.getenv("PRIVATE_KEY")
     if not private_key:
         log.error("PRIVATE_KEY not set in .env")
@@ -270,7 +284,7 @@ def main():
     log.info(f"Interval:      {INTERVAL // 60} minutes")
     log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 3600} hours")
 
-    oracle  = w3.eth.contract(address=PRICE_ORACLE_ADDRESS,    abi=PRICE_ORACLE_ABI)
+    oracle  = w3.eth.contract(address=PRICE_ORACLE_ADDRESS,     abi=PRICE_ORACLE_ABI)
     vault   = w3.eth.contract(address=COLLATERAL_VAULT_ADDRESS, abi=COLLATERAL_VAULT_ABI)
     gateway = w3.eth.contract(address=SOLVENCY_GATEWAY_ADDRESS, abi=SOLVENCY_GATEWAY_ABI)
 
@@ -298,7 +312,7 @@ def main():
             })
 
             signed = w3.eth.account.sign_transaction(tx, private_key)
-            tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+            tx_hash = send_signed(w3, signed)  # ← version-agnostic
             receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
 
             log.info(f"Price submitted: ${price_usd} ({price_wei} wei)")
