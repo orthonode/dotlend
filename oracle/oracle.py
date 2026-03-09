@@ -180,7 +180,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
 
     # Collect all unique depositor addresses from Deposited events
     try:
-        deposited_events = vault_contract.events.Deposited.get_logs(from_block=0, to_block="latest")
+        deposited_events = vault_contract.events.Deposited.get_logs(fromBlock=0, toBlock="latest")
         unique_users = list({e["args"]["user"] for e in deposited_events})
         log.info(f"[solvency] Found {len(unique_users)} unique depositor(s)")
     except Exception as e:
