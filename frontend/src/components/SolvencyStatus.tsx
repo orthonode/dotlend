@@ -1,6 +1,5 @@
 // SolvencyStatus.tsx
-// Reads the last SolvencyProven event from LendingPool and renders a live badge.
-// Drop into nexucore.xyz header or dashboard hero section.
+// Reads the last SolvencyProven event from SolvencyGateway and renders a live badge.
 
 import { useEffect, useState } from "react";
 import { createPublicClient, http, parseAbiItem, formatEther } from "viem";
@@ -77,12 +76,47 @@ function useSolvencyStatus() {
     }
 
     fetch();
-    // Refresh every 5 minutes
     const interval = setInterval(fetch, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   return { data, loading, error };
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function getDotColor(ageHours: number): string {
+  if (ageHours < 7) return "#22c55e";   // green  — fresh
+  if (ageHours < 12) return "#eab308";  // yellow — aging
+  return "#ef4444";                      // red    — stale
+}
+
+function getBadgeLabel(ageHours: number): string {
+  if (ageHours < 7) return "SOLVENCY PROVEN ✓";
+  if (ageHours < 12) return "PROOF AGING";
+  return "PROOF STALE ✗";
+}
+
+function formatAge(ageMs: number): string {
+  const mins = Math.round(ageMs / 60000);
+  if (mins < 60) return `${mins} min ago`;
+  return `${(ageMs / 3600000).toFixed(1)} hr ago`;
+}
+
+// ── Exported helper — used by LendingDashboard hero ──────────────────────────
+
+export function useSolvencyHeroText() {
+  const { data, loading } = useSolvencyStatus();
+
+  if (loading) return "Checking solvency status...";
+  if (!data) return "Solvency proof pending first submission.";
+
+  const ageHours = (Date.now() - data.provenAt.getTime()) / 3600000;
+  const age = formatAge(Date.now() - data.provenAt.getTime());
+
+  if (ageHours < 7) return `Solvency cryptographically proven. Last proof: ${age}.`;
+  if (ageHours < 12) return `Solvency proof aging — last proven ${age}. Next proof due soon.`;
+  return `Solvency proof is stale (${age}). Oracle may be recovering.`;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -109,17 +143,16 @@ export function SolvencyStatus() {
   }
 
   const ageMs = Date.now() - data.provenAt.getTime();
-  const ageHours = ageMs / (1000 * 60 * 60);
-  const isRecent = ageHours < 12;
+  const ageHours = ageMs / 3600000;
+
+  const dotColor = getDotColor(ageHours);
+  const badgeLabel = getBadgeLabel(ageHours);
+  const hoursAgo = formatAge(ageMs);
 
   const collateralF = Number(formatEther(data.totalCollateral));
   const debtF = Number(formatEther(data.totalDebt));
   const ratio = debtF > 0 ? collateralF / debtF : null;
   const ratioDisplay = ratio !== null ? ratio.toFixed(2) + "x" : "∞";
-
-  const hoursAgo = ageHours < 1
-    ? `${Math.round(ageMs / 60000)} min ago`
-    : `${ageHours.toFixed(1)} hr ago`;
 
   const explorerUrl = `https://blockscout-testnet.polkadot.io/tx/${data.txHash}`;
 
@@ -127,9 +160,9 @@ export function SolvencyStatus() {
     <div style={styles.card}>
       {/* Header badge */}
       <div style={styles.badgeRow}>
-        <span style={styles.dot(isRecent ? "#22c55e" : "#eab308")} />
-        <span style={{ ...styles.badgeText, color: isRecent ? "#22c55e" : "#eab308" }}>
-          {isRecent ? "SOLVENCY LOGGED \u2713" : "PROOF AGING"}
+        <span style={styles.dot(dotColor)} />
+        <span style={{ ...styles.badgeText, color: dotColor }}>
+          {badgeLabel}
         </span>
       </div>
 
@@ -137,11 +170,15 @@ export function SolvencyStatus() {
       <div style={styles.statsRow}>
         <div style={styles.stat}>
           <div style={styles.statLabel}>Total Collateral</div>
-          <div style={styles.statValue}>${Number(formatEther(data.totalCollateral)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+          <div style={styles.statValue}>
+            ${collateralF.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </div>
         </div>
         <div style={styles.stat}>
           <div style={styles.statLabel}>Total Debt</div>
-          <div style={styles.statValue}>${Number(formatEther(data.totalDebt)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+          <div style={styles.statValue}>
+            ${debtF.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </div>
         </div>
         <div style={styles.stat}>
           <div style={styles.statLabel}>C/D Ratio</div>
@@ -161,9 +198,12 @@ export function SolvencyStatus() {
           View on Blockscout &rarr;
         </a>
       </div>
+
       {/* Honest testnet disclaimer */}
-      <div style={{ marginTop: "10px", fontSize: "11px", color: "#555", borderTop: "1px solid #1a1a1a", paddingTop: "8px" }}>
-        Testnet: MockSolvencyVerifier (accepts all proofs). Real UltraHonk verifier requires BN254 elliptic curve precompiles (EIP-196/197). PolkaVM&apos;s resolc compiler does not yet support these opcodes. Architecture is mainnet-ready pending PolkaVM roadmap.
+      <div style={styles.disclaimer}>
+        Testnet: MockSolvencyVerifier (accepts all proofs). Real UltraHonk verifier requires BN254
+        elliptic curve precompiles (EIP-196/197). PolkaVM&apos;s resolc compiler does not yet support
+        these opcodes. Architecture is mainnet-ready pending PolkaVM roadmap.
       </div>
     </div>
   );
@@ -229,5 +269,12 @@ const styles = {
     color: "#E6007A",
     fontSize: "12px",
     textDecoration: "none" as const,
+  },
+  disclaimer: {
+    marginTop: "10px",
+    fontSize: "11px",
+    color: "#555",
+    borderTop: "1px solid #1a1a1a",
+    paddingTop: "8px",
   },
 };

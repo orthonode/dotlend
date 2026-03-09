@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useAccount, useReadContracts } from "wagmi";
 import { formatEther } from "viem";
 import { ADDRESSES, VAULT_ABI, ORACLE_ABI } from "@/src/lib/contracts";
-import { SolvencyStatus } from "./SolvencyStatus";
+import { SolvencyStatus, useSolvencyHeroText } from "./SolvencyStatus";
 import { useTx } from "@/src/lib/tx-context";
 
 // Flash the Polkadot pink on value change
@@ -15,7 +15,6 @@ function FlashValue({ value, className = "" }: { value: string; className?: stri
     if (prev.current !== value && ref.current) {
       prev.current = value;
       ref.current.classList.remove("flash");
-      // Force reflow so re-adding the class restarts the animation
       void ref.current.offsetWidth;
       ref.current.classList.add("flash");
     }
@@ -60,7 +59,23 @@ function HealthBar({ hf }: { hf: bigint }) {
   );
 }
 
-const LIQ_THRESHOLD = 0.80;
+// ── Hero section with dynamic solvency text ───────────────────────────────────
+
+function Hero() {
+  const heroText = useSolvencyHeroText();
+  return (
+    <div className="mb-2">
+      <h1 className="text-3xl font-bold leading-tight">
+        The First Money Market on{" "}
+        <span className="text-[#E6007A]">Polkadot Hub</span>
+      </h1>
+      <p className="text-gray-400 mt-2 font-mono text-sm">
+        Deposit vDOT. Borrow HOLLAR.{" "}
+        <span className="text-gray-300">{heroText}</span>
+      </p>
+    </div>
+  );
+}
 
 export function LendingDashboard() {
   const { address } = useAccount();
@@ -84,11 +99,9 @@ export function LendingDashboard() {
 
   const vdotPrice   = oracleData?.[0]?.result ?? 0n;
   const lastUpdated = oracleData?.[1]?.result ?? 0n;
-  // Apply optimistic deltas so position updates the moment user submits tx
   const collateral  = (userData?.[0]?.result ?? 0n) + collateralDelta;
   const debt        = (userData?.[1]?.result ?? 0n) + debtDelta;
 
-  // Same formula as CollateralVault.sol — computed client-side (oracle-safe)
   const collUSD = collateral * vdotPrice / BigInt(1e18);
   const hf = debt > 0n ? collUSD * 80n * BigInt(1e18) / (debt * 100n) : 0n;
 
@@ -107,6 +120,9 @@ export function LendingDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Dynamic hero — solvency text updates from chain */}
+      <Hero />
+
       <SolvencyStatus />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
