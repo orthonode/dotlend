@@ -35,7 +35,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -47,10 +47,10 @@ jobs:
         # We explicitly exclude the contracts/ directory from JS/TS scanning 
         # because the Hardhat/Solidity setup triggers false positives
         # on PolkaVM-specific design choices (e.g. older OpenZeppelin versions).
-        paths-ignore:
-          - 'contracts/**'
-          - 'test/**'
-          - 'scripts/**'
+        paths-ignore: |-
+          contracts/**
+          test/**
+          scripts/**
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
