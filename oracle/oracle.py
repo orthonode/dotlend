@@ -30,7 +30,7 @@ load_dotenv()
 RPC_URL   = "https://eth-rpc-testnet.polkadot.io"
 CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
-SOLVENCY_INTERVAL = 30 * 60      # 30 minutes — matches price oracle tick
+SOLVENCY_INTERVAL = 6 * 60 * 60  # 6 hours between solvency proofs
 
 PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
 VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
@@ -150,7 +150,27 @@ def fetch_vdot_price() -> Decimal:
     except Exception as e:
         log.warning(f"CoinGecko failed: {e}")
 
-    # Source 2: Binance — DOT/USDT
+    # Source 2: KuCoin — DOT/USDT (no geo-block, no API key)
+    try:
+        resp = requests.get("https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=DOT-USDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()["data"]["price"])
+        log.info(f"[price] KuCoin DOT/USDT (proxy): ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"KuCoin failed: {e}")
+
+    # Source 3: OKX — DOT/USDT
+    try:
+        resp = requests.get("https://www.okx.com/api/v5/market/ticker?instId=DOT-USDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()["data"][0]["last"])
+        log.info(f"[price] OKX DOT/USDT (proxy): ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"OKX failed: {e}")
+
+    # Source 4: Binance — DOT/USDT
     try:
         resp = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
         resp.raise_for_status()
@@ -159,19 +179,6 @@ def fetch_vdot_price() -> Decimal:
         return price
     except Exception as e:
         log.warning(f"Binance failed: {e}")
-
-    # Source 3: DIA Oracle
-    try:
-        resp = requests.get(
-            "https://api.diadata.org/v1/assetQuotation/Bifrost/0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
-            timeout=10
-        )
-        resp.raise_for_status()
-        price = Decimal(str(resp.json()["Price"]))
-        log.info(f"[price] DIA vDOT: ${price:.4f}")
-        return price
-    except Exception as e:
-        log.warning(f"DIA failed: {e}")
 
     log.warning("All price sources failed — using fallback $2.45")
     return Decimal("2.45")
@@ -282,7 +289,7 @@ def main():
     log.info(f"vDOT token:    {VDOT_ADDRESS}")
     log.info(f"Chain ID:      {CHAIN_ID}")
     log.info(f"Interval:      {INTERVAL // 60} minutes")
-    log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 60} minutes")
+    log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 3600} hours")
 
     oracle  = w3.eth.contract(address=PRICE_ORACLE_ADDRESS,     abi=PRICE_ORACLE_ABI)
     vault   = w3.eth.contract(address=COLLATERAL_VAULT_ADDRESS, abi=COLLATERAL_VAULT_ABI)
