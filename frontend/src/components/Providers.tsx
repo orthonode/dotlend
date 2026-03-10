@@ -6,6 +6,7 @@ import { config } from "@/src/lib/wagmi";
 import { useState } from "react";
 import { RefetchProvider } from "@/src/lib/refetch-context";
 import { TxProvider } from "@/src/lib/tx-context";
+import { MarketProvider } from "@/src/lib/market-context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -14,7 +15,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <TxProvider>
           <RefetchProvider>
-            {children}
+            <MarketProvider>
+              {children}
+            </MarketProvider>
           </RefetchProvider>
         </TxProvider>
       </QueryClientProvider>

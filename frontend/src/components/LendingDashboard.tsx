@@ -3,9 +3,10 @@
 import { useEffect, useRef } from "react";
 import { useAccount, useReadContracts } from "wagmi";
 import { formatEther } from "viem";
-import { ADDRESSES, VAULT_ABI, ORACLE_ABI } from "@/src/lib/contracts";
+import { VAULT_ABI, ORACLE_ABI } from "@/src/lib/contracts";
 import { SolvencyStatus, useSolvencyHeroText } from "./SolvencyStatus";
 import { useTx } from "@/src/lib/tx-context";
+import { useMarket } from "@/src/lib/market-context";
 
 function FlashValue({ value, className = "" }: { value: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -100,7 +101,7 @@ function AccruedInterestBadge({ debt }: { debt: bigint }) {
   );
 }
 
-function Hero() {
+function Hero({ assetSymbol }: { assetSymbol: string }) {
   const heroText = useSolvencyHeroText();
   return (
     <div className="mb-2">
@@ -108,7 +109,7 @@ function Hero() {
         The First Money Market on <span className="text-[#E6007A]">Polkadot Hub</span>
       </h1>
       <p className="text-gray-400 mt-2 font-mono text-sm">
-        Deposit vDOT. Borrow HOLLAR.{" "}
+        Deposit {assetSymbol}. Borrow HOLLAR.{" "}
         <span className="text-gray-300">{heroText}</span>
       </p>
     </div>
@@ -118,19 +119,20 @@ function Hero() {
 export function LendingDashboard() {
   const { address } = useAccount();
   const { collateralDelta, debtDelta } = useTx();
+  const { marketId, setMarketId, addresses, assetSymbol } = useMarket();
 
   const { data: oracleData } = useReadContracts({
     contracts: [
-      { address: ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "prices",      args: [ADDRESSES.vdot] },
-      { address: ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "lastUpdated", args: [ADDRESSES.vdot] },
+      { address: addresses.priceOracle, abi: ORACLE_ABI, functionName: "prices",      args: [addresses.collateral] },
+      { address: addresses.priceOracle, abi: ORACLE_ABI, functionName: "lastUpdated", args: [addresses.collateral] },
     ],
     query: { refetchInterval: 15_000 },
   });
 
   const { data: userData } = useReadContracts({
     contracts: address ? [
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
+      { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
+      { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
     ] : [],
     query: { refetchInterval: 15_000 },
   });
@@ -151,7 +153,7 @@ export function LendingDashboard() {
     ? Math.min(Number(formatEther(debt)) / Number(formatEther(collUSD)) * 100, 100)
     : 0;
 
-  const collateralDisplay = `${Number(formatEther(collateral)).toFixed(4)} vDOT`;
+  const collateralDisplay = `${Number(formatEther(collateral)).toFixed(4)} ${assetSymbol}`;
   const collUSDDisplay    = `$${Number(formatEther(collUSD)).toFixed(2)}`;
   const debtDisplay       = `${Number(formatEther(debt)).toFixed(6)} HOLLAR`;
   const ltvDisplay        = ltv > 0 ? `${ltv.toFixed(1)}%` : "--";
@@ -159,11 +161,28 @@ export function LendingDashboard() {
 
   return (
     <div className="space-y-6">
-      <Hero />
+      <Hero assetSymbol={assetSymbol} />
+      
+      {/* Market Selector */}
+      <div className="bg-[#111] border border-[#222] rounded-xl p-2 flex gap-2">
+        <button 
+          onClick={() => setMarketId("vdot")}
+          className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${marketId === "vdot" ? "bg-[#E6007A] text-white" : "text-gray-400 hover:bg-[#222]"}`}
+        >
+          vDOT Market
+        </button>
+        <button 
+          onClick={() => setMarketId("wpas")}
+          className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${marketId === "wpas" ? "bg-[#E6007A] text-white" : "text-gray-400 hover:bg-[#222]"}`}
+        >
+          WPAS Market (Native DOT)
+        </button>
+      </div>
+
       <SolvencyStatus />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StatCard label="vDOT Price" value={priceDisplay}
+        <StatCard label={`${assetSymbol} Price`} value={priceDisplay}
           sub={isStale ? "⚠ oracle stale — last known price" : "via PriceOracle on-chain"} />
         <StatCard label="LTV Ratio" value={ltvDisplay}
           sub="Max 70% | Liquidation threshold 80%" />

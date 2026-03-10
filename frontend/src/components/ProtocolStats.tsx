@@ -9,12 +9,12 @@ import { useReadContracts, usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
 import { formatEther, parseAbiItem } from "viem";
 import {
-  ADDRESSES,
   POOL_ABI,
   VAULT_ABI,
   ORACLE_ABI,
   EXPLORER,
 } from "@/src/lib/contracts";
+import { useMarket } from "@/src/lib/market-context";
 
 // ── Treasury Router ABI ────────────────────────────────────────
 // Add these to your contracts.ts ROUTER_ABI as well
@@ -85,30 +85,31 @@ export function ProtocolStats() {
   const client = usePublicClient();
   const [uniqueBorrowers, setUniqueBorrowers] = useState<number | null>(null);
   const [treasury, setTreasury] = useState<string | null>(null);
+  const { addresses, assetSymbol } = useMarket();
 
   // Core stats from contracts
   const { data } = useReadContracts({
     contracts: [
       {
-        address: ADDRESSES.treasuryRouter,
+        address: addresses.treasuryRouter,
         abi: ROUTER_ABI,
         functionName: "totalFeesCollected",
       },
       {
-        address: ADDRESSES.treasuryRouter,
+        address: addresses.treasuryRouter,
         abi: ROUTER_ABI,
         functionName: "totalHollarBurned",
       },
       {
-        address: ADDRESSES.treasuryRouter,
+        address: addresses.treasuryRouter,
         abi: ROUTER_ABI,
         functionName: "treasury",
       },
       {
-        address: ADDRESSES.priceOracle,
+        address: addresses.priceOracle,
         abi: ORACLE_ABI,
         functionName: "prices",
-        args: [ADDRESSES.vdot],
+        args: [addresses.collateral],
       },
     ],
     query: { refetchInterval: 30_000 },
@@ -124,7 +125,7 @@ export function ProtocolStats() {
     contracts: treasuryAddr
       ? [
           {
-            address: ADDRESSES.hollar,
+            address: addresses.hollar,
             abi: ERC20_BALANCE_ABI,
             functionName: "balanceOf",
             args: [treasuryAddr as `0x${string}`],
@@ -141,7 +142,7 @@ export function ProtocolStats() {
     (async () => {
       try {
         const logs = await client.getLogs({
-          address: ADDRESSES.lendingPool,
+          address: addresses.lendingPool,
           event: parseAbiItem(
             "event Borrowed(address indexed user, uint256 hollarAmount)",
           ),
@@ -164,7 +165,7 @@ export function ProtocolStats() {
     (async () => {
       try {
         const deposited = await client.getLogs({
-          address: ADDRESSES.collateralVault,
+          address: addresses.collateralVault,
           event: parseAbiItem(
             "event Deposited(address indexed user, uint256 amount)",
           ),
@@ -172,7 +173,7 @@ export function ProtocolStats() {
           toBlock: "latest",
         });
         const withdrawn = await client.getLogs({
-          address: ADDRESSES.collateralVault,
+          address: addresses.collateralVault,
           event: parseAbiItem(
             "event Withdrawn(address indexed user, uint256 amount)",
           ),
@@ -215,7 +216,7 @@ export function ProtocolStats() {
         <div className="flex items-center justify-between">
           <div className="text-sm font-bold text-white">Protocol Stats</div>
           <a
-            href={`${EXPLORER}/address/${ADDRESSES.lendingPool}`}
+            href={`${EXPLORER}/address/${addresses.lendingPool}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[10px] text-[#E6007A] hover:underline font-mono"
@@ -247,7 +248,7 @@ export function ProtocolStats() {
           value={`$${tvlUSD}`}
           sub={
             tvlVdot !== null
-              ? `${Number(formatEther(tvlVdot)).toFixed(4)} vDOT locked`
+              ? `${Number(formatEther(tvlVdot)).toFixed(4)} ${assetSymbol} locked`
               : "Loading..."
           }
         />

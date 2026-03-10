@@ -4,7 +4,7 @@
 [![CI](https://github.com/orthonode/dotlend/actions/workflows/ci.yml/badge.svg)](https://github.com/orthonode/dotlend/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Chain: Polkadot Hub TestNet](https://img.shields.io/badge/Chain-Polkadot%20Hub%20TestNet-E6007A)](https://blockscout-testnet.polkadot.io)
-[![Tests: 76 passing](https://img.shields.io/badge/Tests-76%20passing-brightgreen)]()
+[![Tests: 76 Hardhat + 6 Forge fuzz](https://img.shields.io/badge/Tests-76%20Hardhat%20%2B%206%20Forge%20fuzz-brightgreen)]()
 [![Hackathon: Polkadot Solidity 2026](https://img.shields.io/badge/Hackathon-Polkadot%20Solidity%202026-pink)](https://dorahacks.io)
 
 ---
@@ -29,7 +29,9 @@ The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amoun
 
 ## What DotLend Does
 
-DotLend is a non-custodial money market protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) as collateral and borrow **HOLLAR** (Hydration's stablecoin) at up to 70% LTV — while continuing to earn Bifrost staking yield (~15% APY) on their deposited assets. The core value proposition: **stake, collateralize, borrow — all natively on Polkadot Hub**.
+DotLend is a non-custodial money market protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) or **native PAS/DOT** as collateral and borrow **HOLLAR** (Hydration's stablecoin) at up to 70% LTV — while continuing to earn Bifrost staking yield (~15% APY) on their deposited assets. The core value proposition: **stake, collateralize, borrow — all natively on Polkadot Hub**.
+
+Native PAS/DOT collateral is enabled via **WPAS** — a zero-admin WETH9-style ERC-20 wrapper deployed on Polkadot Hub. Users `deposit{value: x}()` to receive WPAS 1:1, then deposit WPAS into `CollateralVault` identically to vDOT. No changes to any existing contracts required.
 
 ---
 
@@ -262,11 +264,16 @@ npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
 `oracle/oracle.py` — Python script deployed on Railway. The **container runs 24/7**; the script sleeps 30 minutes between price posts. Railway's `restartPolicyType: ALWAYS` auto-restarts the container on any crash.
 
 Loop:
-1. Fetch DOT/USD from CoinGecko (with Binance + DIA fallbacks)
-2. Call `PriceOracle.submitPrice(vdot, price_in_wei)` on-chain
-3. Sleep 30 minutes → repeat
+1. Fetch DOT/USD from CoinGecko (with Binance, KuCoin, OKX fallbacks)
+2. Call `PriceOracle.submitPrice(vdot, price_in_wei)` on-chain — vDOT price
+3. If `WPAS_ADDRESS` is set in `.env`: also call `submitPrice(wpas, dot_price_in_wei)` — native PAS collateral price
+4. Submit ZK solvency proof to `SolvencyGateway` every 30 minutes
+5. Sleep 30 minutes → repeat
 
-Environment override for local testing: `VDOT_PRICE_USD=8.50 python3 oracle/oracle.py`
+Environment overrides for local testing:
+```bash
+VDOT_PRICE_USD=8.50 DOT_PRICE_USD=5.00 python3 oracle/oracle.py
+```
 
 ### Mainnet Path — Hyperbridge ISMP
 On mainnet, `PriceOracle` will be replaced with a Hyperbridge ISMP adapter:
@@ -330,18 +337,30 @@ cd circuits/solvency && nargo compile
 ### Test
 
 ```bash
+# Hardhat unit tests (76 tests)
 npx hardhat test
+
+# Forge property-based fuzz tests (6 tests, 512 runs each)
+export PATH="$HOME/.foundry/bin:$PATH"
+forge test --match-path "test/fuzz/**" -v
 ```
 
 ```
-76 passing (0 failures)
+Hardhat — 76 passing:
+  PriceOracle     — 12 tests: access control, staleness, price submission
+  CollateralVault — 18 tests: deposit, withdraw, health factor math, LTV enforcement
+  LendingPool     — 22 tests: borrow, repay, liquidate, interest accrual
+  Integration     — 10 tests: full deposit → borrow → price crash → liquidate
+  SolvencyProof   — 14 tests: gateway setup, valid/invalid proof, permissionless,
+                              wrong input count, stale timestamp
 
-  PriceOracle         — 12 tests: access control, staleness, price submission
-  CollateralVault     — 18 tests: deposit, withdraw, health factor math, LTV enforcement
-  LendingPool         — 22 tests: borrow, repay, liquidate, interest accrual
-  Integration         — 10 tests: full deposit → borrow → price crash → liquidate
-  SolvencyProof       — 14 tests: gateway setup, valid/invalid proof, permissionless,
-                                   wrong input count, stale timestamp, existing borrow unaffected
+Forge fuzz — 6 tests × 512 runs:
+  testFuzz_HealthFactorNoOverflow     — formula safe in realistic input range
+  testFuzz_LTVBoundary                — 70% passes, 70%+1 wei fails
+  testFuzz_LiquidationThresholdConsistency — HF < 1e18 ↔ debt > 80% collateral
+  testFuzz_InterestMonotonicity       — interest always non-decreasing over time
+  testFuzz_LiquidationBonusCap        — seized amount never exceeds available collateral
+  testFuzz_RepayCap                   — repay always capped to actual debt
 ```
 
 ### Deploy
@@ -393,6 +412,7 @@ dotlend/
 │   ├── PriceOracle.sol          # authorized price feed, staleness guard
 │   ├── CollateralVault.sol      # vDOT deposit, health factor, liquidation seizure
 │   ├── LendingPool.sol          # borrow / repay / liquidate / interest
+│   ├── WPAS.sol                 # Wrapped PAS — WETH9-style native DOT collateral
 │   ├── SolvencyGateway.sol      # ZK proof submission, SolvencyProven event
 │   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
 │   ├── MockSolvencyVerifier.sol # configurable test double
@@ -405,19 +425,24 @@ dotlend/
 │       └── target/solvency.json # ACIR artifact (committed for Railway)
 ├── scripts/
 │   ├── deploy-protocol.js       # deploy all 7 contracts
+│   ├── deploy-wpas.js           # deploy WPAS + seed price in PriceOracle
 │   ├── interact.js              # deposit → borrow → repay → withdraw
 │   ├── simulate-crisis.js       # price crash → liquidation demo
 │   ├── generate-solvency-proof.js  # ZK proof pipeline (Railway cron)
 │   └── wire-solvency-verifier.js   # one-time verifier wiring
 ├── oracle/
-│   ├── oracle.py                # Python price feed (30-min interval)
+│   ├── oracle.py                # Python price feed (30-min interval; posts vDOT + WPAS)
 │   └── requirements.txt
 ├── test/
 │   ├── PriceOracle.test.js
 │   ├── CollateralVault.test.js
 │   ├── LendingPool.test.js
 │   ├── Integration.test.js
-│   └── SolvencyProof.test.js
+│   ├── SolvencyProof.test.js
+│   └── fuzz/
+│       └── FuzzLendingMath.t.sol  # 6 Forge property-based fuzz tests
+├── lib/
+│   └── forge-std/               # Foundry standard library (git submodule)
 ├── frontend/
 │   ├── src/components/          # React components (see Frontend section)
 │   ├── src/lib/contracts.ts     # ABIs + deployed addresses
@@ -426,6 +451,7 @@ dotlend/
 │   ├── WHITEPAPER.md            # protocol mechanics and math
 │   ├── ARCHITECTURE.md          # system diagrams and data flow
 │   └── ROADMAP.md               # sprint milestones
+├── foundry.toml                 # Forge config (src, test/fuzz, OZ remappings)
 ├── hardhat.config.js            # resolc compiler + network config
 ├── railway.json                 # Railway cron deployment config
 └── PHASES.md                    # project phases and completion criteria
@@ -435,18 +461,28 @@ dotlend/
 
 ## Tests
 
+**76 Hardhat unit tests** — all run locally on Hardhat without testnet access.
+
 ```bash
 npx hardhat test
 ```
 
-All 76 tests run on local Hardhat — no testnet required. No mocking of chain behavior; all contract interactions are real EVM executions.
+**6 Forge property-based fuzz tests** — 512 fuzzer iterations per test, targeting critical math invariants.
+
+```bash
+export PATH="$HOME/.foundry/bin:$PATH"
+forge test --match-path "test/fuzz/**" -v
+```
+
+The Forge fuzz suite discovered a real arithmetic boundary in the health factor formula (collateral × price overflows when both exceed 2^128 simultaneously), which is now documented in the test as the safe operating range of the protocol.
 
 **Coverage highlights:**
-- Health factor math verified at exact LTV boundaries
-- Interest accrual tested across multiple time intervals
-- Liquidation bonus calculation verified against manual math
-- ZK gateway: verifier-not-set, double-set, wrong input count, permissionless caller all covered
-- Integration test executes the complete price-crash liquidation cycle end-to-end
+- Health factor formula: verified safe over realistic collateral × price ranges
+- LTV boundary: exact 70% passes, 70%+1 wei fails — for all uint128 collateral values
+- Liquidation threshold: `HF < 1e18` ↔ `debt > 80%` proven for all input pairs
+- Interest accrual: monotone non-decreasing for all elapsed time values
+- Liquidation bonus cap: seize never exceeds available collateral for any input triplet
+- Repay cap: over-repayment always capped to debt, preventing underflow
 
 ---
 

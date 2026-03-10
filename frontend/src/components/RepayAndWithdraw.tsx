@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther, maxUint256 } from "viem";
-import { ADDRESSES, VAULT_ABI, POOL_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
+import { VAULT_ABI, POOL_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
 import { useRefetch } from "@/src/lib/refetch-context";
 import { useTx } from "@/src/lib/tx-context";
+import { useMarket } from "@/src/lib/market-context";
 
 // ── FAQ / Protocol transparency panel ────────────────────────────────────────
 
@@ -75,13 +76,14 @@ export function RepayAndWithdraw() {
   const queryClient = useQueryClient();
   const { triggerRefetch } = useRefetch();
   const { setStatus, setOptimistic, clearOptimistic } = useTx();
+  const { addresses, assetSymbol } = useMarket();
 
   const { data, refetch } = useReadContracts({
     contracts: address ? [
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
-      { address: ADDRESSES.hollar,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
-      { address: ADDRESSES.hollar,          abi: ERC20_ABI, functionName: "allowance",         args: [address, ADDRESSES.lendingPool] },
+      { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
+      { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
+      { address: addresses.hollar,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
+      { address: addresses.hollar,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.lendingPool] },
     ] : [],
     query: { refetchInterval: 15_000 },
   });
@@ -120,19 +122,19 @@ export function RepayAndWithdraw() {
 
   function handleApprove() {
     setStatus("signing", "Approving HOLLAR…");
-    writeContract({ address: ADDRESSES.hollar, abi: ERC20_ABI, functionName: "approve", args: [ADDRESSES.lendingPool, maxUint256] });
+    writeContract({ address: addresses.hollar, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256] });
   }
 
   function handleRepay() {
     setOptimistic(0n, -parsedRepay);
     setStatus("signing", `Repaying ${Number(repayAmount).toFixed(2)} HOLLAR…`);
-    writeContract({ address: ADDRESSES.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay] });
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay] });
   }
 
   function handleWithdraw() {
     setOptimistic(-parsedWithdraw, 0n);
-    setStatus("signing", `Withdrawing ${Number(withdrawAmount).toFixed(4)} vDOT…`);
-    writeContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw] });
+    setStatus("signing", `Withdrawing ${Number(withdrawAmount).toFixed(4)} ${assetSymbol}…`);
+    writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw] });
   }
 
   if (!address) {
@@ -160,7 +162,7 @@ export function RepayAndWithdraw() {
                 ? "bg-[#E6007A] text-white"
                 : "border border-[#333] text-gray-400 hover:border-[#E6007A]"
             }`}>
-            {tab === "repay" ? "Repay HOLLAR" : "Withdraw vDOT"}
+            {tab === "repay" ? "Repay HOLLAR" : `Withdraw ${assetSymbol}`}
           </button>
         ))}
       </div>
@@ -243,7 +245,7 @@ export function RepayAndWithdraw() {
         <div className="space-y-3">
           <div className="bg-[#0a0a0a] rounded-lg p-3 text-xs font-mono">
             <div className="text-gray-500">Available Collateral</div>
-            <div className="font-bold text-white">{Number(formatEther(collateral)).toFixed(4)} vDOT</div>
+            <div className="font-bold text-white">{Number(formatEther(collateral)).toFixed(4)} {assetSymbol}</div>
             {debt > 0n && (
               <div className="text-yellow-500 mt-2">
                 ⚠ Outstanding debt: {Number(formatEther(debt)).toFixed(6)} HOLLAR.
@@ -278,7 +280,7 @@ export function RepayAndWithdraw() {
                   <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
                 </span>
-              : debt > 0n ? "Repay debt first" : "Withdraw vDOT"}
+              : debt > 0n ? "Repay debt first" : `Withdraw ${assetSymbol}`}
           </button>
 
           <ProtocolFAQ />

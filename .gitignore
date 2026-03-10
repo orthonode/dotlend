@@ -20,6 +20,7 @@ coverage.json
 
 # Build
 dist/
+out/
 
 # Oracle venv
 oracle/.venv/

@@ -1,0 +1,13 @@
+[profile.default]
+src      = "contracts"
+test     = "test/fuzz"
+out      = "out"
+libs     = ["lib", "node_modules"]
+solc     = "0.8.20"
+
+remappings = [
+    "@openzeppelin/=node_modules/@openzeppelin/",
+]
+
+[fuzz]
+runs = 512

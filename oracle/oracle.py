@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DotLend Oracle — posts vDOT price to PriceOracle on Polkadot Hub TestNet
+DotLend Oracle — posts vDOT and WPAS prices to PriceOracle on Polkadot Hub TestNet
 Runs every 30 minutes. Authorized oracle = deployer address.
 
 Also submits a solvency proof to SolvencyGateway every 30 minutes.
@@ -9,7 +9,9 @@ blocked by PolkaVM BN254 precompile gap (EIP-196/197).
 
 Config via .env:
   PRIVATE_KEY       — deployer private key
-  VDOT_PRICE_USD    — override price in USD (optional, default: fetch from CoinGecko)
+  VDOT_PRICE_USD    — override vDOT price in USD (optional, default: fetch from CoinGecko)
+  DOT_PRICE_USD     — override DOT/WPAS price in USD (optional, default: fetch from CoinGecko)
+  WPAS_ADDRESS      — WPAS contract address (leave empty to skip WPAS price posting)
 """
 
 import os
@@ -36,6 +38,11 @@ PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3
 VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
 COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07")
 SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address("0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0")
+
+# WPAS contract address — set via WPAS_ADDRESS in .env after running deploy-wpas.js
+# Leave empty string to disable WPAS price posting until deployed.
+_WPAS_ENV = os.getenv("WPAS_ADDRESS", "")
+WPAS_ADDRESS = Web3.to_checksum_address(_WPAS_ENV) if _WPAS_ENV else None
 
 PRICE_ORACLE_ABI = json.loads("""[
   {
@@ -184,6 +191,62 @@ def fetch_vdot_price() -> Decimal:
     return Decimal("2.45")
 
 
+def fetch_dot_price() -> Decimal:
+    """Fetch native DOT/PAS price in USD for WPAS oracle updates.
+    Uses env override DOT_PRICE_USD if set, otherwise fetches live.
+    """
+    override = os.getenv("DOT_PRICE_USD")
+    if override:
+        log.info(f"Using env override: DOT_PRICE_USD={override}")
+        return Decimal(override)
+
+    # Source 1: CoinGecko — DOT directly
+    try:
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=polkadot&vs_currencies=usd"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        if "polkadot" in data and "usd" in data["polkadot"]:
+            price = Decimal(str(data["polkadot"]["usd"]))
+            log.info(f"[wpas-price] CoinGecko DOT: ${price}")
+            return price
+    except Exception as e:
+        log.warning(f"[wpas-price] CoinGecko failed: {e}")
+
+    # Source 2: KuCoin
+    try:
+        resp = requests.get("https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=DOT-USDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()["data"]["price"])
+        log.info(f"[wpas-price] KuCoin DOT/USDT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"[wpas-price] KuCoin failed: {e}")
+
+    # Source 3: OKX
+    try:
+        resp = requests.get("https://www.okx.com/api/v5/market/ticker?instId=DOT-USDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()["data"][0]["last"])
+        log.info(f"[wpas-price] OKX DOT/USDT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"[wpas-price] OKX failed: {e}")
+
+    # Source 4: Binance
+    try:
+        resp = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()["price"])
+        log.info(f"[wpas-price] Binance DOT/USDT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"[wpas-price] Binance failed: {e}")
+
+    log.warning("[wpas-price] All price sources failed — using fallback $5.00")
+    return Decimal("5.00")
+
+
 def price_to_wei(price_usd: Decimal) -> int:
     return int(price_usd * Decimal("1e18"))
 
@@ -287,6 +350,7 @@ def main():
     log.info(f"Oracle account: {account.address}")
     log.info(f"PriceOracle:   {PRICE_ORACLE_ADDRESS}")
     log.info(f"vDOT token:    {VDOT_ADDRESS}")
+    log.info(f"WPAS token:    {WPAS_ADDRESS or '(not configured — set WPAS_ADDRESS in .env)'}")
     log.info(f"Chain ID:      {CHAIN_ID}")
     log.info(f"Interval:      {INTERVAL // 60} minutes")
     log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 60} minutes")
@@ -328,6 +392,34 @@ def main():
 
         except Exception as e:
             log.error(f"Price tick failed: {e}")
+
+        # ── WPAS (native DOT/PAS) price update ────────────────────────────────
+        if WPAS_ADDRESS:
+            try:
+                dot_price_usd = fetch_dot_price()
+                dot_price_wei = price_to_wei(dot_price_usd)
+
+                nonce = w3.eth.get_transaction_count(account.address)
+                gas_price = w3.eth.gas_price
+
+                tx = oracle.functions.submitPrice(WPAS_ADDRESS, dot_price_wei).build_transaction({
+                    "chainId": CHAIN_ID,
+                    "from": account.address,
+                    "nonce": nonce,
+                    "gasPrice": gas_price,
+                    "gas": 100_000,
+                })
+
+                signed = w3.eth.account.sign_transaction(tx, private_key)
+                tx_hash = send_signed(w3, signed)
+                receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+
+                log.info(f"[wpas] Price submitted: ${dot_price_usd} ({dot_price_wei} wei)")
+                log.info(f"[wpas] Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {'OK' if receipt['status'] == 1 else 'FAIL'}")
+                log.info(f"[wpas] Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
+
+            except Exception as e:
+                log.error(f"[wpas] Price tick failed: {e}")
 
         # ── Solvency proof (every 30 minutes) ─────────────────────────────────
         now = time.time()

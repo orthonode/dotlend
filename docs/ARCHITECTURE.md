@@ -60,6 +60,12 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
 ║   │  mint()       │     │   mint/burn      │     │  stale guard: 3600s             │    ║
 ║   └───────┬───────┘     └────────┬─────────┘     └───────────────┬─────────────────┘    ║
 ║           │ deposit/seize        │ mint/burn/transfer             │ getLatestPrice        ║
+║           │                      │                                │                      ║
+║   ┌───────┴───────┐              │                                │                      ║
+║   │    WPAS       │ (Native)     │                                │                      ║
+║   │  ERC-20 wrap  │              │                                │                      ║
+║   └───────┬───────┘              │                                │                      ║
+║           │ deposit/seize        │                                │                      ║
 ║           ▼                      ▼                                ▼                      ║
 ║   ┌──────────────────────┐   ┌──────────────────────────────────────────────────────┐   ║
 ║   │   CollateralVault    │◄──│              LendingPool                             │   ║
@@ -117,6 +123,14 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
           │  MockvDOT   │  │ MockHOLLAR  │           │
           │ 0x95Fa...CA │  │ 0x2C8C...Af │           │
           └──────┬──────┘  └──────┬──────┘           │
+                 │                │                   │
+           ┌─────┴─────┐          │                   │
+           │   WPAS    │          │                   │
+           │           │          │                   │
+           └─────┬─────┘          │                   │
+                 │                │                   │
+           transferFrom      mint / burn              │
+           transfer          transferFrom             │
                  │                │                   │
            transferFrom      mint / burn              │
            transfer          transferFrom             │
@@ -183,6 +197,12 @@ address public authorizedOracle;
 #### MockvDOT — `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA`
 
 Standard OpenZeppelin v4 ERC-20. Public `mint(address, uint256)` for testnet purposes. Represents liquid staked DOT (vDOT from Bifrost) on Polkadot Hub.
+
+---
+
+#### WPAS — Standard ERC-20 Wrapper
+
+Zero-admin WETH9-style wrapper mapping native PAS/DOT 1:1 to an ERC-20 compliant token. Allows native Polkadot assets to be used as collateral directly within the existing `CollateralVault` architecture. Users call `deposit{value: amount}()` to receive WPAS.
 
 ---
 

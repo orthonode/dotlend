@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther } from "viem";
-import { ADDRESSES, VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
+import { VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
 import { useRefetch } from "@/src/lib/refetch-context";
 import { useTx } from "@/src/lib/tx-context";
+import { useMarket } from "@/src/lib/market-context";
 
 const MAX_LTV = 0.70;
 const LIQ_THRESHOLD = 0.80;
@@ -17,12 +18,13 @@ export function BorrowHOLLAR() {
   const queryClient = useQueryClient();
   const { triggerRefetch } = useRefetch();
   const { setStatus, setOptimistic, clearOptimistic } = useTx();
+  const { addresses } = useMarket();
 
   const { data } = useReadContracts({
     contracts: address ? [
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI,  functionName: "collateralBalance", args: [address] },
-      { address: ADDRESSES.collateralVault, abi: VAULT_ABI,  functionName: "debtBalance",        args: [address] },
-      { address: ADDRESSES.priceOracle,     abi: ORACLE_ABI, functionName: "prices",             args: [ADDRESSES.vdot] },
+      { address: addresses.collateralVault, abi: VAULT_ABI,  functionName: "collateralBalance", args: [address] },
+      { address: addresses.collateralVault, abi: VAULT_ABI,  functionName: "debtBalance",        args: [address] },
+      { address: addresses.priceOracle,     abi: ORACLE_ABI, functionName: "prices",             args: [addresses.collateral] },
     ] : [],
     query: { refetchInterval: 15_000 },
   });
@@ -68,7 +70,7 @@ export function BorrowHOLLAR() {
     setOptimistic(0n, parsed);
     setStatus("signing", `Borrowing ${Number(amount).toFixed(2)} HOLLAR…`);
     writeContract({
-      address: ADDRESSES.lendingPool,
+      address: addresses.lendingPool,
       abi: POOL_ABI,
       functionName: "borrow",
       args: [parsed],

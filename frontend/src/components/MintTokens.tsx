@@ -1,34 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt, useBalance } from "wagmi";
 import { parseEther, formatEther } from "viem";
-import { ADDRESSES, MOCK_ABI, EXPLORER } from "@/src/lib/contracts";
+import { ADDRESSES, MOCK_ABI, WPAS_ABI, EXPLORER } from "@/src/lib/contracts";
+import { useMarket } from "@/src/lib/market-context";
 
 const AMOUNT = parseEther("1000");
 
 export function MintTokens() {
   const { address } = useAccount();
-  const [minting, setMinting] = useState<"vdot" | "hollar" | null>(null);
+  const { marketId, addresses } = useMarket();
+  const [minting, setMinting] = useState<"vdot" | "hollar" | "wpas" | null>(null);
   const [lastTx, setLastTx] = useState<{ token: string; hash: string } | null>(null);
+  const [wrapAmount, setWrapAmount] = useState<string>("100");
+
+  const { data: ethBalance } = useBalance({ address });
 
   const { data, refetch } = useReadContracts({
     contracts: address ? [
-      { address: ADDRESSES.vdot,   abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
-      { address: ADDRESSES.hollar, abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
+      { address: addresses.collateral, abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
+      { address: addresses.hollar, abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
     ] : [],
     query: { enabled: !!address },
   });
 
-  const vdotBal   = data?.[0]?.result ?? 0n;
-  const hollarBal = data?.[1]?.result ?? 0n;
+  const collateralBal = data?.[0]?.result ?? 0n;
+  const hollarBal     = data?.[1]?.result ?? 0n;
 
   const { writeContract, data: txHash, isPending, error: writeError, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
     if (isSuccess && txHash && minting) {
-      setLastTx({ token: minting === "vdot" ? "MockvDOT" : "MockHOLLAR", hash: txHash });
+      const tokenNames = { vdot: "MockvDOT", hollar: "MockHOLLAR", wpas: "WPAS" };
+      setLastTx({ token: tokenNames[minting], hash: txHash });
       setMinting(null);
       refetch();
       reset();
@@ -39,16 +45,26 @@ export function MintTokens() {
     if (writeError) { setMinting(null); }
   }, [writeError]);
 
-  function handleMint(token: "vdot" | "hollar") {
+  function handleMint(token: "vdot" | "hollar" | "wpas") {
     if (!address) return;
     setMinting(token);
     setLastTx(null);
-    writeContract({
-      address: token === "vdot" ? ADDRESSES.vdot : ADDRESSES.hollar,
-      abi: MOCK_ABI,
-      functionName: "mint",
-      args: [address, AMOUNT],
-    });
+
+    if (token === "wpas") {
+      writeContract({
+        address: addresses.collateral,
+        abi: WPAS_ABI,
+        functionName: "deposit",
+        value: parseEther(wrapAmount || "0"),
+      });
+    } else {
+      writeContract({
+        address: token === "vdot" ? addresses.collateral : addresses.hollar,
+        abi: MOCK_ABI,
+        functionName: "mint",
+        args: [address, AMOUNT],
+      });
+    }
   }
 
   const busy = isPending || isConfirming;
@@ -81,27 +97,72 @@ export function MintTokens() {
       {/* Balances + mint buttons */}
       {address ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* vDOT */}
+          {/* Collateral (vDOT or WPAS) */}
           <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
-            <div>
-              <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">MockvDOT</div>
-              <div className="text-2xl font-bold text-white">
-                {Number(formatEther(vdotBal)).toFixed(2)}
-              </div>
-              <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{ADDRESSES.vdot}</div>
-            </div>
-            <button
-              onClick={() => handleMint("vdot")}
-              disabled={busy}
-              className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
-            >
-              {busy && minting === "vdot" ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {isPending ? "Waiting for wallet…" : "Confirming…"}
-                </span>
-              ) : "Mint 1000 MockvDOT"}
-            </button>
+            {marketId === "vdot" ? (
+              <>
+                <div>
+                  <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">MockvDOT</div>
+                  <div className="text-2xl font-bold text-white">
+                    {Number(formatEther(collateralBal)).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{addresses.collateral}</div>
+                </div>
+                <button
+                  onClick={() => handleMint("vdot")}
+                  disabled={busy}
+                  className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
+                >
+                  {busy && minting === "vdot" ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      {isPending ? "Waiting for wallet…" : "Confirming…"}
+                    </span>
+                  ) : "Mint 1000 MockvDOT"}
+                </button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">Wrap Native DOT</div>
+                  <div className="flex justify-between items-end mt-2 mb-1">
+                    <div className="text-sm text-gray-400">Native Balance:</div>
+                    <div className="text-sm font-bold text-white">
+                      {ethBalance ? Number(formatEther(ethBalance.value)).toFixed(4) : "0.00"} DOT
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-end mb-2">
+                    <div className="text-sm text-gray-400">WPAS Balance:</div>
+                    <div className="text-sm font-bold text-white">
+                      {Number(formatEther(collateralBal)).toFixed(4)} WPAS
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="number"
+                      value={wrapAmount}
+                      onChange={(e) => setWrapAmount(e.target.value)}
+                      placeholder="0.00"
+                      disabled={busy}
+                      className="flex-1 bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{addresses.collateral}</div>
+                </div>
+                <button
+                  onClick={() => handleMint("wpas")}
+                  disabled={busy || !wrapAmount || Number(wrapAmount) <= 0}
+                  className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
+                >
+                  {busy && minting === "wpas" ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      {isPending ? "Waiting for wallet…" : "Confirming…"}
+                    </span>
+                  ) : `Wrap ${wrapAmount} DOT`}
+                </button>
+              </>
+            )}
           </div>
 
           {/* HOLLAR */}
@@ -111,7 +172,7 @@ export function MintTokens() {
               <div className="text-2xl font-bold text-white">
                 {Number(formatEther(hollarBal)).toFixed(2)}
               </div>
-              <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{ADDRESSES.hollar}</div>
+              <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{addresses.hollar}</div>
             </div>
             <button
               onClick={() => handleMint("hollar")}

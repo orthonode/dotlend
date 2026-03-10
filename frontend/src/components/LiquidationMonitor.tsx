@@ -4,8 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatEther, parseAbiItem } from "viem";
-import { ADDRESSES, VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
+import { VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
 import { useRefetch } from "@/src/lib/refetch-context";
+import { useMarket } from "@/src/lib/market-context";
 
 interface Position {
   user: `0x${string}`;
@@ -28,6 +29,7 @@ export function LiquidationMonitor() {
   const { refetchCount, triggerRefetch } = useRefetch();
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addresses, assetSymbol } = useMarket();
 
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
@@ -45,7 +47,7 @@ export function LiquidationMonitor() {
       setLoading(true);
 
       const depositLogs = await client.getLogs({
-        address: ADDRESSES.collateralVault,
+        address: addresses.collateralVault,
         event: parseAbiItem("event Deposited(address indexed user, uint256 amount)"),
         fromBlock: 0n,
         toBlock: "latest",
@@ -54,18 +56,18 @@ export function LiquidationMonitor() {
       const uniqueUsers = [...new Set(depositLogs.map(l => l.args.user!))];
 
       const vdotPrice = await client.readContract({
-        address: ADDRESSES.priceOracle,
+        address: addresses.priceOracle,
         abi: ORACLE_ABI,
         functionName: "prices",
-        args: [ADDRESSES.vdot],
+        args: [addresses.collateral],
       }) as bigint;
 
       const result: Position[] = [];
 
       for (const user of uniqueUsers) {
         const [collateral, debt] = await Promise.all([
-          client.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [user] }) as Promise<bigint>,
-          client.readContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [user] }) as Promise<bigint>,
+          client.readContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [user] }) as Promise<bigint>,
+          client.readContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [user] }) as Promise<bigint>,
         ]);
 
         if (collateral === 0n || debt === 0n) continue;
@@ -92,7 +94,7 @@ export function LiquidationMonitor() {
 
   function handleLiquidate(borrower: `0x${string}`) {
     writeContract({
-      address: ADDRESSES.lendingPool,
+      address: addresses.lendingPool,
       abi: POOL_ABI_FULL,
       functionName: "liquidate",
       args: [borrower],
@@ -191,7 +193,7 @@ export function LiquidationMonitor() {
                     </div>
                     <div>
                       <div className="text-gray-500">Bonus</div>
-                      <div className="text-green-400">5% vDOT</div>
+                      <div className="text-green-400">5% {assetSymbol}</div>
                     </div>
                   </div>
 
@@ -236,7 +238,7 @@ export function LiquidationMonitor() {
           </summary>
           <div className="px-3 pb-3 pt-2 border-t border-[#1a1a1a] space-y-2 text-gray-500">
             <div><span className="text-gray-300">Trigger</span> — health factor drops below 1.0 (LTV exceeds 80%). Anyone can call <span className="text-gray-400">liquidate(borrower)</span>.</div>
-            <div><span className="text-gray-300">What happens</span> — the liquidator repays the borrower's full HOLLAR debt and receives their vDOT collateral plus a 5% bonus.</div>
+            <div><span className="text-gray-300">What happens</span> — the liquidator repays the borrower's full HOLLAR debt and receives their {assetSymbol} collateral plus a 5% bonus.</div>
             <div><span className="text-gray-300">Why 80% threshold</span> — collateral is priced at the oracle's last on-chain value. Price feeds update every 30 minutes via the Python oracle; the 80% liquidation threshold gives a buffer against price drops between updates.</div>
             <div><span className="text-gray-300">This monitor</span> — scans all <span className="text-gray-400">Deposited</span> events from block 0, re-reads every 15 seconds. Health factors are computed client-side using the same formula as <span className="text-gray-400">CollateralVault.sol</span>.</div>
             <div className="pt-1 border-t border-[#1a1a1a] text-gray-600">
