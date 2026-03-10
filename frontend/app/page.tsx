@@ -16,8 +16,8 @@ export default function Home() {
       <div className="bg-yellow-950/40 border border-yellow-600/40 rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex-1 text-sm text-yellow-200">
           <span className="font-bold text-yellow-400">Testnet deployment.</span>{" "}
-          This uses <span className="font-mono text-yellow-300">MockvDOT</span> and{" "}
-          <span className="font-mono text-yellow-300">MockHOLLAR</span> — not real assets.
+          This uses <span className="font-mono text-yellow-300">vDOT</span> and{" "}
+          <span className="font-mono text-yellow-300">USDH</span> — not real assets.
           You need to mint test tokens before you can deposit or borrow.
         </div>
         <div className="flex items-center gap-3 shrink-0">

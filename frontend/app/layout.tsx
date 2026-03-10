@@ -7,7 +7,7 @@ import { TxBanner } from "@/src/components/TxBanner";
 
 export const metadata: Metadata = {
   title: "DotLend — First Money Market on Polkadot Hub",
-  description: "Borrow HOLLAR against vDOT. Solvency cryptographically proven.",
+  description: "Deposit vDOT or native DOT. Borrow USDH. Polkadot Hub Money Market.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

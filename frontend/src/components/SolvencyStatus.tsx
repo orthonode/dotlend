@@ -142,7 +142,7 @@ export function useSolvencyHeroText(): string {
   if (!data)   return "Solvency proof pending first submission.";
   const ageHours = (Date.now() - data.provenAt.getTime()) / 3600000;
   const age      = formatAge(Date.now() - data.provenAt.getTime());
-  if (ageHours < 1)  return `Solvency cryptographically proven. Last proof: ${age}.`;
+  if (ageHours < 1)  return `On-chain solvency reporting. Last report: ${age}.`;
   if (ageHours < 2) return `Solvency proof aging — last proven ${age}. Next proof due soon.`;
   return `Solvency proof is stale (${age}). Oracle may be recovering.`;
 }
