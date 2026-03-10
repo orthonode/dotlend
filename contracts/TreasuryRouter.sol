@@ -3,18 +3,18 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IHOLLAR {
+interface IUSDH {
     function burn(uint256 amount) external;
     function mint(address to, uint256 amount) external;
     function transfer(address to, uint256 amount) external returns (bool);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
-/// @title TreasuryRouter — passed as _hollar to LendingPool constructor.
+/// @title TreasuryRouter — passed as _usdh to LendingPool constructor.
 ///
 /// Revenue model (MakerDAO-style):
 ///   100% of repayment/liquidation flows go to the protocol treasury.
-///   HOLLAR is a stablecoin — burning it destroys borrowing capacity for
+///   USDH is a stablecoin — burning it destroys borrowing capacity for
 ///   zero token-value benefit. Instead, treasury governance directs funds to:
 ///     Phase 1 (testnet):  operations, hackathon prizes, liquidity
 ///     Phase 2 (mainnet):  buy DOT/vDOT on open market → distribute to stakers
@@ -22,21 +22,21 @@ interface IHOLLAR {
 ///
 /// Intercept strategy:
 ///   LendingPool.repay() calls in order:
-///     (A) hollar.transferFrom(user, address(this), amount)  — pull from user
-///     (B) hollar.burn(amount)                               — burn from pool
+///     (A) usdh.transferFrom(user, address(this), amount)  — pull from user
+///     (B) usdh.burn(amount)                               — burn from pool
 ///
 ///   We intercept at (A): when transferFrom(user, lendingPool, amount) is called,
-///   the router pulls HOLLAR from user directly into itself, sends 100% to
-///   treasury. When (B) hollar.burn(amount) is called, it's a no-op.
+///   the router pulls USDH from user directly into itself, sends 100% to
+///   treasury. When (B) usdh.burn(amount) is called, it's a no-op.
 ///
 /// Deploy order:
-///   1. Deploy TreasuryRouter(hollarAddress, treasuryAddress)
+///   1. Deploy TreasuryRouter(usdhAddress, treasuryAddress)
 ///   2. Deploy CollateralVault(collateral, oracle)
 ///   3. Deploy LendingPool(vault, ROUTER_ADDRESS, oracle, collateral)
 ///   4. vault.setLendingPool(pool)
 ///   5. router.setLendingPool(pool)  ← so router knows pool address
 contract TreasuryRouter is Ownable {
-    IHOLLAR public immutable hollar;
+    IUSDH public immutable usdh;
     address public treasury;
     address public lendingPool;
 
@@ -45,10 +45,10 @@ contract TreasuryRouter is Ownable {
     event ProtocolFeeCollected(uint256 amount);
     event TreasuryUpdated(address indexed newTreasury);
 
-    constructor(address _hollar, address _treasury) {
-        require(_hollar   != address(0), "TR: zero hollar");
+    constructor(address _usdh, address _treasury) {
+        require(_usdh   != address(0), "TR: zero usdh");
         require(_treasury != address(0), "TR: zero treasury");
-        hollar   = IHOLLAR(_hollar);
+        usdh   = IUSDH(_usdh);
         treasury = _treasury;
     }
 
@@ -69,13 +69,13 @@ contract TreasuryRouter is Ownable {
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         if (to == lendingPool && amount > 0) {
             // Intercept: pull from user into router, send 100% to treasury
-            hollar.transferFrom(from, address(this), amount);
-            hollar.transfer(treasury, amount);
+            usdh.transferFrom(from, address(this), amount);
+            usdh.transfer(treasury, amount);
             totalFeesCollected += amount;
             emit ProtocolFeeCollected(amount);
             return true;
         }
-        return hollar.transferFrom(from, to, amount);
+        return usdh.transferFrom(from, to, amount);
     }
 
     /// @notice Called by LendingPool after transferFrom — already handled, no-op.
@@ -83,8 +83,8 @@ contract TreasuryRouter is Ownable {
         // Revenue already routed to treasury in transferFrom() — nothing to burn
     }
 
-    /// @notice Forwards mint() to real HOLLAR
+    /// @notice Forwards mint() to real USDH
     function mint(address to, uint256 amount) external {
-        hollar.mint(to, amount);
+        usdh.mint(to, amount);
     }
 }

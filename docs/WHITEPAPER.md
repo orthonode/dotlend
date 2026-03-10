@@ -139,7 +139,7 @@ Contract deployment must follow dependency order:
 2. MockvDOT.deploy()
 3. MockUSDH.deploy()
 4. CollateralVault.deploy(vdot, oracle)
-5. LendingPool.deploy(vault, hollar, oracle, vdot)
+5. LendingPool.deploy(vault, usdh, oracle, vdot)
 6. CollateralVault.setLendingPool(lendingPool)   ← one-time link
 7. MockSolvencyVerifier.deploy()
 8. SolvencyGateway.deploy()
@@ -214,19 +214,19 @@ If the withdrawal would push the position below LTV, the transaction reverts. Th
 ### 4.6 Borrowing Flow
 
 ```
-User calls LendingPool.borrow(hollarAmount)
+User calls LendingPool.borrow(usdhAmount)
   │
   ├─► accrueInterest(msg.sender)          // update debt for accumulated interest
   │
   ├─► collateralUSD = vault.getCollateralValue(msg.sender)
   │
-  ├─► newDebt = currentDebt + hollarAmount
+  ├─► newDebt = currentDebt + usdhAmount
   │
   ├─► require(newDebt * 100 <= collateralUSD * 70)   // LTV check
   │
   ├─► vault.setDebt(msg.sender, newDebt)
   │
-  └─► hollar.mint(msg.sender, hollarAmount)           // USDH issued
+  └─► usdh.mint(msg.sender, usdhAmount)           // USDH issued
 ```
 
 USDH is minted directly to the borrower — there is no liquidity pool to draw from. The protocol is a synthetic issuer: USDH enters existence when borrowed and is destroyed (burned) when repaid. Total USDH supply is always equal to total outstanding debt plus accumulated fees.
@@ -234,15 +234,15 @@ USDH is minted directly to the borrower — there is no liquidity pool to draw f
 ### 4.7 Repayment Flow
 
 ```
-User calls LendingPool.repay(hollarAmount)
+User calls LendingPool.repay(usdhAmount)
   │
   ├─► accrueInterest(msg.sender)
   │
-  ├─► repayAmount = min(hollarAmount, debt)    // cannot over-repay
+  ├─► repayAmount = min(usdhAmount, debt)    // cannot over-repay
   │
-  ├─► hollar.transferFrom(user, pool, repayAmount)
+  ├─► usdh.transferFrom(user, pool, repayAmount)
   │
-  ├─► hollar.burn(repayAmount)                 // USDH destroyed
+  ├─► usdh.burn(repayAmount)                 // USDH destroyed
   │
   └─► vault.setDebt(user, debt - repayAmount)
 ```
@@ -387,9 +387,9 @@ Liquidator calls liquidate(borrower)
   │
   ├─► debt = vault.debtBalance(borrower)
   │
-  ├─► hollar.transferFrom(liquidator, pool, debt)   // liquidator pays full debt
+  ├─► usdh.transferFrom(liquidator, pool, debt)   // liquidator pays full debt
   │
-  ├─► hollar.burn(debt)
+  ├─► usdh.burn(debt)
   │
   ├─► vdotPrice = oracle.getPrice(vdot)
   │

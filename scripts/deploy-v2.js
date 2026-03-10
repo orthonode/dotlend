@@ -1,7 +1,7 @@
 // scripts/deploy-v2.js
 // Deploys TreasuryRouter + CollateralVault + LendingPool.
 // LendingPool.sol is UNCHANGED from original — no recompile size issues.
-// TreasuryRouter is passed as the _hollar address to LendingPool.
+// TreasuryRouter is passed as the _usdh address to LendingPool.
 //
 // Run:
 //   npx hardhat run scripts/deploy-v2.js --network polkadotHubTestnet
@@ -11,7 +11,7 @@ const { ethers } = require("hardhat");
 // Existing deployed — unchanged
 const PRICE_ORACLE = "0xc12D24cD6DF4521C9A453a325751bB1f38326a91";
 const VDOT         = "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F";
-const HOLLAR       = "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca";
+const USDH       = "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca";
 const SOLVENCY_GW  = "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa";
 
 async function main() {
@@ -24,7 +24,7 @@ async function main() {
   // 1. Deploy TreasuryRouter
   console.log("1. Deploying TreasuryRouter...");
   const Router = await ethers.getContractFactory("TreasuryRouter");
-  const router = await Router.deploy(HOLLAR, treasury);
+  const router = await Router.deploy(USDH, treasury);
   await router.waitForDeployment();
   const routerAddress = await router.getAddress();
   console.log("   TreasuryRouter:", routerAddress);
@@ -38,7 +38,7 @@ async function main() {
   console.log("   CollateralVault:", vaultAddress);
 
   // 3. Deploy LendingPool — ORIGINAL UNCHANGED CONTRACT
-  //    Pass ROUTER as _hollar — pool thinks it's talking to HOLLAR directly
+  //    Pass ROUTER as _usdh — pool thinks it's talking to USDH directly
   console.log("3. Deploying LendingPool (original, unchanged)...");
   const Pool = await ethers.getContractFactory("LendingPool");
   const pool = await Pool.deploy(vaultAddress, routerAddress, PRICE_ORACLE, VDOT);
@@ -71,7 +71,7 @@ async function main() {
   console.log("Unchanged:");
   console.log(`  priceOracle:     "${PRICE_ORACLE}",`);
   console.log(`  vdot:            "${VDOT}",`);
-  console.log(`  hollar:          "${HOLLAR}",`);
+  console.log(`  usdh:            "${USDH}",`);
   console.log(`  solvencyGateway: "${SOLVENCY_GW}",`);
   console.log(`  treasury:        "${treasury}",`);
   console.log("");

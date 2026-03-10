@@ -9,7 +9,7 @@
 - [x] OZ v4.9.6 installed and locked
 - [x] Counter.sol — scaffold verification
 - [x] MockvDOT.sol — ERC-20 mock (OZ v4, mint only)
-- [x] MockHOLLAR.sol — ERC-20 mock (OZ v4, mint only)
+- [x] MockUSDH.sol — ERC-20 mock (OZ v4, mint only)
 - [x] resolc compile passes (hh-resolc-artifact-1, 0x50564d00 prefix)
 - [x] .claude/ — 11 agents + 22 commands + pre-push hook
 - [x] PHASES.md, ROADMAP.md, .gitignore

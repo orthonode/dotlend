@@ -24,7 +24,7 @@ interface IMintBurn {
 }
 
 
-/// @title LendingPool — borrow, repay, and liquidate HOLLAR against vDOT collateral
+/// @title LendingPool — borrow, repay, and liquidate USDH against vDOT collateral
 /// @notice Stability fee accrues on every interaction via block.timestamp.
 ///         No cron needed — interest is lazily updated per user.
 contract LendingPool is Ownable, ReentrancyGuard {
@@ -38,15 +38,15 @@ contract LendingPool is Ownable, ReentrancyGuard {
     uint256 public constant BONUS_PRECISION = 100;
 
     ICollateralVault public immutable vault;
-    IMintBurn public immutable hollar;
+    IMintBurn public immutable usdh;
     IPriceOracle public immutable oracle;
     address public immutable vdot;
 
     /// @notice Timestamp of last interest accrual per user
     mapping(address => uint256) public lastAccrualTime;
 
-    event Borrowed(address indexed user, uint256 hollarAmount);
-    event Repaid(address indexed user, uint256 hollarAmount);
+    event Borrowed(address indexed user, uint256 usdhAmount);
+    event Repaid(address indexed user, uint256 usdhAmount);
     event Liquidated(
         address indexed borrower,
         address indexed liquidator,
@@ -57,16 +57,16 @@ contract LendingPool is Ownable, ReentrancyGuard {
 
     constructor(
         address _vault,
-        address _hollar,
+        address _usdh,
         address _oracle,
         address _vdot
     ) {
         require(_vault != address(0), "Pool: zero vault");
-        require(_hollar != address(0), "Pool: zero hollar");
+        require(_usdh != address(0), "Pool: zero usdh");
         require(_oracle != address(0), "Pool: zero oracle");
         require(_vdot != address(0), "Pool: zero vdot");
         vault = ICollateralVault(_vault);
-        hollar = IMintBurn(_hollar);
+        usdh = IMintBurn(_usdh);
         oracle = IPriceOracle(_oracle);
         vdot = _vdot;
     }
@@ -91,16 +91,16 @@ contract LendingPool is Ownable, ReentrancyGuard {
         lastAccrualTime[user] = block.timestamp;
     }
 
-    /// @notice Borrow HOLLAR against deposited vDOT collateral
-    function borrow(uint256 hollarAmount) external nonReentrant {
-        require(hollarAmount > 0, "Pool: zero amount");
+    /// @notice Borrow USDH against deposited vDOT collateral
+    function borrow(uint256 usdhAmount) external nonReentrant {
+        require(usdhAmount > 0, "Pool: zero amount");
         accrueInterest(msg.sender);
 
         uint256 collateralUSD = vault.getCollateralValue(msg.sender);
         require(collateralUSD > 0, "Pool: no collateral");
 
         uint256 currentDebt = vault.debtBalance(msg.sender);
-        uint256 newDebt = currentDebt + hollarAmount;
+        uint256 newDebt = currentDebt + usdhAmount;
 
         require(newDebt * 100 <= collateralUSD * 70, "Pool: exceeds LTV");
 
@@ -109,22 +109,22 @@ contract LendingPool is Ownable, ReentrancyGuard {
             lastAccrualTime[msg.sender] = block.timestamp;
         }
 
-        hollar.mint(msg.sender, hollarAmount);
-        emit Borrowed(msg.sender, hollarAmount);
+        usdh.mint(msg.sender, usdhAmount);
+        emit Borrowed(msg.sender, usdhAmount);
     }
 
-    /// @notice Repay HOLLAR debt
-    function repay(uint256 hollarAmount) external nonReentrant {
-        require(hollarAmount > 0, "Pool: zero amount");
+    /// @notice Repay USDH debt
+    function repay(uint256 usdhAmount) external nonReentrant {
+        require(usdhAmount > 0, "Pool: zero amount");
         accrueInterest(msg.sender);
 
         uint256 debt = vault.debtBalance(msg.sender);
         require(debt > 0, "Pool: no debt");
 
-        uint256 repayAmount = hollarAmount > debt ? debt : hollarAmount;
+        uint256 repayAmount = usdhAmount > debt ? debt : usdhAmount;
 
-        hollar.transferFrom(msg.sender, address(this), repayAmount);
-        hollar.burn(repayAmount);
+        usdh.transferFrom(msg.sender, address(this), repayAmount);
+        usdh.burn(repayAmount);
 
         vault.setDebt(msg.sender, debt - repayAmount);
         lastAccrualTime[msg.sender] = block.timestamp;
@@ -142,8 +142,8 @@ contract LendingPool is Ownable, ReentrancyGuard {
         uint256 debt = vault.debtBalance(borrower);
         require(debt > 0, "Pool: no debt");
 
-        hollar.transferFrom(msg.sender, address(this), debt);
-        hollar.burn(debt);
+        usdh.transferFrom(msg.sender, address(this), debt);
+        usdh.burn(debt);
 
         uint256 vdotPrice = oracle.getPrice(vdot);
         uint256 debtInVdot = (debt * 1e18) / vdotPrice;

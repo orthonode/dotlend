@@ -4,11 +4,11 @@
 // Flow:
 //   1. Mint vDOT to deployer
 //   2. Deposit vDOT → collateral
-//   3. Borrow HOLLAR at max LTV (70%)
+//   3. Borrow USDH at max LTV (70%)
 //   4. Verify health factor is healthy (≥ 1.0)
 //   5. Crash vDOT price via oracle
 //   6. Verify health factor is now < 1.0 (liquidatable)
-//   7. Mint HOLLAR to liquidator (same deployer account for testnet)
+//   7. Mint USDH to liquidator (same deployer account for testnet)
 //   8. Liquidate → deployer receives vDOT + 5% bonus
 //   9. Verify debt cleared, print results
 
@@ -17,7 +17,7 @@ const hre = require("hardhat");
 const ADDRESSES = {
   priceOracle:     "0xc12D24cD6DF4521C9A453a325751bB1f38326a91",
   vdot:            "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
-  hollar:          "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca",
+  usdh:          "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca",
   collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
   lendingPool:     "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
 };
@@ -49,7 +49,7 @@ async function main() {
   console.log("=".repeat(60));
 
   const vdot   = await hre.ethers.getContractAt("MockvDOT",        ADDRESSES.vdot);
-  const hollar = await hre.ethers.getContractAt("MockHOLLAR",      ADDRESSES.hollar);
+  const usdh = await hre.ethers.getContractAt("MockUSDH",      ADDRESSES.usdh);
   const vault  = await hre.ethers.getContractAt("CollateralVault", ADDRESSES.collateralVault);
   const pool   = await hre.ethers.getContractAt("LendingPool",     ADDRESSES.lendingPool);
   const oracle = await hre.ethers.getContractAt("PriceOracle",     ADDRESSES.priceOracle);
@@ -77,8 +77,8 @@ async function main() {
   const collateralUSD = await vault.getCollateralValue(deployer.address);
   console.log(`  Collateral value: $${fmt(collateralUSD)} (10 vDOT × $8.50)`);
 
-  console.log("\n[A4] Borrowing $59 HOLLAR (≈ 69.4% LTV, under 70% cap)...");
-  await waitAndLog("LendingPool.borrow($59 HOLLAR)", pool.borrow(BORROW_AMOUNT));
+  console.log("\n[A4] Borrowing $59 USDH (≈ 69.4% LTV, under 70% cap)...");
+  await waitAndLog("LendingPool.borrow($59 USDH)", pool.borrow(BORROW_AMOUNT));
 
   const hfBefore = await vault.getHealthFactor(deployer.address);
   console.log(`  Health factor BEFORE crash: ${fmt(hfBefore)}`);
@@ -112,13 +112,13 @@ async function main() {
 
   // Get current debt (includes any accrued interest)
   const currentDebt = await vault.debtBalance(deployer.address);
-  console.log(`\n[C1] Current debt: $${fmt(currentDebt)} HOLLAR`);
+  console.log(`\n[C1] Current debt: $${fmt(currentDebt)} USDH`);
 
-  // Mint HOLLAR to liquidator (deployer) to cover debt repayment
-  const hollarBuffer = currentDebt + hre.ethers.parseEther("1");
-  console.log(`[C2] Minting $${fmt(hollarBuffer)} HOLLAR to liquidator (deployer)...`);
-  await waitAndLog("MockHOLLAR.mint(liquidator, debt+buffer)", hollar.mint(deployer.address, hollarBuffer));
-  await waitAndLog("MockHOLLAR.approve(pool, debt+buffer)", hollar.approve(ADDRESSES.lendingPool, hollarBuffer));
+  // Mint USDH to liquidator (deployer) to cover debt repayment
+  const usdhBuffer = currentDebt + hre.ethers.parseEther("1");
+  console.log(`[C2] Minting $${fmt(usdhBuffer)} USDH to liquidator (deployer)...`);
+  await waitAndLog("MockUSDH.mint(liquidator, debt+buffer)", usdh.mint(deployer.address, usdhBuffer));
+  await waitAndLog("MockUSDH.approve(pool, debt+buffer)", usdh.approve(ADDRESSES.lendingPool, usdhBuffer));
 
   console.log("\n[C3] Executing liquidation...");
   const vdotBefore = await vdot.balanceOf(deployer.address);
@@ -133,8 +133,8 @@ async function main() {
   console.log("\n" + "=".repeat(60));
   console.log("CRISIS SIMULATION RESULTS");
   console.log("=".repeat(60));
-  console.log(`  Debt repaid:           $${fmt(currentDebt)} HOLLAR`);
-  console.log(`  Debt remaining:        $${fmt(debtAfter)} HOLLAR`);
+  console.log(`  Debt repaid:           $${fmt(currentDebt)} USDH`);
+  console.log(`  Debt remaining:        $${fmt(debtAfter)} USDH`);
   console.log(`  vDOT seized by liq.:   ${fmt(seized)} vDOT`);
   console.log(`  Collateral remaining:  ${fmt(collateralAfter)} vDOT`);
   console.log(`  Liquidation bonus:     5% ✓`);

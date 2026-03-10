@@ -16,8 +16,8 @@ pragma solidity ^0.8.20;
 /// Proving system: UltraHonk (Noir 1.0.0-beta.19 default)
 ///
 /// Public inputs layout (uint256[] calldata publicInputs):
-///   [0] total_collateral_value  -- sum of all user collateral values (HOLLAR-wei)
-///   [1] total_debt              -- sum of all user debts (HOLLAR-wei)
+///   [0] total_collateral_value  -- sum of all user collateral values (USDH-wei)
+///   [1] total_debt              -- sum of all user debts (USDH-wei)
 ///   [2] oracle_timestamp        -- UNIX timestamp of price snapshot used
 ///
 /// @dev For local hardhat tests, deploy MockSolvencyVerifier instead.

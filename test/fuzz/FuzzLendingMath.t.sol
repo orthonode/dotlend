@@ -40,7 +40,7 @@ contract FuzzLendingMath is Test {
     function testFuzz_HealthFactorNoOverflow(
         uint96  collateral, // vDOT amount in wei (≤ 2^96 — realistic upper bound)
         uint64  price,      // vDOT price in 1e18 USD (≤ 2^64 — realistic upper bound)
-        uint128 debt        // HOLLAR debt in 1e18
+        uint128 debt        // USDH debt in 1e18
     ) public pure {
         // debt must be non-zero (div by zero guard)
         vm.assume(debt > 0 && collateral > 0 && price > 0);
@@ -99,7 +99,7 @@ contract FuzzLendingMath is Test {
     ///         debt > collateralUSD * 80 / 100
     function testFuzz_LiquidationThresholdConsistency(
         uint128 collateralUSD, // in 1e18 USD
-        uint128 debt           // HOLLAR debt in 1e18
+        uint128 debt           // USDH debt in 1e18
     ) public pure {
         vm.assume(collateralUSD > 0 && debt > 0);
 
@@ -150,7 +150,7 @@ contract FuzzLendingMath is Test {
     /// @notice The 5% liquidation bonus, after capping at available collateral,
     ///         must never cause the protocol to seize more than the borrower holds.
     function testFuzz_LiquidationBonusCap(
-        uint128 debt,              // HOLLAR to repay in 1e18
+        uint128 debt,              // USDH to repay in 1e18
         uint128 vdotPrice,         // vDOT price in 1e18 USD
         uint128 actualCollateral   // user's actual vDOT balance
     ) public pure {
@@ -180,19 +180,19 @@ contract FuzzLendingMath is Test {
     // 6. REPAY CAP — repayAmount is always capped to actual debt
     // ─────────────────────────────────────────────────────────────────────────
 
-    /// @notice When a user over-repays (hollarAmount > debt), the protocol
+    /// @notice When a user over-repays (usdhAmount > debt), the protocol
     ///         must only reduce debt to 0, never subtract past zero.
-    function testFuzz_RepayCap(uint128 hollarAmount, uint128 debt) public pure {
+    function testFuzz_RepayCap(uint128 usdhAmount, uint128 debt) public pure {
         vm.assume(debt > 0);
 
         // Replicate LendingPool.repay logic
-        uint256 repayAmount = uint256(hollarAmount) > uint256(debt)
+        uint256 repayAmount = uint256(usdhAmount) > uint256(debt)
             ? uint256(debt)
-            : uint256(hollarAmount);
+            : uint256(usdhAmount);
 
         // Result must always be <= debt (prevents underflow in setDebt)
         assertLe(repayAmount, uint256(debt), "Repay amount must not exceed debt");
-        // And must be <= hollarAmount provided
-        assertLe(repayAmount, uint256(hollarAmount) > uint256(debt) ? uint256(debt) : uint256(hollarAmount));
+        // And must be <= usdhAmount provided
+        assertLe(repayAmount, uint256(usdhAmount) > uint256(debt) ? uint256(debt) : uint256(usdhAmount));
     }
 }

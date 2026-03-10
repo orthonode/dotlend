@@ -534,7 +534,7 @@ The most interesting OZ interaction in DotLend is the one that **didn't work** a
 
 When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a **strict 24KB initcode size limit** — significantly smaller than Ethereum's 24.576KB limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
 
-The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `hollar.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and routes 100% to the treasury. When `LendingPool` calls `hollar.burn()`, the router returns a no-op.
+The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and routes 100% to the treasury. When `LendingPool` calls `usdh.burn()`, the router returns a no-op.
 
 This pattern exists *specifically because* OpenZeppelin's composition model (Ownable + ReentrancyGuard + ERC20 interactions) consumed enough bytecode that the fee logic had to be externalized. It's a real constraint that produced a cleaner architecture — the router pattern is now more testable, more upgradeable, and more auditable than inline fee logic would have been.
 

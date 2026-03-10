@@ -28,16 +28,16 @@ async function deployFixture() {
   const vdot = await MockvDOT.deploy();
   await vdot.waitForDeployment();
 
-  const MockHOLLAR = await ethers.getContractFactory("MockHOLLAR");
-  const hollar = await MockHOLLAR.deploy();
-  await hollar.waitForDeployment();
+  const MockUSDH = await ethers.getContractFactory("MockUSDH");
+  const usdh = await MockUSDH.deploy();
+  await usdh.waitForDeployment();
 
   const CollateralVault = await ethers.getContractFactory("CollateralVault");
   const vault = await CollateralVault.deploy(vdot.target, oracle.target);
   await vault.waitForDeployment();
 
   const LendingPool = await ethers.getContractFactory("LendingPool");
-  const pool = await LendingPool.deploy(vault.target, hollar.target, oracle.target, vdot.target);
+  const pool = await LendingPool.deploy(vault.target, usdh.target, oracle.target, vdot.target);
   await pool.waitForDeployment();
   await vault.setLendingPool(pool.target);
 
@@ -55,7 +55,7 @@ async function deployFixture() {
   const rejectingVerifier = await MockVerifier.deploy(false);
   await rejectingVerifier.waitForDeployment();
 
-  return { pool, vault, oracle, vdot, hollar, gateway, acceptingVerifier, rejectingVerifier, owner, alice, bob };
+  return { pool, vault, oracle, vdot, usdh, gateway, acceptingVerifier, rejectingVerifier, owner, alice, bob };
 }
 
 describe("SolvencyProof", function () {

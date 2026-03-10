@@ -12,7 +12,7 @@ contract PriceOracle is Ownable {
 
     /// @notice Price for each token in USD, scaled to 1e18
     ///         e.g. vDOT at $8.50 → 8.5e18
-    ///              HOLLAR at $1.00 → 1e18
+    ///              USDH at $1.00 → 1e18
     mapping(address => uint256) public prices;
 
     /// @notice Timestamp of last price update per token

@@ -10,7 +10,7 @@
 const hre = require("hardhat");
 
 const PRICE_ORACLE_ADDRESS = "0xc12D24cD6DF4521C9A453a325751bB1f38326a91";
-const HOLLAR_ADDRESS = "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca"; // Existing MockHOLLAR
+const USDH_ADDRESS = "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca"; // Existing MockUSDH
 const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS || "0x0000000000000000000000000000000000000000"; // Set your treasury wallet
 
 const INITIAL_DOT_PRICE_USD = "5.00"; 
@@ -62,7 +62,7 @@ async function main() {
   // 2. Deploy TreasuryRouter for WPAS market
   console.log("\n[2/4] Deploying TreasuryRouter (WPAS market)...");
   const TreasuryRouter = await hre.ethers.getContractFactory("TreasuryRouter");
-  const router = await TreasuryRouter.deploy(HOLLAR_ADDRESS, treasuryAddr);
+  const router = await TreasuryRouter.deploy(USDH_ADDRESS, treasuryAddr);
   await router.waitForDeployment();
   const routerAddress = await router.getAddress();
   console.log(`  TreasuryRouter:   ${routerAddress}`);
@@ -75,7 +75,7 @@ async function main() {
   const vaultAddress = await vault.getAddress();
   console.log(`  CollateralVault:  ${vaultAddress}`);
 
-  // 4. Deploy WPAS Lending Pool — uses TreasuryRouter, not raw HOLLAR
+  // 4. Deploy WPAS Lending Pool — uses TreasuryRouter, not raw USDH
   console.log("\n[4/4] Deploying LendingPool (WPAS)...");
   const LendingPool = await hre.ethers.getContractFactory("LendingPool");
   const pool = await LendingPool.deploy(vaultAddress, routerAddress, PRICE_ORACLE_ADDRESS, wpasAddress);

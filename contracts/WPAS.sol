@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 /// @notice Identical in design to WETH9: deposit native PAS to mint WPAS 1:1,
 ///         withdraw WPAS to receive native PAS back.
 ///         WPAS can then be deposited into DotLend's CollateralVault as collateral,
-///         enabling native DOT/PAS to back HOLLAR loans without modifying any
+///         enabling native DOT/PAS to back USDH loans without modifying any
 ///         existing DotLend contracts.
 /// @dev No owner or admin — fully permissionless and non-upgradeable.
 contract WPAS is ERC20 {

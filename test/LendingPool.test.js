@@ -10,9 +10,9 @@ describe("LendingPool", function () {
     const vdot = await MockvDOT.deploy();
     await vdot.waitForDeployment();
 
-    const MockHOLLAR = await ethers.getContractFactory("MockHOLLAR");
-    const hollar = await MockHOLLAR.deploy();
-    await hollar.waitForDeployment();
+    const MockUSDH = await ethers.getContractFactory("MockUSDH");
+    const usdh = await MockUSDH.deploy();
+    await usdh.waitForDeployment();
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
     const oracle = await PriceOracle.deploy();
@@ -25,7 +25,7 @@ describe("LendingPool", function () {
     await vault.waitForDeployment();
 
     const LendingPool = await ethers.getContractFactory("LendingPool");
-    const pool = await LendingPool.deploy(vault.target, hollar.target, oracle.target, vdot.target);
+    const pool = await LendingPool.deploy(vault.target, usdh.target, oracle.target, vdot.target);
     await pool.waitForDeployment();
 
     await vault.setLendingPool(pool.target);
@@ -35,15 +35,15 @@ describe("LendingPool", function () {
     await vdot.connect(user).approve(vault.target, ethers.parseEther("100"));
     await vault.connect(user).deposit(ethers.parseEther("10"));
 
-    return { vault, vdot, hollar, oracle, pool, owner, user, liquidator };
+    return { vault, vdot, usdh, oracle, pool, owner, user, liquidator };
   }
 
   async function borrowedFixture() {
     const ctx = await deployFixture();
     await ctx.pool.connect(ctx.user).borrow(ethers.parseEther("50"));
     // Mint extra buffer so user can repay principal + any accrued interest
-    await ctx.hollar.mint(ctx.user.address, ethers.parseEther("1"));
-    await ctx.hollar.connect(ctx.user).approve(ctx.pool.target, ethers.parseEther("100"));
+    await ctx.usdh.mint(ctx.user.address, ethers.parseEther("1"));
+    await ctx.usdh.connect(ctx.user).approve(ctx.pool.target, ethers.parseEther("100"));
     return ctx;
   }
 
@@ -53,8 +53,8 @@ describe("LendingPool", function () {
     // Price crash: $10 → $8. HF = (80*80*1e18)/(70*100) ≈ 0.914 < 1e18
     await ctx.oracle.submitPrice(ctx.vdot.target, ethers.parseEther("8"));
     // Mint buffer above $70 so liquidator can cover debt + any accrued interest
-    await ctx.hollar.mint(ctx.liquidator.address, ethers.parseEther("75"));
-    await ctx.hollar.connect(ctx.liquidator).approve(ctx.pool.target, ethers.parseEther("75"));
+    await ctx.usdh.mint(ctx.liquidator.address, ethers.parseEther("75"));
+    await ctx.usdh.connect(ctx.liquidator).approve(ctx.pool.target, ethers.parseEther("75"));
     return ctx;
   }
 
@@ -83,11 +83,11 @@ describe("LendingPool", function () {
         .to.be.revertedWith("Pool: no collateral");
     });
 
-    it("mints HOLLAR to borrower", async function () {
-      const { pool, hollar, user } = await loadFixture(deployFixture);
+    it("mints USDH to borrower", async function () {
+      const { pool, usdh, user } = await loadFixture(deployFixture);
       const amount = ethers.parseEther("50");
       await pool.connect(user).borrow(amount);
-      expect(await hollar.balanceOf(user.address)).to.equal(amount);
+      expect(await usdh.balanceOf(user.address)).to.equal(amount);
     });
 
     it("emits Borrowed event", async function () {
@@ -114,8 +114,8 @@ describe("LendingPool", function () {
     });
 
     it("repaying more than owed repays only exact debt", async function () {
-      const { pool, vault, hollar, user } = await loadFixture(borrowedFixture);
-      await hollar.mint(user.address, ethers.parseEther("10"));
+      const { pool, vault, usdh, user } = await loadFixture(borrowedFixture);
+      await usdh.mint(user.address, ethers.parseEther("10"));
       await pool.connect(user).repay(ethers.parseEther("100"));
       expect(await vault.debtBalance(user.address)).to.equal(0n);
     });
@@ -150,7 +150,7 @@ describe("LendingPool", function () {
       await pool.accrueInterest(user.address);
       const interest = (await vault.debtBalance(user.address)) - debtBefore;
       // 50 * 5 / 10000 = 0.025 per year — wait: 5 bps = 0.05%, so 50 * 0.0005 = 0.025
-      // Actually 5 bps = 5/10000 = 0.0005 fraction per year → 50 * 0.0005 = 0.025 HOLLAR
+      // Actually 5 bps = 5/10000 = 0.0005 fraction per year → 50 * 0.0005 = 0.025 USDH
       expect(interest).to.be.gt(0n);
     });
 
@@ -190,11 +190,11 @@ describe("LendingPool", function () {
     });
 
     it("reverts after liquidation — position is now healthy (no debt)", async function () {
-      const { pool, hollar, user, liquidator } = await loadFixture(liquidatableFixture);
+      const { pool, usdh, user, liquidator } = await loadFixture(liquidatableFixture);
       await pool.connect(liquidator).liquidate(user.address);
       // After liquidation: debt=0 → getHealthFactor returns MaxUint256 → "position healthy" fires first
-      await hollar.mint(liquidator.address, ethers.parseEther("1"));
-      await hollar.connect(liquidator).approve(pool.target, ethers.parseEther("1"));
+      await usdh.mint(liquidator.address, ethers.parseEther("1"));
+      await usdh.connect(liquidator).approve(pool.target, ethers.parseEther("1"));
       await expect(pool.connect(liquidator).liquidate(user.address))
         .to.be.revertedWith("Pool: position healthy");
     });

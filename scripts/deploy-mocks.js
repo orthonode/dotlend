@@ -1,4 +1,4 @@
-// Phase 1 deploy: Counter + MockvDOT + MockHOLLAR
+// Phase 1 deploy: Counter + MockvDOT + MockUSDH
 const { ethers } = require("hardhat");
 
 async function main() {
@@ -21,16 +21,16 @@ async function main() {
   console.log("MockvDOT:   ", vdotAddr);
   console.log("  Subscan:  ", `https://assethub-westend.subscan.io/account/${vdotAddr}`);
 
-  // MockHOLLAR
-  const MockHOLLAR = await ethers.getContractFactory("MockHOLLAR");
-  const hollar = await MockHOLLAR.deploy();
-  await hollar.waitForDeployment();
-  const hollarAddr = await hollar.getAddress();
-  console.log("MockHOLLAR: ", hollarAddr);
-  console.log("  Subscan:  ", `https://assethub-westend.subscan.io/account/${hollarAddr}`);
+  // MockUSDH
+  const MockUSDH = await ethers.getContractFactory("MockUSDH");
+  const usdh = await MockUSDH.deploy();
+  await usdh.waitForDeployment();
+  const usdhAddr = await usdh.getAddress();
+  console.log("MockUSDH:   ", usdhAddr);
+  console.log("  Subscan:  ", `https://assethub-westend.subscan.io/account/${usdhAddr}`);
 
   console.log("\n--- Phase 1 contracts deployed ---");
-  console.log(JSON.stringify({ Counter: counterAddr, MockvDOT: vdotAddr, MockHOLLAR: hollarAddr }, null, 2));
+  console.log(JSON.stringify({ Counter: counterAddr, MockvDOT: vdotAddr, MockUSDH: usdhAddr }, null, 2));
 }
 
 main()

@@ -10,9 +10,9 @@ describe("Integration — Full DotLend Flow", function () {
     const vdot = await MockvDOT.deploy();
     await vdot.waitForDeployment();
 
-    const MockHOLLAR = await ethers.getContractFactory("MockHOLLAR");
-    const hollar = await MockHOLLAR.deploy();
-    await hollar.waitForDeployment();
+    const MockUSDH = await ethers.getContractFactory("MockUSDH");
+    const usdh = await MockUSDH.deploy();
+    await usdh.waitForDeployment();
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
     const oracle = await PriceOracle.deploy();
@@ -25,16 +25,16 @@ describe("Integration — Full DotLend Flow", function () {
     await vault.waitForDeployment();
 
     const LendingPool = await ethers.getContractFactory("LendingPool");
-    const pool = await LendingPool.deploy(vault.target, hollar.target, oracle.target, vdot.target);
+    const pool = await LendingPool.deploy(vault.target, usdh.target, oracle.target, vdot.target);
     await pool.waitForDeployment();
 
     await vault.setLendingPool(pool.target);
 
-    return { vault, vdot, hollar, oracle, pool, owner, alice, bob };
+    return { vault, vdot, usdh, oracle, pool, owner, alice, bob };
   }
 
   it("full deposit → borrow → repay → withdraw flow", async function () {
-    const { vault, vdot, hollar, pool, alice } = await loadFixture(deployAll);
+    const { vault, vdot, usdh, pool, alice } = await loadFixture(deployAll);
 
     await vdot.mint(alice.address, ethers.parseEther("20"));
     await vdot.connect(alice).approve(vault.target, ethers.parseEther("20"));
@@ -43,17 +43,17 @@ describe("Integration — Full DotLend Flow", function () {
     await vault.connect(alice).deposit(ethers.parseEther("10"));
     expect(await vault.getCollateralValue(alice.address)).to.equal(ethers.parseEther("100"));
 
-    // Borrow $50 HOLLAR (within 70% LTV)
+    // Borrow $50 USDH (within 70% LTV)
     await pool.connect(alice).borrow(ethers.parseEther("50"));
-    expect(await hollar.balanceOf(alice.address)).to.equal(ethers.parseEther("50"));
+    expect(await usdh.balanceOf(alice.address)).to.equal(ethers.parseEther("50"));
     expect(await vault.debtBalance(alice.address)).to.equal(ethers.parseEther("50"));
 
     // Health factor must be >= 1e18
     expect(await vault.getHealthFactor(alice.address)).to.be.gte(ethers.parseEther("1"));
 
     // Full repay — mint buffer for accrued interest, repay more than borrow so all debt cleared
-    await hollar.mint(alice.address, ethers.parseEther("1"));
-    await hollar.connect(alice).approve(pool.target, ethers.parseEther("60"));
+    await usdh.mint(alice.address, ethers.parseEther("1"));
+    await usdh.connect(alice).approve(pool.target, ethers.parseEther("60"));
     await pool.connect(alice).repay(ethers.parseEther("55"));
     expect(await vault.debtBalance(alice.address)).to.equal(0n);
 
@@ -76,15 +76,15 @@ describe("Integration — Full DotLend Flow", function () {
     const debtAfter = await vault.debtBalance(alice.address);
 
     expect(debtAfter).to.be.gt(debtBefore);
-    // 50 HOLLAR * 5bps = 50 * 5 / 10000 = 0.025 HOLLAR
+    // 50 USDH * 5bps = 50 * 5 / 10000 = 0.025 USDH
     const interest = debtAfter - debtBefore;
     expect(interest).to.be.gt(0n);
-    // Sanity: interest < 1 HOLLAR (should be ~0.025)
+    // Sanity: interest < 1 USDH (should be ~0.025)
     expect(interest).to.be.lt(ethers.parseEther("1"));
   });
 
   it("price crash → liquidation → debt cleared, liquidator receives collateral", async function () {
-    const { vault, vdot, hollar, oracle, pool, alice, bob } = await loadFixture(deployAll);
+    const { vault, vdot, usdh, oracle, pool, alice, bob } = await loadFixture(deployAll);
 
     await vdot.mint(alice.address, ethers.parseEther("10"));
     await vdot.connect(alice).approve(vault.target, ethers.parseEther("10"));
@@ -99,8 +99,8 @@ describe("Integration — Full DotLend Flow", function () {
     expect(await vault.getHealthFactor(alice.address)).to.be.lt(ethers.parseEther("1"));
 
     // Bob liquidates — mint buffer above $70 to cover debt + any accrued interest
-    await hollar.mint(bob.address, ethers.parseEther("75"));
-    await hollar.connect(bob).approve(pool.target, ethers.parseEther("75"));
+    await usdh.mint(bob.address, ethers.parseEther("75"));
+    await usdh.connect(bob).approve(pool.target, ethers.parseEther("75"));
 
     const vdotBefore = await vdot.balanceOf(bob.address);
     await pool.connect(bob).liquidate(alice.address);
@@ -131,7 +131,7 @@ describe("Integration — Full DotLend Flow", function () {
   });
 
   it("liquidation 5% bonus: liquidator gets debtInVdot * 1.05 vDOT", async function () {
-    const { vault, vdot, hollar, oracle, pool, alice, bob } = await loadFixture(deployAll);
+    const { vault, vdot, usdh, oracle, pool, alice, bob } = await loadFixture(deployAll);
 
     await vdot.mint(alice.address, ethers.parseEther("10"));
     await vdot.connect(alice).approve(vault.target, ethers.parseEther("10"));
@@ -140,8 +140,8 @@ describe("Integration — Full DotLend Flow", function () {
 
     await oracle.submitPrice(vdot.target, ethers.parseEther("8"));
 
-    await hollar.mint(bob.address, ethers.parseEther("75"));
-    await hollar.connect(bob).approve(pool.target, ethers.parseEther("75"));
+    await usdh.mint(bob.address, ethers.parseEther("75"));
+    await usdh.connect(bob).approve(pool.target, ethers.parseEther("75"));
     await pool.connect(bob).liquidate(alice.address);
 
     // debt≈$70, vDOT=$8 → debtInVdot≈8.75 vDOT, with 5% bonus ≈ 9.1875 vDOT

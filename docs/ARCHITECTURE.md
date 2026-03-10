@@ -9,7 +9,7 @@
 2. [Contract Architecture](#2-contract-architecture)
 3. [User Flow Diagrams](#3-user-flow-diagrams)
 4. [Oracle Architecture](#4-oracle-architecture)
-5. [ZK Solvency Proof Architecture](#5-zk-solvency-proof-architecture)
+5. [ZK Solvency Architecture](#5-zk-solvency-architecture)
 6. [Frontend Architecture](#6-frontend-architecture)
 7. [Deployment Topology](#7-deployment-topology)
 8. [Security Model](#8-security-model)
@@ -19,7 +19,7 @@
 
 ## 1. System Overview
 
-DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-compatible via PolkaVM). Users deposit vDOT as collateral and borrow HOLLAR — a synthetic stablecoin — at a 70% LTV ratio. The protocol is the first native lending market for vDOT, directly addressing the supply cap exhaustion and zero on-chain lending infrastructure that exists today on Hydration.
+DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-compatible via PolkaVM). Users deposit vDOT as collateral and borrow USDH — a synthetic stablecoin — at a 70% LTV ratio. The protocol is the first native lending market for vDOT, directly addressing the supply cap exhaustion and zero on-chain lending infrastructure that exists today on Hydration.
 
 ### Full System Diagram
 
@@ -43,7 +43,7 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
                     │  ┌─────────────────────────────────────┐   │
                     │  │ ConnectButton  │  SolvencyStatus     │   │
                     │  │ LendingDashboard                     │   │
-                    │  │ DepositCollateral  │  BorrowHOLLAR   │   │
+                    │  │ DepositCollateral  │  BorrowUSDH      │   │
                     │  │ RepayAndWithdraw   │  LiquidationMon │   │
                     │  └─────────────────────────────────────┘   │
                     └───────────┬────────────────────────────────┘
@@ -54,7 +54,7 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
 ║               POLKADOT HUB TESTNET  (Chain ID 420420417, PolkaVM)                        ║
 ║                                                                                           ║
 ║   ┌───────────────┐     ┌──────────────────┐     ┌─────────────────────────────────┐    ║
-║   │  MockvDOT     │     │   MockHOLLAR     │     │         PriceOracle             │    ║
+║   │  MockvDOT     │     │   MockUSDH       │     │         PriceOracle             │    ║
 ║   │  ERC-20       │     │   ERC-20         │     │  submitPrice / getPrice          │    ║
 ║   │  mint()       │     │   mint/burn      │     │  stale guard: 3600s             │    ║
 ║   └───────┬───────┘     └────────┬─────────┘     └───────────────┬─────────────────┘    ║
@@ -119,8 +119,8 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
                     │             │                   │
                     ▼             ▼                   │
           ┌─────────────┐  ┌─────────────┐           │
-          │  MockvDOT   │  │ MockHOLLAR  │           │
-          │ 0x95Fa...CA │  │ 0x2C8C...Af │           │
+          │  MockvDOT   │  │ MockUSDH   │           │
+          │ 0x95Fa...CA │  │ 0xA94f...ca │           │
           └──────┬──────┘  └──────┬──────┘           │
                  │                │                   │
            ┌─────┴─────┐          │                   │
@@ -205,11 +205,11 @@ Zero-admin WETH9-style wrapper mapping native PAS/DOT 1:1 to an ERC-20 compliant
 
 ---
 
-#### MockHOLLAR — `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca`
+#### MockUSDH — `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca`
 
-Standard OpenZeppelin v4 ERC-20. `mint()` is restricted to `LendingPool` only. `burn()` is called via `burnFrom` by `LendingPool` on repayment. HOLLAR is the protocol-native synthetic dollar.
+Standard OpenZeppelin v4 ERC-20. `mint()` is restricted to `LendingPool` only. `burn()` is called via `burnFrom` by `LendingPool` on repayment. USDH is the protocol-native synthetic dollar.
 
-**Key design decision:** HOLLAR is protocol-minted debt, not a pre-funded reserve. This eliminates liquidity provider risk from the lending side — collateral solvency is the only backstop.
+**Key design decision:** USDH is protocol-minted debt, not a pre-funded reserve. This eliminates liquidity provider risk from the lending side — collateral solvency is the only backstop.
 
 ---
 
@@ -229,7 +229,7 @@ Holds all vDOT collateral. Computes health factors. Mediates between user deposi
 **Storage:**
 ```
 mapping(address => uint256) public collateralBalance;  // in vDOT wei
-mapping(address => uint256) public debtBalance;        // in HOLLAR wei
+mapping(address => uint256) public debtBalance;        // in USDH wei
 uint256 public constant LTV = 70;                      // 70%
 uint256 public constant LIQUIDATION_THRESHOLD = 80;   // 80%
 uint256 public constant LIQUIDATION_BONUS = 5;        // 5%
@@ -243,9 +243,9 @@ Core protocol logic. Orchestrates borrow, repay, and liquidate. Applies lazy int
 
 | Function | Visibility | Description |
 |---|---|---|
-| `borrow(uint256 hollarAmount)` | `public nonReentrant` | Check LTV, update debt, mint HOLLAR. |
-| `repay(uint256 hollarAmount)` | `public nonReentrant` | Burn HOLLAR, reduce debt. |
-| `liquidate(address borrower)` | `public nonReentrant` | Seize collateral, wipe debt, liquidator covers HOLLAR. |
+| `borrow(uint256 usdhAmount)` | `public nonReentrant` | Check LTV, update debt, mint USDH. |
+| `repay(uint256 usdhAmount)` | `public nonReentrant` | Burn USDH, reduce debt. |
+| `liquidate(address borrower)` | `public nonReentrant` | Seize collateral, wipe debt, liquidator covers USDH. |
 | `accrueInterest(address user)` | `internal` | Compound stability fee since last interaction. |
 
 **Interest Accrual (lazy model):**
@@ -256,7 +256,7 @@ newDebt     = oldDebt * (1 + STABILITY_FEE_BPS/10000) ^ (elapsed / SECONDS_PER_Y
 Approximated with integer math, no floating point. Stability fee: 0.5% per year (5 bps).
 
 **Liquidation Mechanics:**
-- Caller must hold enough HOLLAR to cover the borrower's full debt.
+- Caller must hold enough USDH to cover the borrower's full debt.
 - Liquidator receives collateral worth `debt * (1 + LIQUIDATION_BONUS/100)` at oracle price.
 - Full debt wipe only — no partial liquidations in v1.
 
@@ -324,7 +324,7 @@ User                    Frontend               CollateralVault          MockvDOT
 ### 3.2 Borrow Flow
 
 ```
-User            Frontend         LendingPool      CollateralVault   PriceOracle   MockHOLLAR
+User            Frontend         LendingPool      CollateralVault   PriceOracle   MockUSDH
  │                  │                │                   │               │              │
  │ Enter amount     │                │                   │               │              │
  │─────────────────►│                │                   │               │              │
@@ -351,23 +351,23 @@ User            Frontend         LendingPool      CollateralVault   PriceOracle 
  │                  │                │ vault.setDebt(user, totalDebt)    │              │
  │                  │                │───────────────────►               │              │
  │                  │                │                   │               │              │
- │                  │                │ hollar.mint(user, amount)         │              │
+ │                  │                │ usdh.mint(user, amount)           │              │
  │                  │                │──────────────────────────────────────────────►  │
  │                  │                │                   │               │              │
  │                  │  Borrowed event│                   │               │              │
  │                  │◄───────────────│                   │               │              │
- │ HOLLAR in wallet │                │                   │               │              │
+ │ USDH in wallet   │                │                   │               │              │
  │◄─────────────────│                │                   │               │              │
 ```
 
 ### 3.3 Repay Flow
 
 ```
-User            Frontend           LendingPool           CollateralVault    MockHOLLAR
+User            Frontend           LendingPool           CollateralVault    MockUSDH
  │                  │                   │                       │                │
  │  Select Repay    │                   │                       │                │
  │─────────────────►│                   │                       │                │
- │                  │  hollar.approve   │                       │                │
+ │                  │  usdh.approve     │                   │                       │                │
  │                  │  (lendingPool, n) │                       │                │
  │                  │────────────────────────────────────────────────────────►  │
  │  Confirm approve │                   │                       │                │
@@ -377,11 +377,11 @@ User            Frontend           LendingPool           CollateralVault    Mock
  │                  │  repay(amount)    │                       │                │
  │                  │───────────────────►                       │                │
  │                  │                   │  accrueInterest(user) │                │
- │                  │                   │  hollar.transferFrom  │                │
+ │                  │                   │  usdh.transferFrom  │                │
  │                  │                   │  (user, pool, amount) │                │
  │                  │                   │────────────────────────────────────►  │
  │                  │                   │                       │                │
- │                  │                   │  hollar.burn(amount)  │                │
+ │                  │                   │  usdh.burn(amount)    │                │
  │                  │                   │────────────────────────────────────►  │
  │                  │                   │                       │                │
  │                  │                   │  vault.setDebt        │                │
@@ -400,7 +400,7 @@ User            Frontend           LendingPool           CollateralVault    Mock
                 DOT drops → HF < 1.0
                         │
                         ▼
-Liquidator      Frontend            LendingPool      CollateralVault   MockHOLLAR   MockvDOT
+Liquidator      Frontend            LendingPool      CollateralVault   MockUSDH     MockvDOT
     │               │                    │                  │               │            │
     │  Monitor HFs  │                    │                  │               │            │
     │──────────────►│                    │                  │               │            │
@@ -414,7 +414,7 @@ Liquidator      Frontend            LendingPool      CollateralVault   MockHOLLA
     │  Click         │                   │                  │               │            │
     │  "Liquidate"  │                    │                  │               │            │
     │──────────────►│                    │                  │               │            │
-    │               │ hollar.approve     │                  │               │            │
+    │               │ usdh.approve       │                  │               │            │
     │               │ (lendingPool, debt)│                  │               │            │
     │               │────────────────────────────────────────────────────►  │            │
     │               │ liquidate(borrower)│                  │               │            │
@@ -425,10 +425,10 @@ Liquidator      Frontend            LendingPool      CollateralVault   MockHOLLA
     │               │                    │  HF < 1.0 ✓      │               │            │
     │               │                    │◄──────────────── │               │            │
     │               │                    │                  │               │            │
-    │               │                    │ hollar.transferFrom              │            │
+    │               │                    │ usdh.transferFrom                │            │
     │               │                    │ (liquidator, pool, debt)         │            │
     │               │                    │────────────────────────────────►  │            │
-    │               │                    │ hollar.burn(debt) │               │            │
+    │               │                    │ usdh.burn(debt)   │               │            │
     │               │                    │────────────────────────────────►  │            │
     │               │                    │ vault.setDebt(borrower, 0)        │            │
     │               │                    │──────────────────►                │            │
@@ -517,12 +517,12 @@ On mainnet, the oracle EOA is replaced by a trustless cross-chain message from H
 
 Key Property: No oracle EOA private key. No single point of compromise.
 Price derives from Hydration's Omnipool TWAP, which is the most liquid
-vDOT/USD venue in the Polkadot ecosystem ($330M TVL in HOLLAR).
+vDOT/USD venue in the Polkadot ecosystem ($330M TVL in USDH).
 ```
 
 ---
 
-## 5. ZK Solvency Proof Architecture
+## 5. ZK Solvency Architecture
 
 ### 5.1 Circuit Structure
 
@@ -538,7 +538,7 @@ vDOT/USD venue in the Polkadot ecosystem ($330M TVL in HOLLAR).
 │  PRIVATE INPUTS (witness — never revealed on-chain):                            │
 │  ┌──────────────────────────────────────────────────────────────────────────┐  │
 │  │  collateral_values : [u64; 64]   // per-user vDOT in gwei (/ 1e9)       │  │
-│  │  debt_amounts      : [u64; 64]   // per-user HOLLAR in gwei (/ 1e9)     │  │
+│  │  debt_amounts      : [u64; 64]   // per-user USDH in gwei (/ 1e9)     │  │
 │  └──────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                  │
 │  PUBLIC INPUTS (verified on-chain):                                             │
@@ -589,7 +589,7 @@ vDOT/USD venue in the Polkadot ecosystem ($330M TVL in HOLLAR).
                          │  Step 3: Read On-Chain State      │
                          │  For each user:                   │
                          │  collateralBalance[user] (vDOT)   │
-                         │  debtBalance[user] (HOLLAR)       │
+                         │  debtBalance[user] (USDH)       │
                          └───────────────┬─────────────────┘
                                          │
                                          ▼
@@ -728,17 +728,17 @@ app/
         │     useWriteContract(CollateralVault,"deposit")
         │     Two-step: approve → deposit
         │
-        ├── BorrowHOLLAR.tsx
-        │     Input: HOLLAR amount
+        ├── BorrowUSDH.tsx
+        │     Input: USDH amount
         │     Real-time health factor preview after borrow
         │     Red warning if projected HF < 1.2
         │     useWriteContract(LendingPool, "borrow")
         │
         ├── RepayAndWithdraw.tsx
         │     Tabbed: [Repay | Withdraw]
-        │     Repay: approve HOLLAR → repay
+        │     Repay: approve USDH → repay
         │     Withdraw: checks health factor headroom
-        │     useWriteContract(MockHOLLAR,  "approve")
+        │     useWriteContract(MockUSDH,    "approve")
         │     useWriteContract(LendingPool, "repay")
         │     useWriteContract(CollateralVault, "withdraw")
         │
@@ -746,7 +746,7 @@ app/
               Scan Borrowed events → active borrower addresses
               getHealthFactor for each → display table
               HF < 1.0 → "Liquidate" button active
-              useWriteContract(MockHOLLAR,  "approve")
+              useWriteContract(MockUSDH,    "approve")
               useWriteContract(LendingPool, "liquidate")
 ```
 
@@ -836,7 +836,7 @@ const logs = await publicClient.getLogs({
   │                                                                               │
   │  PriceOracle          0xc12D24cD6DF4521C9A453a325751bB1f38326a91            │
   │  MockvDOT             0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F            │
-  │  MockHOLLAR           0xA94f7464F3a2cA966CB31881A1614A9CF97859ca            │
+  │  MockUSDH           0xA94f7464F3a2cA966CB31881A1614A9CF97859ca            │
   │  CollateralVault      0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8            │
   │  LendingPool          0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419            │
   │  MockSolvencyVerifier 0xED2676C995BAA392093Ac0b907EA216c2B8C52cc            │
@@ -872,8 +872,8 @@ const logs = await publicClient.getLogs({
 │ PriceOracle.setOracle   │ Owner        │ onlyOwner        │ Oracle rotation abuse   │
 │ CollateralVault.setDebt │ LendingPool  │ onlyLendingPool  │ Debt forgery            │
 │ CollateralVault.seize   │ LendingPool  │ onlyLendingPool  │ Collateral theft        │
-│ MockHOLLAR.mint         │ LendingPool  │ onlyMinter       │ Infinite HOLLAR mint    │
-│ MockHOLLAR.burn         │ LendingPool  │ internal burn    │ Debt erasure            │
+│ MockUSDH.mint         │ LendingPool  │ onlyMinter       │ Infinite USDH mint    │
+│ MockUSDH.burn         │ LendingPool  │ internal burn    │ Debt erasure            │
 │ LendingPool.borrow      │ Any user     │ nonReentrant     │ Reentrancy → extra debt │
 │ LendingPool.repay       │ Any user     │ nonReentrant     │ Reentrancy → debt clear │
 │ LendingPool.liquidate   │ Any user     │ nonReentrant     │ Reentrancy → drain      │
@@ -890,7 +890,7 @@ const logs = await publicClient.getLogs({
 Correct order in borrow():
   1. Check: newDebt ≤ collateralValue * LTV / 100        ← check
   2. vault.setDebt(user, newDebt)                        ← effect
-  3. hollar.mint(user, hollarAmount)                     ← interaction
+  3. usdh.mint(user, usdhAmount)                     ← interaction
 ```
 
 ### 8.3 Oracle Manipulation Resistance
@@ -986,11 +986,21 @@ The Noir-generated `UltraHonk` verifier contract uses `assembly {}` blocks for B
 |---|---|
 | PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` |
 | MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
-| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
-| CollateralVault | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` |
-| LendingPool | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` |
+| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
+| CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` |
+| LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` |
+| TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
 | SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` |
+
+### Market-Specific Addresses (WPAS)
+
+| Contract | Address |
+|---|---|
+| WPAS (Collateral) | `0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6` |
+| CollateralVault (WPAS) | `0x4131788B3A068Acf9758C740826A368bf9FBaE4D` |
+| LendingPool (WPAS) | `0xC557C3869B6B7572a81dB50C61A369682C035EAD` |
+| TreasuryRouter (WPAS) | `0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba` |
 
 **Network:** Westend Asset Hub (Polkadot Hub TestNet)
 **Chain ID:** 420420417

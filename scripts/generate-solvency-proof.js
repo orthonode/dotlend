@@ -6,7 +6,7 @@
 // 2. Fetches current vDOT price from PriceOracle
 // 3. Builds the Noir circuit witness
 // 4. Generates a ZK proof using @noir-lang/noir_js + @noir-lang/backend_barretenberg
-// 5. Submits proof to LendingPool.publishSolvencyProof()
+// 5. Submits proof to SolvencyGateway.publishSolvencyProof()
 // 6. Prints Blockscout link
 //
 // Usage:
@@ -23,7 +23,7 @@ require("dotenv").config();
 const ADDRESSES = {
   priceOracle:      "0xc12D24cD6DF4521C9A453a325751bB1f38326a91",
   vdot:             "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
-  hollar:           "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca",
+  usdh:             "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca",
   collateralVault:  "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
   lendingPool:      "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
   solvencyGateway:  "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa",
@@ -60,7 +60,7 @@ async function getActiveUsers(vault) {
 function toCircuitUnit(weiValue) {
   // Circuit uses u64 scaled to 1e9 (gwei units) to fit u64 range
   // 1 ether = 1e18 wei; u64 max ~ 1.8e19; so max ~18 ether in gwei = 18e9
-  // For DotLend amounts (collateral < 1000 vDOT, debt < 10000 HOLLAR), gwei is safe
+  // For DotLend amounts (collateral < 1000 vDOT, debt < 10000 USDH), gwei is safe
   return BigInt(weiValue) / 1_000_000_000n; // wei -> gwei
 }
 
@@ -79,7 +79,7 @@ async function buildWitness(vault, oracle, vdotAddress, activeUsers) {
     const collWei = await vault.collateralBalance(user);
     const debtWei = await vault.debtBalance(user);
 
-    // collateral value in HOLLAR-wei: (collateral * price) / 1e18
+    // collateral value in USDH-wei: (collateral * price) / 1e18
     const collValueWei = (collWei * vdotPrice) / (10n ** 18n);
 
     // Convert to gwei-scale for u64

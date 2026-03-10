@@ -35,7 +35,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     /// @notice vDOT collateral balance per user
     mapping(address => uint256) public collateralBalance;
 
-    /// @notice HOLLAR debt balance per user (in 1e18, set by LendingPool)
+    /// @notice USDH debt balance per user (in 1e18, set by LendingPool)
     mapping(address => uint256) public debtBalance;
 
     event Deposited(address indexed user, uint256 amount);

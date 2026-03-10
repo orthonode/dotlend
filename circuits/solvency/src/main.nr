@@ -4,9 +4,9 @@
 /// WITHOUT revealing individual user positions.
 ///
 /// Private inputs:
-///   collateral_values[N] -- each user's collateral value in HOLLAR-wei
+///   collateral_values[N] -- each user's collateral value in USDH-wei
 ///                           (i.e. collateral_amount * price / 1e18, already scaled)
-///   debt_amounts[N]      -- each user's outstanding debt in HOLLAR-wei
+///   debt_amounts[N]      -- each user's outstanding debt in USDH-wei
 ///
 /// Public inputs:
 ///   total_collateral_value -- sum of all collateral values (verifiable by anyone)

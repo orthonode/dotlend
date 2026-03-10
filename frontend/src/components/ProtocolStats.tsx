@@ -111,7 +111,7 @@ export function ProtocolStats() {
     contracts: treasuryAddr
       ? [
           {
-            address: addresses.hollar,
+            address: addresses.usdh,
             abi: ERC20_BALANCE_ABI,
             functionName: "balanceOf",
             args: [treasuryAddr as `0x${string}`],
@@ -130,7 +130,7 @@ export function ProtocolStats() {
         const logs = await client.getLogs({
           address: addresses.lendingPool,
           event: parseAbiItem(
-            "event Borrowed(address indexed user, uint256 hollarAmount)",
+            "event Borrowed(address indexed user, uint256 usdhAmount)",
           ),
           fromBlock: 0n,
           toBlock: "latest",

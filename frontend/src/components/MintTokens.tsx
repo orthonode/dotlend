@@ -11,7 +11,7 @@ const AMOUNT = parseEther("1000");
 export function MintTokens() {
   const { address } = useAccount();
   const { marketId, addresses } = useMarket();
-  const [minting, setMinting] = useState<"vdot" | "hollar" | "wpas" | null>(null);
+  const [minting, setMinting] = useState<"vdot" | "usdh" | "wpas" | null>(null);
   const [lastTx, setLastTx] = useState<{ token: string; hash: string } | null>(null);
   const [wrapAmount, setWrapAmount] = useState<string>("100");
 
@@ -20,20 +20,20 @@ export function MintTokens() {
   const { data, refetch } = useReadContracts({
     contracts: address ? [
       { address: addresses.collateral, abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
-      { address: addresses.hollar, abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
+      { address: addresses.usdh, abi: MOCK_ABI, functionName: "balanceOf", args: [address] },
     ] : [],
     query: { enabled: !!address },
   });
 
   const collateralBal = data?.[0]?.result ?? 0n;
-  const hollarBal     = data?.[1]?.result ?? 0n;
+  const usdhBal       = data?.[1]?.result ?? 0n;
 
   const { writeContract, data: txHash, isPending, error: writeError, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
     if (isSuccess && txHash && minting) {
-      const tokenNames = { vdot: "vDOT", hollar: "USDH", wpas: "WPAS" };
+      const tokenNames = { vdot: "vDOT", usdh: "USDH", wpas: "WPAS" };
       setLastTx({ token: tokenNames[minting], hash: txHash });
       setMinting(null);
       refetch();
@@ -45,7 +45,7 @@ export function MintTokens() {
     if (writeError) { setMinting(null); }
   }, [writeError]);
 
-  function handleMint(token: "vdot" | "hollar" | "wpas") {
+  function handleMint(token: "vdot" | "usdh" | "wpas") {
     if (!address) return;
     setMinting(token);
     setLastTx(null);
@@ -59,7 +59,7 @@ export function MintTokens() {
       });
     } else {
       writeContract({
-        address: token === "vdot" ? addresses.collateral : addresses.hollar,
+        address: token === "vdot" ? addresses.collateral : addresses.usdh,
         abi: MOCK_ABI,
         functionName: "mint",
         args: [address, AMOUNT],
@@ -184,16 +184,16 @@ export function MintTokens() {
             <div>
               <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">USDH</div>
               <div className="text-2xl font-bold text-white">
-                {Number(formatEther(hollarBal)).toFixed(2)}
+                {Number(formatEther(usdhBal)).toFixed(2)}
               </div>
-              <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{addresses.hollar}</div>
+              <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{addresses.usdh}</div>
             </div>
             <button
-              onClick={() => handleMint("hollar")}
+              onClick={() => handleMint("usdh")}
               disabled={busy}
               className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
             >
-              {busy && minting === "hollar" ? (
+              {busy && minting === "usdh" ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   {isPending ? "Waiting for wallet…" : "Confirming…"}
@@ -257,7 +257,7 @@ export function MintTokens() {
                 vDOT → Write Contract on Blockscout →
               </a>
               <a
-                href={`https://blockscout-testnet.polkadot.io/address/${ADDRESSES.hollar}?tab=write_contract`}
+                href={`https://blockscout-testnet.polkadot.io/address/${ADDRESSES.usdh}?tab=write_contract`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#E6007A] hover:underline"

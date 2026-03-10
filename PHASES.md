@@ -13,7 +13,7 @@
 - [x] `README.md` — skeleton (full version in Phase 5)
 - [x] `contracts/Counter.sol` — scaffold verification contract
 - [x] `contracts/MockvDOT.sol` — ERC-20 mock, mint() only, OZ v4
-- [x] `contracts/MockHOLLAR.sol` — ERC-20 mock, mint() only, OZ v4
+- [x] `contracts/MockUSDH.sol` — ERC-20 mock, mint() only, OZ v4
 - [x] `scripts/deploy-mocks.js` — deploy all Phase 1 contracts
 - [x] `hardhat.config.js` — resolc + westendAssetHub network configured
 - [x] `.gitignore` — node_modules, artifacts, .env, .claude/, CLAUDE.md
@@ -59,7 +59,7 @@ Contract deployment to Westend Asset Hub is in Phase 3 (requires WND on Asset Hu
 Crisis simulation live on Polkadot Hub TestNet:
 - Price crash: $8.50 → $6.00
 - Health factor: 1.214 → 0.857 (liquidatable) ✓
-- Debt repaid: $84 HOLLAR ✓
+- Debt repaid: $84 USDH ✓
 - vDOT seized: 14.7 vDOT (14 base + 5% bonus) ✓
 - Debt cleared: $0.00 ✓
 - [Liquidation tx](https://blockscout-testnet.polkadot.io/tx/0xa09407bb1b8c41d265305de78ddb024144daeb0c47bfc62ff663bb7daf95c085)
@@ -144,7 +144,7 @@ DoraHacks submission confirmed. README has all deployed addresses. Video uploade
 |----------|---------|---------|
 | PriceOracle | 0xc12D24cD6DF4521C9A453a325751bB1f38326a91 | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
 | MockvDOT | 0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
-| MockHOLLAR | 0xA94f7464F3a2cA966CB31881A1614A9CF97859ca | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
+| MockUSDH | 0xA94f7464F3a2cA966CB31881A1614A9CF97859ca | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
 | TreasuryRouter (vDOT) | 0x68099740bb099970c62F231fE5d8A08ae58de9AA | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
 | CollateralVault (vDOT) | 0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8 | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
 | LendingPool (vDOT) | 0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419 | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |

@@ -1,8 +1,8 @@
 // scripts/deploy-protocol.js
 // Deploys full DotLend protocol stack:
-//   PriceOracle → MockvDOT → MockHOLLAR → TreasuryRouter → CollateralVault → LendingPool
+//   PriceOracle → MockvDOT → MockUSDH → TreasuryRouter → CollateralVault → LendingPool
 // Then wires: vault.setLendingPool, router.setLendingPool, oracle.setAuthorizedOracle
-// Revenue model: 100% of stability fees → treasury (MakerDAO-style, no HOLLAR burn)
+// Revenue model: 100% of stability fees → treasury (MakerDAO-style, no USDH burn)
 
 const hre = require("hardhat");
 
@@ -41,17 +41,17 @@ async function main() {
   await vdot.waitForDeployment();
   console.log(`  MockvDOT:         ${vdot.target}`);
 
-  // 3. MockHOLLAR
-  console.log("[3/7] Deploying MockHOLLAR...");
-  const MockHOLLAR = await hre.ethers.getContractFactory("MockHOLLAR");
-  const hollar = await MockHOLLAR.deploy();
-  await hollar.waitForDeployment();
-  console.log(`  MockHOLLAR:       ${hollar.target}`);
+  // 3. MockUSDH
+  console.log("[3/7] Deploying MockUSDH...");
+  const MockUSDH = await hre.ethers.getContractFactory("MockUSDH");
+  const usdh = await MockUSDH.deploy();
+  await usdh.waitForDeployment();
+  console.log(`  MockUSDH:         ${usdh.target}`);
 
-  // 4. TreasuryRouter — 100% of fees to treasury, no HOLLAR burn
+  // 4. TreasuryRouter — 100% of fees to treasury, no USDH burn
   console.log("[4/7] Deploying TreasuryRouter...");
   const TreasuryRouter = await hre.ethers.getContractFactory("TreasuryRouter");
-  const router = await TreasuryRouter.deploy(hollar.target, treasuryAddr);
+  const router = await TreasuryRouter.deploy(usdh.target, treasuryAddr);
   await router.waitForDeployment();
   console.log(`  TreasuryRouter:   ${router.target}`);
 
@@ -62,7 +62,7 @@ async function main() {
   await vault.waitForDeployment();
   console.log(`  CollateralVault:  ${vault.target}`);
 
-  // 6. LendingPool — uses TreasuryRouter, not raw MockHOLLAR
+  // 6. LendingPool — uses TreasuryRouter, not raw MockUSDH
   console.log("[6/7] Deploying LendingPool...");
   const LendingPool = await hre.ethers.getContractFactory("LendingPool");
   const pool = await LendingPool.deploy(vault.target, router.target, oracle.target, vdot.target);
@@ -118,7 +118,7 @@ async function main() {
   console.log("=".repeat(60));
   console.log(`PriceOracle:          ${oracle.target}`);
   console.log(`MockvDOT:             ${vdot.target}`);
-  console.log(`MockHOLLAR:           ${hollar.target}`);
+  console.log(`MockUSDH:             ${usdh.target}`);
   console.log(`TreasuryRouter:       ${router.target}`);
   console.log(`CollateralVault:      ${vault.target}`);
   console.log(`LendingPool:          ${pool.target}`);
@@ -129,7 +129,7 @@ async function main() {
     console.log("\nExplorer links:");
     console.log(`  PriceOracle:          ${explorerBase}/${oracle.target}`);
     console.log(`  MockvDOT:             ${explorerBase}/${vdot.target}`);
-    console.log(`  MockHOLLAR:           ${explorerBase}/${hollar.target}`);
+    console.log(`  MockUSDH:             ${explorerBase}/${usdh.target}`);
     console.log(`  TreasuryRouter:       ${explorerBase}/${router.target}`);
     console.log(`  CollateralVault:      ${explorerBase}/${vault.target}`);
     console.log(`  LendingPool:          ${explorerBase}/${pool.target}`);

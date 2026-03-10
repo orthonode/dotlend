@@ -1,6 +1,6 @@
 export const COMMON_ADDRESSES = {
   priceOracle:     "0xc12D24cD6DF4521C9A453a325751bB1f38326a91" as `0x${string}`,
-  hollar:          "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca" as `0x${string}`,
+  usdh:            "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca" as `0x${string}`,
   treasuryRouter:  "0x68099740bb099970c62F231fE5d8A08ae58de9AA" as `0x${string}`,
   solvencyGateway: "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa" as `0x${string}`,
 };
@@ -9,6 +9,7 @@ export type MarketAddresses = {
   collateral: `0x${string}`;
   collateralVault: `0x${string}`;
   lendingPool: `0x${string}`;
+  treasuryRouter: `0x${string}`;
 };
 
 export const MARKETS: Record<"vdot" | "wpas", MarketAddresses> = {
@@ -16,11 +17,13 @@ export const MARKETS: Record<"vdot" | "wpas", MarketAddresses> = {
     collateral: "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
     collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
     lendingPool: "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
+    treasuryRouter: "0x68099740bb099970c62F231fE5d8A08ae58de9AA",
   },
   wpas: {
     collateral: "0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6",
     collateralVault: "0x4131788B3A068Acf9758C740826A368bf9FBaE4D",
     lendingPool: "0xC557C3869B6B7572a81dB50C61A369682C035EAD",
+    treasuryRouter: "0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba",
   }
 };
 
@@ -53,9 +56,9 @@ export const VAULT_ABI = [
 
 export const POOL_ABI = [
   { name: "borrow", type: "function", stateMutability: "nonpayable",
-    inputs: [{ name: "hollarAmount", type: "uint256" }], outputs: [] },
+    inputs: [{ name: "usdhAmount", type: "uint256" }], outputs: [] },
   { name: "repay", type: "function", stateMutability: "nonpayable",
-    inputs: [{ name: "hollarAmount", type: "uint256" }], outputs: [] },
+    inputs: [{ name: "usdhAmount", type: "uint256" }], outputs: [] },
   { name: "liquidate", type: "function", stateMutability: "nonpayable",
     inputs: [{ name: "borrower", type: "address" }], outputs: [] },
 ] as const;

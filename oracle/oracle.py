@@ -34,13 +34,12 @@ CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
 SOLVENCY_INTERVAL = 30 * 60  # 30 minutes between solvency proofs
 
-PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xc12D24cD6DF4521C9A453a325751bB1f38326a91")
-VDOT_ADDRESS             = Web3.to_checksum_address("0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F")
-COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8")
-SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address("0x3e7D948769818C71075E38bbAA6198908Ba6CFAa")
+PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address(os.getenv("PRICE_ORACLE_ADDRESS", "0xc12D24cD6DF4521C9A453a325751bB1f38326a91"))
+VDOT_ADDRESS             = Web3.to_checksum_address(os.getenv("VDOT_ADDRESS", "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F"))
+COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address(os.getenv("COLLATERAL_VAULT_ADDRESS", "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8"))
+SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address(os.getenv("SOLVENCY_GATEWAY_ADDRESS", "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa"))
 
-# WPAS contract address — set via WPAS_ADDRESS in .env after running deploy-wpas.js
-# Leave empty string to disable WPAS price posting until deployed.
+# WPAS contract address — set via WPAS_ADDRESS in .env
 _WPAS_ENV = os.getenv("WPAS_ADDRESS", "")
 WPAS_ADDRESS = Web3.to_checksum_address(_WPAS_ENV) if _WPAS_ENV else None
 

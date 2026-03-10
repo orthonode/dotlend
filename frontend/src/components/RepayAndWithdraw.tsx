@@ -82,15 +82,15 @@ export function RepayAndWithdraw() {
     contracts: address ? [
       { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
       { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
-      { address: addresses.hollar,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
-      { address: addresses.hollar,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.lendingPool] },
+      { address: addresses.usdh,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
+      { address: addresses.usdh,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.lendingPool] },
     ] : [],
     query: { refetchInterval: 15_000 },
   });
 
   const debt       = data?.[0]?.result ?? 0n;
   const collateral = data?.[1]?.result ?? 0n;
-  const hollarBal  = data?.[2]?.result ?? 0n;
+  const usdhBal  = data?.[2]?.result ?? 0n;
   const allowance  = data?.[3]?.result ?? 0n;
 
   const parsedRepay    = repayAmount    ? parseEther(repayAmount)    : 0n;
@@ -122,7 +122,7 @@ export function RepayAndWithdraw() {
 
   function handleApprove() {
     setStatus("signing", "Approving USDH…");
-    writeContract({ address: addresses.hollar, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256] });
+    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256] });
   }
 
   function handleRepay() {
@@ -177,7 +177,7 @@ export function RepayAndWithdraw() {
             </div>
             <div className="bg-[#0a0a0a] rounded-lg p-2">
               <div className="text-gray-500">USDH Balance</div>
-              <div className="font-bold font-mono">{Number(formatEther(hollarBal)).toFixed(6)}</div>
+              <div className="font-bold font-mono">{Number(formatEther(usdhBal)).toFixed(6)}</div>
             </div>
           </div>
 

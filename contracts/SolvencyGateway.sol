@@ -12,8 +12,8 @@ interface ISolvencyVerifier {
 ///         Decoupled from LendingPool to stay within PolkaVM initcode limits.
 ///
 /// Public inputs layout:
-///   [0] total_collateral_value  -- sum of all collateral values (HOLLAR-wei)
-///   [1] total_debt              -- sum of all debts (HOLLAR-wei)
+///   [0] total_collateral_value  -- sum of all collateral values (USDH-wei)
+///   [1] total_debt              -- sum of all debts (USDH-wei)
 ///   [2] oracle_timestamp        -- UNIX timestamp of price snapshot
 ///
 /// Anyone can call publishSolvencyProof — permissionless.
