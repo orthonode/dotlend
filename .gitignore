@@ -35,3 +35,6 @@ Thumbs.db
 artifacts/
 oracle/__pycache__/
 __pycache__/
+
+# Internal explanations
+explaination.md
