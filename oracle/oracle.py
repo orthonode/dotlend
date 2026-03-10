@@ -30,7 +30,7 @@ load_dotenv()
 RPC_URL   = "https://eth-rpc-testnet.polkadot.io"
 CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
-SOLVENCY_INTERVAL = 6 * 60 * 60  # 6 hours between solvency proofs
+SOLVENCY_INTERVAL = 30 * 60      # 30 minutes — matches price oracle tick
 
 PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
 VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
@@ -282,7 +282,7 @@ def main():
     log.info(f"vDOT token:    {VDOT_ADDRESS}")
     log.info(f"Chain ID:      {CHAIN_ID}")
     log.info(f"Interval:      {INTERVAL // 60} minutes")
-    log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 3600} hours")
+    log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 60} minutes")
 
     oracle  = w3.eth.contract(address=PRICE_ORACLE_ADDRESS,     abi=PRICE_ORACLE_ABI)
     vault   = w3.eth.contract(address=COLLATERAL_VAULT_ADDRESS, abi=COLLATERAL_VAULT_ABI)
