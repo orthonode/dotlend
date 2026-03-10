@@ -1,12 +1,4 @@
-# DotLend — DoraHacks Submission
-## Polkadot Solidity Hackathon 2026 | EVM Track | DeFi/Stablecoin-enabled dApps
-## Deadline: March 20, 2026 23:59
-
----
-
-## Project Name
-
-DotLend
+# DotLend — Overview
 
 ---
 
@@ -20,7 +12,7 @@ The first money market on Polkadot Hub. Solvency cryptographically proven every 
 
 ### The Ecosystem Gap
 
-Polkadot has $330M in HOLLAR and vDOT at 76% utilization on Hydration — supply cap hit, demand proven. Yet there are **zero native lending markets on Polkadot Hub**. Every dollar of yield-bearing vDOT collateral sitting idle is a failure of the ecosystem. DotLend fixes this.
+Polkadot has $330M in HOLLAR and vDOT at 76% utilization on Hydration — the supply cap is hit, demand is there, and capital is just waiting around. Yet there are **zero native lending markets on Polkadot Hub**. It really bothered me seeing all this yield-bearing vDOT collateral sitting idle. I built DotLend to fix this.
 
 ### The ZK Layer — What's Built and What's Mocked
 
@@ -38,9 +30,9 @@ DotLend is a non-custodial money market protocol where users deposit vDOT as col
 
 ### Why Not Hydration?
 
-Hydration is an AMM. DotLend is a collateralized debt position engine. **They are complementary, not competing.**
+I hear this question constantly. The reality is simple: **Hydration is an AMM. DotLend is a collateralized debt position engine. They are complementary, not competing.**
 
-A vDOT holder on Hydration can supply to a pool — but cannot borrow against their position. DotLend unlocks that: deposit vDOT, borrow HOLLAR, deploy that HOLLAR into Hydration's pools or anywhere in the ecosystem. DotLend is a liquidity source for Hydration, not a competitor. Victor Xu (Bifrost) confirmed vDOT lending is the #1 requested feature from the vDOT community — Hydration's AMM model cannot provide it.
+A vDOT holder on Hydration can supply to a pool — but they can't borrow against their position. Honestly, it frustrated me that I couldn't get liquidity without selling my staked DOT. DotLend unlocks that: deposit vDOT, borrow HOLLAR, and you can deploy that HOLLAR right back into Hydration's pools if you want. DotLend is actually a liquidity source for Hydration, not a competitor. Even Victor Xu from Bifrost confirmed that vDOT lending is the #1 requested feature from the community — Hydration's AMM model just isn't built to provide it right now.
 
 ### Why It's Only Possible on Polkadot
 
@@ -52,7 +44,7 @@ Seven contracts deployed and verified on Polkadot Hub TestNet (Chain ID 42042041
 
 ### Next Steps
 
-DotLend will apply for a W3F grant as ecosystem-critical DeFi infrastructure — the missing collateral layer that allows HOLLAR to scale beyond Hydration. Alongside the grant application, the team is pursuing a formal security audit via the Polkadot Assurance Legion (PAL) subsidy and targeting acceptance into the Velocity Labs DeFi Builders Cohort 2 for go-to-market support targeting $10M TVL by Q3 2026.
+I plan to apply for a W3F grant to keep pushing this forward. The goal is to get a formal security audit through the Polkadot Assurance Legion (PAL) subsidy and see if I can get into the Velocity Labs DeFi Builders Cohort to help bootstrap initial liquidity.
 
 ---
 
@@ -140,15 +132,10 @@ https://github.com/orthonode/dotlend
 
 ---
 
-## Track
-
-EVM Smart Contracts — DeFi / Stablecoin-enabled dApps
-
----
-
 ## Team
 
-**Orthonode Infrastructure Labs**
+**Orthonode**
+**Arhant Barmate** (Founder & Lead Engineer)
 Bhopal, India
 research@orthonode.xyz
 orthonode.xyz | nexucore.xyz

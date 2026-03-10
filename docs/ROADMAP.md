@@ -1,5 +1,4 @@
 # DotLend — Roadmap
-## Polkadot Solidity Hackathon 2026
 
 ---
 
@@ -69,22 +68,20 @@
 
 ---
 
-## Phase 5 — Submission
-**Target: Mar 18–20**
+## Phase 5 — Mainnet Prep
+**Target: Q2 2026**
 
 - [ ] README.md — full with all Subscan links
 - [ ] docs/WHITEPAPER.md
 - [ ] docs/ARCHITECTURE.md
 - [ ] Demo video (3 min, YouTube unlisted)
-- [ ] DoraHacks submission (hard deadline: Mar 20 23:59)
-- [ ] DM Victor (Bifrost) on X
-- [ ] Demo rehearsed 3×
+- [ ] Send to Bifrost for review
+- [ ] Hyperbridge ISMP oracle integration
 
-**Demo Day: Mar 24–25 — camera on, non-negotiable.**
+**Mainnet launch — non-negotiable.**
 
 ---
 
 ## Invariants (never change)
 - LTV: 70% | Liquidation: 80% | Fee: 5 bps | Liquidation bonus: 5%
-- Prize: $3,000 hackathon prize
-- Post-hackathon: W3F grant + Velocity Labs DeFi Builders Cohort 2
+- Pre-launch Goal: W3F grant + Velocity Labs DeFi Builders Cohort 2

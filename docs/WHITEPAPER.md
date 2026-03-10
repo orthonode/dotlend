@@ -1,8 +1,7 @@
-# DotLend: The First Money Market on Polkadot Hub
+# DotLend: Why We Need a Money Market on Polkadot Hub
 
-**Technical Whitepaper — v1.0**
-**Polkadot Solidity Hackathon 2026 | EVM Track | DeFi/Stablecoin-enabled dApps**
-**March 2026 | Orthonode Systems | Arhant Barmate**
+**Technical Overview — v1.0**
+**March 2026 | Orthonode | Arhant Barmate (Founder & Lead Engineer)**
 
 ---
 
@@ -26,9 +25,9 @@
 
 ## 1. Abstract
 
-DotLend is the first money market deployed on Polkadot Hub. It enables holders of vDOT — Bifrost's liquid staking derivative — to borrow HOLLAR, Hydration's USD-pegged stablecoin, without surrendering staking yield. The protocol introduces lazy interest accrual, a four-tier liquidation engine, and a cryptographically verified solvency proof published on-chain every 30 minutes using a Noir ZK circuit with the UltraHonk proving system.
+DotLend is a native money market I built for Polkadot Hub. It lets holders of vDOT (Bifrost's liquid staking derivative) borrow HOLLAR (Hydration's stablecoin) without giving up their staking yield. I added lazy interest accrual, a straightforward liquidation engine, and a cryptographic solvency proof that gets pushed on-chain every 30 minutes using a Noir ZK circuit.
 
-The core design is shaped by PolkaVM's execution constraints. Every contract avoids forbidden opcodes, uses OpenZeppelin v4.x exclusively, and operates as a pure state machine with no proxy patterns, no assembly, and no floating-point arithmetic. The entire interest and collateral model operates in 1e18 fixed-point. The ZK verifier is decoupled into a standalone gateway contract to remain within PolkaVM's 100 KB initcode ceiling.
+The architecture was entirely dictated by PolkaVM's current limits. I had to avoid some opcodes, stuck to OpenZeppelin v4.x, and built a pure state machine with no proxies, assembly, or floating-point math. I also had to split the ZK verifier out into its own gateway contract just to stay under PolkaVM's 100 KB initcode cap.
 
 All five protocol contracts and both ZK infrastructure contracts are deployed on Polkadot Hub TestNet (Chain ID 420420417). A live crisis simulation — price crash from $8.50 to $6.00, health factor collapse from 1.214 to 0.857, and a successful on-chain liquidation — has been executed and confirmed at transaction `0xa09407bb...`.
 

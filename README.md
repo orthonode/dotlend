@@ -11,7 +11,7 @@
 
 ## The Problem
 
-Polkadot has **$330M in HOLLAR** and **vDOT at 76% utilization** on Hydration — supply cap hit, demand proven, capital waiting. Yet there are **zero native lending markets on Polkadot Hub**. Every dollar of yield-bearing vDOT collateral sitting idle is a failure of the ecosystem. DotLend fixes this.
+Polkadot has **$330M in HOLLAR** and **vDOT at 76% utilization** on Hydration — the supply cap is hit, demand is there, and capital is just waiting around. Yet there are **zero native lending markets on Polkadot Hub**. It really bothered me seeing all this yield-bearing vDOT collateral sitting idle. I built DotLend to fix this.
 
 ---
 
@@ -37,20 +37,20 @@ Native PAS/DOT collateral is enabled via **WPAS** — a zero-admin WETH9-style E
 
 ## Why Not Hydration?
 
-Judges will ask. The answer: **Hydration is an AMM. DotLend is a collateralized debt position engine. They are complementary, not competing.**
+I get this question all the time. The reality is pretty simple: **Hydration is an AMM. DotLend is a collateralized debt position engine. They are complementary, not competing.**
 
-A vDOT holder on Hydration can supply to a pool — but cannot borrow against their position. DotLend unlocks that: deposit vDOT, borrow HOLLAR, deploy that HOLLAR into Hydration's pools. DotLend is a **liquidity source for Hydration**, not a competitor. Victor Xu (Bifrost) confirmed vDOT lending is the #1 requested feature from the community — Hydration cannot provide it.
+A vDOT holder on Hydration can supply to a pool — but they can't borrow against their position. Honestly, it frustrated me that I couldn't get liquidity without selling my staked DOT. DotLend unlocks that: deposit vDOT, borrow HOLLAR, and you can even deploy that HOLLAR right back into Hydration's pools if you want. DotLend is actually a **liquidity source for Hydration**, not a competitor. Victor Xu from Bifrost confirmed that vDOT lending is the #1 requested feature from the community — Hydration just isn't built to provide it right now.
 
 ---
 
-## Why Now. Why Polkadot Hub.
+## Why I Built This Now
 
 | Signal | Data |
 |--------|------|
-| vDOT utilization on Hydration | **76%** — supply cap hit. Demand for vDOT lending is proven. |
+| vDOT utilization on Hydration | **76%** — the supply cap is actually hit. People clearly want this. |
 | HOLLAR TVL | **$330M** — largest stablecoin in the Polkadot ecosystem |
-| Native lending market on Polkadot Hub | **Zero** — DotLend is the first |
-| Polkadot Hub EVM launch | **2026** — first mover window is now |
+| Native lending market on Polkadot Hub | **Zero** — So I decided to build the first one. |
+| Polkadot Hub EVM launch | **2026** — Seemed like the right time to just ship it. |
 
 ---
 

@@ -1,6 +1,5 @@
 # DotLend — Pitch Deck
-## Polkadot Solidity Hackathon 2026
-## Source: export to PDF for Demo Day (March 24–25, 2026)
+## Polkadot Hub Native DeFi
 
 ---
 
@@ -10,15 +9,15 @@
 
 # DotLend
 
-### The First Money Market on Polkadot Hub
+### A Native Money Market for Polkadot Hub
 
-**Deposit vDOT. Borrow HOLLAR. Solvency cryptographically proven every 30 minutes.**
+**Deposit vDOT. Borrow HOLLAR. Cryptographic solvency proofs every 30 minutes.**
 
 ---
 
 nexucore.xyz | github.com/orthonode/dotlend
 
-Orthonode Infrastructure Labs | Bhopal, India | March 2026
+Orthonode | Arhant Barmate (Founder & Lead Engineer) | March 2026
 
 research@orthonode.xyz
 
@@ -234,7 +233,7 @@ BN254 precompile-ready for mainnet ZK verifier deployment.
 
 ## SLIDE 8 — BUILT FOR THIS ECOSYSTEM
 
-# Judge Hooks
+# What the Ecosystem is Saying
 
 ---
 
@@ -340,21 +339,23 @@ At $40M TVL: **$200,000/year** — fully self-sustaining.
 
 ## SLIDE 11 — TEAM
 
-# Orthonode Infrastructure Labs
+# Orthonode
 
 ---
+
+**Arhant Barmate** — Founder & Lead Engineer
 
 Building verification and governance infrastructure across multiple chains.
 
-**DotLend** — this project, Polkadot Hub
-Money market protocol. 7 contracts, 76 tests. Live.
+**DotLend** — this project, built natively for PolkaVM constraints.
+7 contracts, 76 tests. Live on Westend Testnet.
 
 ---
 
-**Infrastructure work (cross-chain):**
-- Hardware attestation primitives (Arbitrum Stylus + TON)
-- Zero-trust edge verification layer (chain-agnostic)
-- On-chain ticketing governance (Solana, SPL-Governance)
+**Current Focus:**
+- Zero-knowledge solvency proofs
+- On-chain oracle architectures
+- Gas-optimized state execution
 
 ---
 
@@ -369,37 +370,32 @@ Bhopal, India
 
 ---
 
-## SLIDE 12 — THE ASK
+## SLIDE 12 — NEXT STEPS
 
-# Three Asks
-
----
-
-**1. W3F Grant**
-DotLend as core DeFi infrastructure for the HOLLAR ecosystem.
-HOLLAR cannot scale past Hydration without a lending market.
-DotLend is the missing primitive.
+# Where DotLend Goes From Here
 
 ---
 
-**2. Velocity Labs DeFi Builders Program Cohort 2**
-Go-to-market support, ecosystem partnerships, liquidity bootstrapping.
-Target: $10M TVL by Q3 2026.
+**1. Mainnet Deployment**
+Finalizing the Hyperbridge ISMP integration to pull trustless TWAP prices from Hydration. The technical design is complete; implementation is next.
 
 ---
 
-**3. PAL Audit Subsidy**
-Four clean contracts, no exotic opcodes, ready for formal verification.
-Audit is the final step before mainnet deployment.
+**2. W3F Grant Application**
+Applying for a grant to fund a formal security audit. Since DotLend uses standard OpenZeppelin contracts and avoids complex assembly, an audit via PAL is the last major hurdle before a safe mainnet launch.
 
 ---
 
-**DotLend is not a hackathon project.**
+**3. Liquidity Bootstrapping**
+Looking to connect with early liquidity providers and ecosystem builders (like Velocity Labs) who want to see vDOT utilization increase.
 
-It is the missing money market that makes Polkadot DeFi composable.
+---
+
+DotLend is a complete technical foundation for a missing primitive.
+
 vDOT earns yield. HOLLAR needs collateral. Polkadot Hub needs a lending market.
 
-**We built it.**
+**DotLend connects them.**
 
 ---
 

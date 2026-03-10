@@ -1,6 +1,5 @@
 # DotLend — Technical Architecture
 ## The First Money Market on Polkadot Hub
-### Polkadot Solidity Hackathon 2026 | EVM Track | DeFi/Stablecoin-enabled dApps
 
 ---
 
@@ -1001,5 +1000,4 @@ The Noir-generated `UltraHonk` verifier contract uses `assembly {}` blocks for B
 
 ---
 
-*DotLend — Orthonode Systems | Arhant Barmate <infrastructure@orthonode.xyz>*
-*Polkadot Solidity Hackathon 2026 | EVM Track*
+*DotLend — Orthonode | Arhant Barmate (Founder & Lead Engineer) <infrastructure@orthonode.xyz>*
