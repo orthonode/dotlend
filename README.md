@@ -63,15 +63,16 @@ A vDOT holder on Hydration can supply to a pool — but cannot borrow against th
 
 ## Deployed Contracts
 
-All 7 contracts deployed and verified on Polkadot Hub TestNet (March 8, 2026).
+All 8 contracts deployed and verified on Polkadot Hub TestNet.
 
 | Contract | Address | Blockscout |
 |----------|---------|------------|
 | PriceOracle | `0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D` | [view](https://blockscout-testnet.polkadot.io/address/0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D) |
 | MockvDOT | `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA` | [view](https://blockscout-testnet.polkadot.io/address/0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA) |
 | MockHOLLAR | `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf` | [view](https://blockscout-testnet.polkadot.io/address/0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf) |
-| CollateralVault | `0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c` | [view](https://blockscout-testnet.polkadot.io/address/0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c) |
-| LendingPool | `0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b` | [view](https://blockscout-testnet.polkadot.io/address/0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b) |
+| CollateralVault | `0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07` | [view](https://blockscout-testnet.polkadot.io/address/0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07) |
+| TreasuryRouter | `0x000ae32C07F153aF485505d63364f49dEBF9518f` | [view](https://blockscout-testnet.polkadot.io/address/0x000ae32C07F153aF485505d63364f49dEBF9518f) |
+| LendingPool | `0x76316a10e293A33Aa89843Fe4d390787ceEEEEa2` | [view](https://blockscout-testnet.polkadot.io/address/0x76316a10e293A33Aa89843Fe4d390787ceEEEEa2) |
 | MockSolvencyVerifier | `0x541051e3d31ef573e7Ff76d67809704b92c6cc0e` | [view](https://blockscout-testnet.polkadot.io/address/0x541051e3d31ef573e7Ff76d67809704b92c6cc0e) |
 | SolvencyGateway | `0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0` | [view](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) |
 
@@ -135,6 +136,10 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B68283
        │                                MockHOLLAR          oracle.py             │
        │                                                    (every 30m)            │
        ├──repay(HOLLAR)───────────────► LendingPool                                │
+       │                                    │                                      │
+       │                               burn() / transfer()                         │
+       │                                    ▼                                      │
+       │                              TreasuryRouter  (10% fee split)              │
        │                                    │                                      │
        │                              burn()│                                      │
        │                                MockHOLLAR                                 │

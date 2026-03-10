@@ -6,6 +6,7 @@ import { DepositCollateral } from "@/src/components/DepositCollateral";
 import { BorrowHOLLAR } from "@/src/components/BorrowHOLLAR";
 import { RepayAndWithdraw } from "@/src/components/RepayAndWithdraw";
 import { LiquidationMonitor } from "@/src/components/LiquidationMonitor";
+import { ProtocolStats } from "@/src/components/ProtocolStats";
 
 export default function Home() {
   return (
@@ -44,6 +45,8 @@ export default function Home() {
         <DepositCollateral />
         <BorrowHOLLAR />
       </div>
+      
+      <ProtocolStats />
 
       <RepayAndWithdraw />
       <LiquidationMonitor />

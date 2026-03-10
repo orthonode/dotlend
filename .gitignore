@@ -31,4 +31,6 @@ yarn.lock
 # OS
 .DS_Store
 Thumbs.db
-artifacts/\noracle/__pycache__/\n__pycache__/
+artifacts/
+oracle/__pycache__/
+__pycache__/

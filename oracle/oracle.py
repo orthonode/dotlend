@@ -34,7 +34,7 @@ SOLVENCY_INTERVAL = 6 * 60 * 60  # 6 hours between solvency proofs
 
 PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
 VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
-COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c")
+COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07")
 SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address("0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0")
 
 PRICE_ORACLE_ABI = json.loads("""[
