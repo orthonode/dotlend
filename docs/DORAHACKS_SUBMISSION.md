@@ -4,7 +4,7 @@
 
 ## Tagline
 
-The first money market on Polkadot Hub. Solvency cryptographically proven every 30 minutes.
+The first money market on Polkadot Hub. Solvency cryptographic proofs generated every 30 minutes.
 
 ---
 

@@ -180,7 +180,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B68283
 
 ## ZK Solvency Proof
 
-DotLend generates a zero-knowledge proof every 30 minutes that cryptographically proves:
+DotLend generates a zero-knowledge proof every 30 minutes that demonstrates:
 
 ```
 sum(collateral_value_i) > sum(debt_i)    for all active users i
