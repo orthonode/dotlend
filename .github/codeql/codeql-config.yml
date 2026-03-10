@@ -1,0 +1,6 @@
+name: "DotLend CodeQL Config"
+
+paths-ignore:
+  - contracts
+  - test
+  - scripts
