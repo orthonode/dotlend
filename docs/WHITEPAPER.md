@@ -488,7 +488,7 @@ liquidator profit:    $88.20 - $84.00 = $4.20 (5% bonus achieved)
 
 Traditional on-chain lending protocols are auditable but not cryptographically proven. Any observer can read individual positions, but computing and certifying aggregate solvency requires either trust in a centralized operator or an expensive on-chain computation over all user positions.
 
-DotLend introduces a ZK solvency proof that is generated off-chain every 30 minutes. This proof architecture is designed to cryptographically certify that `totalCollateralValue > totalDebt` across all active positions, without revealing any individual user's balance. On testnet, this verification is mocked; on mainnet, solvency will be verified automatically, not trusted.
+DotLend introduces a ZK solvency architecture that generates reports off-chain every 30 minutes. This architecture is designed to cryptographically certify that `totalCollateralValue > totalDebt` across all active positions, without revealing any individual user's balance. On testnet, this verification is mocked; on mainnet, solvency will be verified automatically when PolkaVM ships BN254 support.
 
 ### 7.2 Circuit Design
 

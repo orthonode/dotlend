@@ -11,7 +11,7 @@
 
 ### The First Money Market on Polkadot Hub
 
-**Deposit vDOT or native DOT. Borrow USDH. Zero-knowledge solvency proofs every 30 minutes.**
+**Deposit vDOT or native DOT. Borrow USDH. On-chain solvency reporting, ZK verification pending PolkaVM precompile support.**
 
 ---
 
@@ -304,7 +304,7 @@ That's the pitch Polkadot's ecosystem will care about.
 - ✓ 92 Hardhat + 6 Forge fuzz tests — 0 failures
 - ✓ Live frontend at nexucore.xyz
 - ✓ TreasuryRouter deployed — 100% fees to treasury
-- ✓ ZK solvency proof pipeline (Noir + Railway)
+- ✓ ZK solvency architecture (Noir + mock verifier)
 - ✓ Full crisis simulation: price crash → liquidation confirmed
 
 ---

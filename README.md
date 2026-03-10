@@ -104,7 +104,7 @@ All 12 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 
 > [Liquidation tx on Blockscout](https://blockscout-testnet.polkadot.io/tx/0xa09407bb1b8c41d265305de78ddb024144daeb0c47bfc62ff663bb7daf95c085)
 
-### ZK solvency proof — automated every 30 minutes
+### ZK solvency architecture — automated every 30 minutes
 
 The Railway cron job submits a `SolvencyProven` event to `SolvencyGateway` every 30 minutes.
 Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) under the contract's Events tab.
@@ -271,7 +271,7 @@ Loop:
 1. Fetch DOT/USD from CoinGecko (with Binance, KuCoin, OKX fallbacks)
 2. Call `PriceOracle.submitPrice(vdot, price_in_wei)` on-chain — vDOT price
 3. If `WPAS_ADDRESS` is set in `.env`: also call `submitPrice(wpas, dot_price_in_wei)` — native PAS collateral price
-4. Submit ZK solvency proof to `SolvencyGateway` every 30 minutes
+4. Submit solvency report to `SolvencyGateway` every 30 minutes
 5. Sleep 30 minutes → repeat
 
 Environment overrides for local testing:
@@ -397,7 +397,7 @@ npx hardhat run scripts/interact.js --network polkadotHubTestnet
 # Price crash → liquidation simulation
 npx hardhat run scripts/simulate-crisis.js --network polkadotHubTestnet
 
-# Generate and submit ZK solvency proof
+# Generate and submit solvency report
 npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
 ```
 

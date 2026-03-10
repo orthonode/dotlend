@@ -96,7 +96,7 @@ export function Markets() {
         <h2 className="text-xl font-bold text-white mb-2">DotLend Markets</h2>
         <p className="text-sm text-gray-400">
           The native liquidity layer for Polkadot Hub. Deposit any asset, borrow any asset. 
-          Currently live on testnet demonstrating ZK-solvency mechanics. Adding Snowbridge assets for mainnet.
+          Currently live on testnet, with Snowbridge assets arriving for mainnet.
         </p>
       </div>
 

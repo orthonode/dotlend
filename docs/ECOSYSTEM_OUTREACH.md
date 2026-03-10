@@ -31,7 +31,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Application for go-to-market support and liquidity bootstrapping.
 
 **Draft Message:**
-> Hey Nico — Arhant from Orthonode. You've mentioned money markets being a top need for Polkadot — I've built DotLend, the first one. Two collateral markets live (vDOT + native DOT), 12 contracts, 92 tests, ZK solvency proofs, treasury router with MakerDAO-style fee model. With Snowbridge now live ($75M TVL), the V2 plan adds wETH/wBTC/USDC collateral — becoming a full Aave-like two-sided market on Polkadot Hub. Would love to explore liquidity bootstrapping support.
+> Hey Nico — Arhant from Orthonode. You've mentioned money markets being a top need for Polkadot — I've built DotLend, the first one. Two collateral markets live (vDOT + native DOT), 12 contracts, 92 tests, ZK solvency architecture, treasury router with MakerDAO-style fee model. With Snowbridge now live ($75M TVL), the V2 plan adds wETH/wBTC/USDC collateral — becoming a full Aave-like two-sided market on Polkadot Hub. Would love to explore liquidity bootstrapping support.
 
 ---
 
@@ -40,7 +40,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Inquire about W3F grants for critical DeFi infrastructure.
 
 **Draft Message:**
-> Hi — I'm building DotLend, a native money market for Polkadot Hub. Two collateral markets (vDOT, native DOT), MakerDAO-style treasury model where 100% of fees buy DOT on-market, and ZK solvency proofs. V2 leverages Snowbridge to add wETH/wBTC/USDC markets. 92 tests, 9 deployed contracts, live at nexucore.xyz. Is this type of core DeFi infrastructure aligned with current grant priorities?
+> Hi — I'm building DotLend, a native money market for Polkadot Hub. Two collateral markets (vDOT, native DOT), MakerDAO-style treasury model where 100% of fees buy DOT on-market, and ZK solvency architecture. V2 leverages Snowbridge to add wETH/wBTC/USDC markets. 92 tests, 9 deployed contracts, live at nexucore.xyz. Is this type of core DeFi infrastructure aligned with current grant priorities?
 
 ---
 
