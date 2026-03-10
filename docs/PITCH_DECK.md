@@ -11,7 +11,7 @@
 
 ### A Native Money Market for Polkadot Hub
 
-**Deposit vDOT. Borrow HOLLAR. Cryptographic solvency proofs every 30 minutes.**
+**Deposit vDOT. Borrow HOLLAR. Cryptographic solvency proofs generated every 30 minutes.**
 
 ---
 
@@ -99,7 +99,7 @@ HF < 1.0  →  Liquidatable (5% bonus to liquidators)
 |--------|--------|
 | Contracts deployed | 7 — all on Chain ID 420420417 |
 | Tests passing | 76 passing, 0 failures |
-| Solvency status | SOLVENT ✓ — proven every 30 minutes |
+| Solvency status | SOLVENT ✓ — proofs generated every 30 minutes |
 | vDOT Price | $2.45 via PriceOracle on-chain |
 | Full flow | Deposit → Borrow → Liquidate → Repay ✓ |
 
@@ -152,7 +152,7 @@ Where to VERIFY:  SolvencyGateway on Blockscout → SolvencyProven events
 
 **This is the first money market anywhere to do this.**
 
-Not a claim. A cryptographic fact, published on-chain, every 30 minutes.
+*Transparency note:* The Noir ZK proofs are generated off-chain every 30 minutes today. On-chain verification is currently mocked until PolkaVM adds BN254 precompiles (EIP-196/197). The architecture is ready for mainnet.
 
 ---
 
