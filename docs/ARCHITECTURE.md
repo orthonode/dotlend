@@ -543,11 +543,11 @@ vDOT/USD venue in the Polkadot ecosystem ($330M TVL in HOLLAR).
 ### 5.2 Off-Chain Proof Generation Pipeline
 
 **Script:** `scripts/generate-solvency-proof.js`
-**Runtime:** Railway cron, every 6 hours
+**Runtime:** Railway cron, every 30 minutes
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                  generate-solvency-proof.js  (Railway Cron, every 6h)               │
+│                  generate-solvency-proof.js  (Railway Cron, every 30m)              │
 └──────────────────────────────────────────┬──────────────────────────────────────────┘
                                            │
                                            ▼

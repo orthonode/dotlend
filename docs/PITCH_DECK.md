@@ -12,7 +12,7 @@
 
 ### The First Money Market on Polkadot Hub
 
-**Deposit vDOT. Borrow HOLLAR. Solvency cryptographically proven every 6 hours.**
+**Deposit vDOT. Borrow HOLLAR. Solvency cryptographically proven every 30 minutes.**
 
 ---
 
@@ -100,7 +100,7 @@ HF < 1.0  →  Liquidatable (5% bonus to liquidators)
 |--------|--------|
 | Contracts deployed | 7 — all on Chain ID 420420417 |
 | Tests passing | 76 passing, 0 failures |
-| Solvency status | SOLVENT ✓ — proven every 6 hours |
+| Solvency status | SOLVENT ✓ — proven every 30 minutes |
 | vDOT Price | $2.45 via PriceOracle on-chain |
 | Full flow | Deposit → Borrow → Liquidate → Repay ✓ |
 
@@ -139,7 +139,7 @@ Every lending protocol, every exchange, every yield vault — they all ask you t
 
 **DotLend's answer:**
 
-Every 6 hours, a zero-knowledge proof is published on-chain.
+Every 30 minutes, a zero-knowledge proof is published on-chain.
 
 ```
 What it PROVES:   total_collateral_value ≥ total_debt
@@ -153,7 +153,7 @@ Where to VERIFY:  SolvencyGateway on Blockscout → SolvencyProven events
 
 **This is the first money market anywhere to do this.**
 
-Not a claim. A cryptographic fact, published on-chain, every 6 hours.
+Not a claim. A cryptographic fact, published on-chain, every 30 minutes.
 
 ---
 

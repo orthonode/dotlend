@@ -117,14 +117,14 @@ function useSolvencyData() {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getDotColor(ageHours: number): string {
-  if (ageHours < 7)  return "#22c55e";
-  if (ageHours < 12) return "#eab308";
+  if (ageHours < 1)  return "#22c55e";
+  if (ageHours < 2) return "#eab308";
   return "#ef4444";
 }
 
 function getBadgeLabel(ageHours: number): string {
-  if (ageHours < 7)  return "SOLVENCY PROVEN ✓";
-  if (ageHours < 12) return "PROOF AGING";
+  if (ageHours < 1)  return "SOLVENCY PROVEN ✓";
+  if (ageHours < 2) return "PROOF AGING";
   return "PROOF STALE ✗";
 }
 
@@ -142,8 +142,8 @@ export function useSolvencyHeroText(): string {
   if (!data)   return "Solvency proof pending first submission.";
   const ageHours = (Date.now() - data.provenAt.getTime()) / 3600000;
   const age      = formatAge(Date.now() - data.provenAt.getTime());
-  if (ageHours < 7)  return `Solvency cryptographically proven. Last proof: ${age}.`;
-  if (ageHours < 12) return `Solvency proof aging — last proven ${age}. Next proof due soon.`;
+  if (ageHours < 1)  return `Solvency cryptographically proven. Last proof: ${age}.`;
+  if (ageHours < 2) return `Solvency proof aging — last proven ${age}. Next proof due soon.`;
   return `Solvency proof is stale (${age}). Oracle may be recovering.`;
 }
 

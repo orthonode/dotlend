@@ -17,7 +17,7 @@ Polkadot has **$330M in HOLLAR** and **vDOT at 76% utilization** on Hydration �
 
 ## The ZK Layer — Honest Testnet Status
 
-The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and individual positions as private witnesses. The circuit compiles, and valid proofs are generated off-chain every 6 hours by a Railway worker.
+The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and individual positions as private witnesses. The circuit compiles, and valid proofs are generated off-chain every 30 minutes by a Railway worker.
 
 **What works on testnet:** Proof generation runs. `SolvencyGateway.publishSolvencyProof()` is called. A `SolvencyProven` event is emitted and visible on Blockscout.
 
@@ -99,9 +99,9 @@ All 8 contracts deployed and verified on Polkadot Hub TestNet.
 
 > [Liquidation tx on Blockscout](https://blockscout-testnet.polkadot.io/tx/0xa09407bb1b8c41d265305de78ddb024144daeb0c47bfc62ff663bb7daf95c085)
 
-### ZK solvency proof — automated every 6 hours
+### ZK solvency proof — automated every 30 minutes
 
-The Railway cron job submits a `SolvencyProven` event to `SolvencyGateway` every 6 hours.
+The Railway cron job submits a `SolvencyProven` event to `SolvencyGateway` every 30 minutes.
 Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) under the contract's Events tab.
 
 ---
@@ -154,7 +154,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B68283
   Anyone──publishSolvencyProof()──► SolvencyGateway ◄── MockSolvencyVerifier      │
                                             │               (testnet)              │
                                     SolvencyProven event                           │
-                                    (every 6 hours, Railway)                       │
+                                    (every 30 minutes, Railway)                    │
                                                                                    │
                     └─────────────────────────────────────────────────────────────┘
 
@@ -178,7 +178,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B68283
 
 ## ZK Solvency Proof
 
-DotLend generates a zero-knowledge proof every 6 hours that cryptographically proves:
+DotLend generates a zero-knowledge proof every 30 minutes that cryptographically proves:
 
 ```
 sum(collateral_value_i) > sum(debt_i)    for all active users i

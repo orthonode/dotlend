@@ -86,7 +86,7 @@ Crisis simulation live on Polkadot Hub TestNet:
 - [x] `contracts/LendingPool.sol` — added `publishSolvencyProof()`, `setSolvencyVerifier()`, `SolvencyProven` event
 - [x] `scripts/generate-solvency-proof.js` — reads on-chain positions, builds witness, generates proof, submits
 - [x] `test/SolvencyProof.test.js` — 14 tests: valid proof, invalid proof, stale timestamp, permissionless, input validation
-- [x] `railway.json` — Railway cron config (every 6 hours, auto-submit proof)
+- [x] `railway.json` — Railway cron config (every 30 minutes, auto-submit proof)
 - [x] `frontend/src/components/SolvencyStatus.tsx` — live SOLVENT badge widget for nexucore.xyz
 - [x] All 76 tests passing (62 original + 14 new), 0 failures
 
@@ -94,7 +94,7 @@ Crisis simulation live on Polkadot Hub TestNet:
 - `nargo compile` exits 0, ACIR artifact: circuits/solvency/target/solvency.json
 - 76 tests green: `npx hardhat test`
 - `publishSolvencyProof()` emits `SolvencyProven(totalCollateral, totalDebt, timestamp)`
-- Railway cron submits proof every 6 hours (judges see live SolvencyProven events)
+- Railway cron submits proof every 30 minutes (judges see live SolvencyProven events)
 - SolvencyStatus.tsx widget shows SOLVENT badge on nexucore.xyz
 
 ### PolkaVM Note

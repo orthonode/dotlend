@@ -12,7 +12,7 @@ DotLend
 
 ## Tagline
 
-The first money market on Polkadot Hub. Solvency cryptographically proven every 6 hours.
+The first money market on Polkadot Hub. Solvency cryptographically proven every 30 minutes.
 
 ---
 
@@ -26,7 +26,7 @@ Polkadot has $330M in HOLLAR and vDOT at 76% utilization on Hydration — supply
 
 The ZK solvency circuit is written in Noir (UltraHonk proving system). It constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and per-user positions as private witnesses. The circuit compiles cleanly and generates valid proofs off-chain.
 
-**What works today:** A Railway worker generates a proof every 6 hours and calls `SolvencyGateway.publishSolvencyProof()`. A `SolvencyProven` event is emitted on-chain and visible on Blockscout with collateral/debt totals.
+**What works today:** A Railway worker generates a proof every 30 minutes and calls `SolvencyGateway.publishSolvencyProof()`. A `SolvencyProven` event is emitted on-chain and visible on Blockscout with collateral/debt totals.
 
 **Honest caveat:** On-chain verification uses `MockSolvencyVerifier`, which accepts all proofs without cryptographic checking. The production `SolvencyVerifier.sol` — the Noir-generated UltraHonk verifier — requires BN254 elliptic curve precompiles (EVM opcodes 0x06/0x07/0x08). PolkaVM does not yet support these precompiles. The real verifier contract is in the repo and will deploy as soon as PolkaVM adds BN254 support.
 
@@ -48,7 +48,7 @@ vDOT and HOLLAR are native Polkadot assets. On any other chain, building a lendi
 
 ### Traction
 
-Seven contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 76 tests pass with 0 failures covering every state transition including a complete price-crash liquidation cycle. Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts vDOT prices every 30 minutes. ZK proof pipeline runs automatically on Railway every 6 hours.
+Seven contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 76 tests pass with 0 failures covering every state transition including a complete price-crash liquidation cycle. Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts vDOT prices every 30 minutes. ZK proof pipeline runs automatically on Railway every 30 minutes.
 
 ### Next Steps
 
@@ -105,7 +105,7 @@ All math is performed in 1e18 fixed-point using Solidity 0.8.20's built-in check
 | Compiler | resolc 0.5.0 via @parity/hardhat-polkadot |
 | ZK Layer | Noir 1.0.0-beta.19, UltraHonk, nargo |
 | Frontend | Next.js 14, React, TypeScript, viem v2, wagmi v2, TailwindCSS |
-| Prover | Node.js cron on Railway (every 6 hours) |
+| Prover | Node.js cron on Railway (every 30 minutes) |
 | Oracle (testnet) | Python 3, web3.py, CoinGecko + Binance + DIA fallback |
 | Oracle (mainnet) | Hyperbridge ISMP (PriceOracle implements IIsmpModule) |
 | Network | Polkadot Hub TestNet, Chain ID 420420417 |

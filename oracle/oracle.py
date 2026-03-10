@@ -3,7 +3,7 @@
 DotLend Oracle — posts vDOT price to PriceOracle on Polkadot Hub TestNet
 Runs every 30 minutes. Authorized oracle = deployer address.
 
-Also submits a solvency proof to SolvencyGateway every 6 hours.
+Also submits a solvency proof to SolvencyGateway every 30 minutes.
 MockSolvencyVerifier accepts any proof bytes — real UltraHonk verifier
 blocked by PolkaVM BN254 precompile gap (EIP-196/197).
 
@@ -30,7 +30,7 @@ load_dotenv()
 RPC_URL   = "https://eth-rpc-testnet.polkadot.io"
 CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
-SOLVENCY_INTERVAL = 6 * 60 * 60  # 6 hours between solvency proofs
+SOLVENCY_INTERVAL = 30 * 60  # 30 minutes between solvency proofs
 
 PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
 VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
@@ -289,7 +289,7 @@ def main():
     log.info(f"vDOT token:    {VDOT_ADDRESS}")
     log.info(f"Chain ID:      {CHAIN_ID}")
     log.info(f"Interval:      {INTERVAL // 60} minutes")
-    log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 3600} hours")
+    log.info(f"Solvency proof: every {SOLVENCY_INTERVAL // 60} minutes")
 
     oracle  = w3.eth.contract(address=PRICE_ORACLE_ADDRESS,     abi=PRICE_ORACLE_ABI)
     vault   = w3.eth.contract(address=COLLATERAL_VAULT_ADDRESS, abi=COLLATERAL_VAULT_ABI)
@@ -329,7 +329,7 @@ def main():
         except Exception as e:
             log.error(f"Price tick failed: {e}")
 
-        # ── Solvency proof (every 6 hours) ────────────────────────────────────
+        # ── Solvency proof (every 30 minutes) ─────────────────────────────────
         now = time.time()
         if now - last_solvency_time >= SOLVENCY_INTERVAL:
             try:

@@ -20,7 +20,7 @@
 
 **Send:**
 
-> Hey Victor — built DotLend, the first money market on Polkadot Hub where vDOT is the prime collateral. It's deployed and live on Paseo (nexucore.xyz) with 7 contracts, 76 tests, and ZK solvency proofs every 6h. Wanted to talk about a SLPx integration so users can mint vDOT and post it as collateral in one tx — is that something Bifrost would support?
+> Hey Victor — built DotLend, the first money market on Polkadot Hub where vDOT is the prime collateral. It's deployed and live on Paseo (nexucore.xyz) with 7 contracts, 76 tests, and ZK solvency proofs every 30m. Wanted to talk about a SLPx integration so users can mint vDOT and post it as collateral in one tx — is that something Bifrost would support?
 
 **Follow-up (if no reply after 24h):**
 
@@ -105,6 +105,6 @@
 - Contracts: 7 deployed
 - vDOT utilization: 76% on Hydration (supply cap hit)
 - HOLLAR TVL: $330M
-- ZK proof: every 6 hours, SolvencyGateway on Blockscout
+- ZK proof: every 30 minutes, SolvencyGateway on Blockscout
 - Whitepaper: docs/WHITEPAPER.md
 - Architecture: docs/ARCHITECTURE.md

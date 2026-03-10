@@ -26,7 +26,7 @@
 
 ## 1. Abstract
 
-DotLend is the first money market deployed on Polkadot Hub. It enables holders of vDOT — Bifrost's liquid staking derivative — to borrow HOLLAR, Hydration's USD-pegged stablecoin, without surrendering staking yield. The protocol introduces lazy interest accrual, a four-tier liquidation engine, and a cryptographically verified solvency proof published on-chain every six hours using a Noir ZK circuit with the UltraHonk proving system.
+DotLend is the first money market deployed on Polkadot Hub. It enables holders of vDOT — Bifrost's liquid staking derivative — to borrow HOLLAR, Hydration's USD-pegged stablecoin, without surrendering staking yield. The protocol introduces lazy interest accrual, a four-tier liquidation engine, and a cryptographically verified solvency proof published on-chain every 30 minutes using a Noir ZK circuit with the UltraHonk proving system.
 
 The core design is shaped by PolkaVM's execution constraints. Every contract avoids forbidden opcodes, uses OpenZeppelin v4.x exclusively, and operates as a pure state machine with no proxy patterns, no assembly, and no floating-point arithmetic. The entire interest and collateral model operates in 1e18 fixed-point. The ZK verifier is decoupled into a standalone gateway contract to remain within PolkaVM's 100 KB initcode ceiling.
 
@@ -489,7 +489,7 @@ liquidator profit:    $88.20 - $84.00 = $4.20 (5% bonus achieved)
 
 Traditional on-chain lending protocols are auditable but not cryptographically proven. Any observer can read individual positions, but computing and certifying aggregate solvency requires either trust in a centralized operator or an expensive on-chain computation over all user positions.
 
-DotLend introduces a ZK solvency proof that is published on-chain every six hours. This proof cryptographically certifies that `totalCollateralValue > totalDebt` across all active positions, without revealing any individual user's balance. Solvency is verified, not trusted.
+DotLend introduces a ZK solvency proof that is published on-chain every 30 minutes. This proof cryptographically certifies that `totalCollateralValue > totalDebt` across all active positions, without revealing any individual user's balance. Solvency is verified, not trusted.
 
 ### 7.2 Circuit Design
 
@@ -550,7 +550,7 @@ The gateway contract enforces `publicInputs.length == 3` and passes the full arr
 
 ### 7.5 Proof Generation Pipeline
 
-A Railway cron job runs `scripts/generate-solvency-proof.js` every six hours:
+A Railway cron job runs `scripts/generate-solvency-proof.js` every 30 minutes:
 
 ```
 Step 1: Refresh oracle price
@@ -855,7 +855,7 @@ Post-liquidation:
   liquidator net: +$4.20 profit
 ```
 
-**Solvency proofs:** `SolvencyProven` events are emitted by `SolvencyGateway` every 6 hours, visible at:
+**Solvency proofs:** `SolvencyProven` events are emitted by `SolvencyGateway` every 30 minutes, visible at:
 ```
 https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0
 ```
@@ -947,7 +947,7 @@ The protocol is technically differentiated in three ways:
 
 **1. PolkaVM-native design.** Every contract was built for PolkaVM from the ground up. No opcodes that resolc cannot compile, no patterns that don't work under PolkaVM's constraints, no external dependencies that assume Ethereum mainnet behavior. This is not an Ethereum protocol transplanted to Polkadot — it is a Polkadot-native protocol.
 
-**2. Cryptographic solvency proof.** DotLend is the only money market in the Polkadot ecosystem that publishes on-chain ZK proofs of protocol solvency. Every six hours, anyone can verify that total collateral exceeds total debt — without revealing a single user's position. This is a genuine trust primitive, not a marketing claim.
+**2. Cryptographic solvency proof.** DotLend is the only money market in the Polkadot ecosystem that publishes on-chain ZK proofs of protocol solvency. Every 30 minutes, anyone can verify that total collateral exceeds total debt — without revealing a single user's position. This is a genuine trust primitive, not a marketing claim.
 
 **3. Polkadot-native oracle path.** The testnet oracle is functional and live. The mainnet oracle path via Hyperbridge ISMP is designed, scoped, and ready to implement when PolkaVM's BN254 precompile support arrives. There is no dependency on Chainlink, no dependency on external bridges, no dependency on Ethereum infrastructure. The entire oracle stack, from price discovery on Hydration to on-chain price submission on Polkadot Hub, is Polkadot-native.
 
