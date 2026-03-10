@@ -8,6 +8,65 @@ import { ADDRESSES, VAULT_ABI, POOL_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/c
 import { useRefetch } from "@/src/lib/refetch-context";
 import { useTx } from "@/src/lib/tx-context";
 
+// ── FAQ / Protocol transparency panel ────────────────────────────────────────
+
+function ProtocolFAQ() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border border-[#1a1a1a] rounded-lg text-xs font-mono">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex justify-between items-center px-3 py-2 text-gray-400 hover:text-white transition"
+      >
+        <span className="uppercase tracking-widest">How repay works</span>
+        <span>{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3 space-y-2 text-gray-500 border-t border-[#1a1a1a] pt-2">
+          <div>
+            <span className="text-gray-300">Stability fee</span> — 0.5%/year (5 bps), accrues
+            every second on-chain. Applied automatically when you call repay().
+          </div>
+          <div>
+            <span className="text-gray-300">Full debt button</span> — adds a 1% buffer on top
+            of your current debt reading. This covers interest that accrues between when the
+            UI reads your balance and when your transaction confirms (~2–10 seconds).
+          </div>
+          <div>
+            <span className="text-gray-300">You never overpay</span> — the contract caps repayment
+            at your exact on-chain debt:{" "}
+            <span className="text-gray-400">repayAmount = min(sent, actualDebt)</span>.
+            Any excess HOLLAR stays in your wallet untouched.
+          </div>
+          <div>
+            <span className="text-gray-300">Why withdrawal is blocked</span> — the contract
+            requires debt = 0 before you can withdraw collateral. Use "Full debt" to clear
+            it completely, then switch to the Withdraw tab.
+          </div>
+          <div>
+            <span className="text-gray-300">Liquidation threshold</span> — if your health factor
+            drops below 1.0 (LTV exceeds 80%), anyone can liquidate your position and receive
+            a 5% bonus on the seized collateral.
+          </div>
+          <div className="text-gray-600 pt-1 border-t border-[#1a1a1a]">
+            All logic is on-chain and open source:{" "}
+            <a
+              href="https://github.com/orthonode/dotlend/blob/main/contracts/LendingPool.sol"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#E6007A] hover:underline"
+            >
+              LendingPool.sol →
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
 export function RepayAndWithdraw() {
   const { address } = useAccount();
   const [repayAmount, setRepayAmount] = useState("");
@@ -17,7 +76,7 @@ export function RepayAndWithdraw() {
   const { triggerRefetch } = useRefetch();
   const { setStatus, setOptimistic, clearOptimistic } = useTx();
 
-  const { data } = useReadContracts({
+  const { data, refetch } = useReadContracts({
     contracts: address ? [
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
       { address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
@@ -41,16 +100,20 @@ export function RepayAndWithdraw() {
 
   useEffect(() => { if (isPending)    setStatus("confirming"); }, [isPending, setStatus]);
   useEffect(() => { if (isConfirming) setStatus("confirming"); }, [isConfirming, setStatus]);
+
   useEffect(() => {
     if (isSuccess) {
       setStatus("success");
       clearOptimistic();
+      // Force immediate refetch so withdraw tab shows updated debt before user switches tabs
+      refetch();
       queryClient.invalidateQueries();
       triggerRefetch();
       setRepayAmount("");
       setWithdrawAmount("");
     }
-  }, [isSuccess, setStatus, clearOptimistic, queryClient, triggerRefetch]);
+  }, [isSuccess, setStatus, clearOptimistic, queryClient, triggerRefetch, refetch]);
+
   useEffect(() => {
     if (writeError || receiptError) { setStatus("error"); clearOptimistic(); }
   }, [writeError, receiptError, setStatus, clearOptimistic]);
@@ -61,13 +124,13 @@ export function RepayAndWithdraw() {
   }
 
   function handleRepay() {
-    setOptimistic(0n, -parsedRepay); // optimistic: debt decreases immediately
+    setOptimistic(0n, -parsedRepay);
     setStatus("signing", `Repaying ${Number(repayAmount).toFixed(2)} HOLLAR…`);
     writeContract({ address: ADDRESSES.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay] });
   }
 
   function handleWithdraw() {
-    setOptimistic(-parsedWithdraw, 0n); // optimistic: collateral decreases immediately
+    setOptimistic(-parsedWithdraw, 0n);
     setStatus("signing", `Withdrawing ${Number(withdrawAmount).toFixed(4)} vDOT…`);
     writeContract({ address: ADDRESSES.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw] });
   }
@@ -82,13 +145,20 @@ export function RepayAndWithdraw() {
 
   const busy = isPending || isConfirming;
 
+  // Estimate interest accruing per second for display
+  const debtNum     = Number(formatEther(debt));
+  const perSecond   = debtNum * 0.005 / (365 * 24 * 3600);
+  const bufferedDebt = debt + debt / 100n;
+
   return (
     <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
       <div className="flex gap-2">
         {(["repay", "withdraw"] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
-              activeTab === tab ? "bg-[#E6007A] text-white" : "border border-[#333] text-gray-400 hover:border-[#E6007A]"
+              activeTab === tab
+                ? "bg-[#E6007A] text-white"
+                : "border border-[#333] text-gray-400 hover:border-[#E6007A]"
             }`}>
             {tab === "repay" ? "Repay HOLLAR" : "Withdraw vDOT"}
           </button>
@@ -97,67 +167,121 @@ export function RepayAndWithdraw() {
 
       {activeTab === "repay" && (
         <div className="space-y-3">
+          {/* Balances */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="bg-[#0a0a0a] rounded-lg p-2">
               <div className="text-gray-500">Outstanding Debt</div>
-              <div className="font-bold text-[#E6007A]">{Number(formatEther(debt)).toFixed(4)} HOLLAR</div>
+              <div className="font-bold text-[#E6007A] font-mono">{Number(formatEther(debt)).toFixed(6)} HOLLAR</div>
             </div>
             <div className="bg-[#0a0a0a] rounded-lg p-2">
               <div className="text-gray-500">HOLLAR Balance</div>
-              <div className="font-bold">{Number(formatEther(hollarBal)).toFixed(4)}</div>
+              <div className="font-bold font-mono">{Number(formatEther(hollarBal)).toFixed(6)}</div>
             </div>
           </div>
+
+          {/* Interest accrual rate */}
+          {debt > 0n && (
+            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 text-xs font-mono text-gray-500">
+              Interest accruing at{" "}
+              <span className="text-gray-300">~${perSecond.toFixed(8)}/sec</span>
+              {" "}(0.5%/yr). Applied on-chain when you call repay().
+            </div>
+          )}
+
+          {/* Amount input */}
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Repay Amount</span>
-              <button onClick={() => {
-                // Add 1% buffer to cover interest that accrues between read and tx execution.
-                // repay() caps at actual debt (min(sent, debt)), so the extra stays in your wallet.
-                const buffered = debt + debt / 100n;
-                setRepayAmount(formatEther(buffered));
-              }} className="text-[#E6007A] hover:underline">
-                Full debt
+              <button
+                onClick={() => setRepayAmount(formatEther(bufferedDebt))}
+                className="text-[#E6007A] hover:underline"
+              >
+                Full debt (+1% buffer)
               </button>
             </div>
-            <input type="number" value={repayAmount} onChange={e => setRepayAmount(e.target.value)}
+            <input
+              type="number" value={repayAmount} onChange={e => setRepayAmount(e.target.value)}
               placeholder="0.00" disabled={busy}
-              className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50" />
+              className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+            />
           </div>
-          <div className="text-xs text-gray-500">Stability fee accrues each second. &quot;Full debt&quot; adds a 1% buffer — you&apos;re only charged the exact on-chain debt.</div>
+
+          {/* Transparent repay explanation */}
+          <div className="text-xs text-gray-600 font-mono space-y-1">
+            <div>• Buffer covers interest accrued during tx confirmation (~2–10s)</div>
+            <div>• Contract charges only exact debt: <span className="text-gray-400">min(sent, actualDebt)</span></div>
+            <div>• Excess HOLLAR stays in your wallet — you are never overcharged</div>
+          </div>
+
           {needsApproval ? (
             <button onClick={handleApprove} disabled={busy}
               className="w-full py-3 rounded-lg font-bold text-sm bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition">
-              {busy ? <span className="flex items-center justify-center gap-2"><span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />{isPending ? "Waiting for wallet…" : "Confirming…"}</span> : "Approve HOLLAR"}
+              {busy
+                ? <span className="flex items-center justify-center gap-2">
+                    <span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    {isPending ? "Waiting for wallet…" : "Confirming…"}
+                  </span>
+                : "Approve HOLLAR"}
             </button>
           ) : (
             <button onClick={handleRepay} disabled={busy || !repayAmount}
               className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition">
-              {busy ? <span className="flex items-center justify-center gap-2"><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />{isPending ? "Waiting for wallet…" : "Confirming on-chain…"}</span> : "Repay HOLLAR"}
+              {busy
+                ? <span className="flex items-center justify-center gap-2">
+                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
+                  </span>
+                : "Repay HOLLAR"}
             </button>
           )}
+
+          <ProtocolFAQ />
         </div>
       )}
 
       {activeTab === "withdraw" && (
         <div className="space-y-3">
-          <div className="bg-[#0a0a0a] rounded-lg p-3 text-xs">
+          <div className="bg-[#0a0a0a] rounded-lg p-3 text-xs font-mono">
             <div className="text-gray-500">Available Collateral</div>
             <div className="font-bold text-white">{Number(formatEther(collateral)).toFixed(4)} vDOT</div>
-            {debt > 0n && <div className="text-yellow-500 mt-1">Repay all debt before withdrawing collateral</div>}
+            {debt > 0n && (
+              <div className="text-yellow-500 mt-2">
+                ⚠ Outstanding debt: {Number(formatEther(debt)).toFixed(6)} HOLLAR.
+                Repay in full before withdrawing collateral.
+              </div>
+            )}
+            {debt === 0n && collateral > 0n && (
+              <div className="text-green-500 mt-2">✓ No debt — full collateral available to withdraw</div>
+            )}
           </div>
+
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Withdraw Amount</span>
-              <button onClick={() => setWithdrawAmount(formatEther(collateral))} className="text-[#E6007A] hover:underline">MAX</button>
+              <button onClick={() => setWithdrawAmount(formatEther(collateral))}
+                className="text-[#E6007A] hover:underline">MAX</button>
             </div>
-            <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
-              placeholder="0.00" disabled={busy}
-              className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50" />
+            <input
+              type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
+              placeholder="0.00" disabled={busy || debt > 0n}
+              className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+            />
           </div>
-          <button onClick={handleWithdraw} disabled={busy || !withdrawAmount || debt > 0n}
-            className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition">
-            {busy ? <span className="flex items-center justify-center gap-2"><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />{isPending ? "Waiting for wallet…" : "Confirming on-chain…"}</span> : "Withdraw vDOT"}
+
+          <button
+            onClick={handleWithdraw}
+            disabled={busy || !withdrawAmount || debt > 0n}
+            className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
+          >
+            {busy
+              ? <span className="flex items-center justify-center gap-2">
+                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
+                </span>
+              : debt > 0n ? "Repay debt first" : "Withdraw vDOT"}
           </button>
+
+          <ProtocolFAQ />
         </div>
       )}
 
