@@ -1,5 +1,5 @@
 # DotLend — Pitch Deck
-## Polkadot Hub Native DeFi
+## The Aave of Polkadot
 
 ---
 
@@ -9,15 +9,15 @@
 
 # DotLend
 
-### A Native Money Market for Polkadot Hub
+### The First Money Market on Polkadot Hub
 
-**Deposit vDOT. Borrow HOLLAR. Cryptographic solvency proofs generated every 30 minutes.**
+**Deposit vDOT or native DOT. Borrow HOLLAR. Zero-knowledge solvency proofs every 30 minutes.**
 
 ---
 
 nexucore.xyz | github.com/orthonode/dotlend
 
-Orthonode | Arhant Barmate (Founder & Lead Engineer) | March 2026
+Orthonode | Arhant Barmate (Solo Founder & Engineer) | March 2026
 
 research@orthonode.xyz
 
@@ -25,46 +25,49 @@ research@orthonode.xyz
 
 ---
 
-## SLIDE 2 — THE GAP
+## SLIDE 2 — THE PROBLEM I FOUND
 
-# Polkadot Has $330M in Stablecoins and Zero Lending Markets
-
----
-
-| Signal | Data |
-|--------|------|
-| vDOT utilization on Hydration | **76%** — supply cap HIT |
-| HOLLAR TVL | **$330M** — launched September 2025 |
-| Native money markets on Polkadot Hub | **0** |
+# I Couldn't Borrow Against My Staked DOT
 
 ---
 
-**Ethereum lending markets:**
-- Aave: **$20B TVL**
-- Morpho: **$3B TVL**
-- Compound: **$3B TVL**
+I had vDOT — Bifrost's liquid staking token. It was earning 15% APY. But I needed liquidity. My options were:
 
-**Polkadot: $0**
+1. **Sell my vDOT** — lose the staking yield forever
+2. **Wait** — and miss the opportunity
 
-Not zero market share. **Literally zero.**
+On Ethereum, I'd go to Aave and borrow USDC against my stETH in 30 seconds. On Polkadot? Nothing. Zero lending markets.
 
-vDOT holders have $200M+ in yield-bearing assets with nowhere to borrow against them.
+---
+
+I checked the data:
+
+| Signal | What I Found |
+|--------|-------------|
+| vDOT utilization on Hydration | **76%** — supply cap literally hit |
+| HOLLAR TVL | **$330M** — Polkadot's largest stablecoin |
+| Native lending markets on Polkadot Hub | **Zero** |
+| Ethereum lending market TVL (Aave alone) | **$20B** |
+
+$200M+ in vDOT sitting idle. $330M in HOLLAR with no collateral use case. And nobody building the thing that connects them.
+
+So I built it.
 
 ---
 
 ---
 
-## SLIDE 3 — THE SOLUTION
+## SLIDE 3 — WHAT DOTLEND DOES
 
-# DotLend in Three Steps
+# Three Steps. That's It.
 
 ---
 
-**Step 1 — Deposit vDOT as collateral**
-Keep earning Bifrost staking yield (~15% APY) while your vDOT is posted.
+**Step 1 — Deposit vDOT (or native DOT) as collateral**
+Keep earning Bifrost staking yield (~15% APY) while your assets are posted.
 
 **Step 2 — Borrow HOLLAR (up to 70% LTV)**
-Get immediate HOLLAR liquidity without selling your position.
+Get immediate stablecoin liquidity without selling your position.
 
 **Step 3 — Repay when ready**
 Or get liquidated if health drops below 1.0. Liquidators earn a 5% bonus.
@@ -79,44 +82,34 @@ HF = 1.0  →  Liquidation threshold
 HF < 1.0  →  Liquidatable (5% bonus to liquidators)
 ```
 
-**LTV: 70% | Liquidation Threshold: 80% | Stability Fee: 0.5%/yr**
+**LTV: 70% | Liquidation Threshold: 80% | Stability Fee: 0.5%/yr | Treasury Fee: 100%**
 
 ---
 
 ---
 
-## SLIDE 4 — LIVE DEMO
+## SLIDE 4 — WHAT'S LIVE TODAY
 
-# Live on Polkadot Hub TestNet Today
-
----
-
-**nexucore.xyz**
+# 12 Contracts. 92 Tests. 2 Collateral Markets.
 
 ---
+
+**nexucore.xyz** — live right now
 
 | Metric | Status |
 |--------|--------|
-| Contracts deployed | 7 — all on Chain ID 420420417 |
-| Tests passing | 76 passing, 0 failures |
-| Solvency status | SOLVENT ✓ — proofs generated every 30 minutes |
-| vDOT Price | $2.45 via PriceOracle on-chain |
-| Full flow | Deposit → Borrow → Liquidate → Repay ✓ |
+| Contracts deployed | **12** across 2 markets (vDOT + native DOT) |
+| Tests passing | **92 Hardhat + 6 Forge fuzz** — 0 failures |
+| TreasuryRouter | **100% of fees → treasury** (MakerDAO model) |
+| Oracle | Live, posting vDOT + DOT prices every 30 minutes |
+| ZK Solvency | SOLVENT ✓ — proof generated every 30 minutes |
+| Full flow | Deposit → Borrow → Repay → Liquidate ✓ |
 
 ---
 
-**Deployed contracts (Polkadot Hub TestNet):**
-
-```
-PriceOracle:     0xc12D24cD6DF4521C9A453a325751bB1f38326a91
-MockvDOT:        0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F
-MockHOLLAR:      0xA94f7464F3a2cA966CB31881A1614A9CF97859ca
-CollateralVault: 0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8
-LendingPool:     0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419
-SolvencyGateway: 0x3e7D948769818C71075E38bbAA6198908Ba6CFAa
-```
-
-Explorer: blockscout-testnet.polkadot.io
+**Markets:**
+- **vDOT Market** — deposit Bifrost liquid-staked DOT, borrow HOLLAR
+- **WPAS Market** — deposit native DOT (wrapped via WPAS), borrow HOLLAR
 
 ---
 
@@ -124,15 +117,13 @@ Explorer: blockscout-testnet.polkadot.io
 
 ## SLIDE 5 — THE ZK INNOVATION
 
-# First Money Market With Cryptographic Solvency Proof
+# The First Money Market With Cryptographic Solvency Proof
 
 ---
 
-**The problem with DeFi transparency:**
-
 > "Trust us, we're solvent."
 
-Every lending protocol, every exchange, every yield vault — they all ask you to trust a dashboard. FTX had a dashboard. Celsius had a dashboard.
+Every lending protocol says this. FTX had a dashboard. Celsius had a dashboard.
 
 ---
 
@@ -150,9 +141,7 @@ Where to VERIFY:  SolvencyGateway on Blockscout → SolvencyProven events
 
 ---
 
-**This is the first money market anywhere to do this.**
-
-*Transparency note:* The Noir ZK proofs are generated off-chain every 30 minutes today. On-chain verification is currently mocked until PolkaVM adds BN254 precompiles (EIP-196/197). The architecture is ready for mainnet.
+*Transparency:* On-chain verification uses `MockSolvencyVerifier` on testnet. The real UltraHonk verifier requires BN254 precompiles (EIP-196/197) which PolkaVM doesn't support yet. The real verifier is in the repo, ready to deploy when BN254 lands. We chose to be honest about this rather than hide it.
 
 ---
 
@@ -160,242 +149,249 @@ Where to VERIFY:  SolvencyGateway on Blockscout → SolvencyProven events
 
 ## SLIDE 6 — WHY ONLY ON POLKADOT
 
-# Architecture That's Impossible on Ethereum
+# Can't Build This on Ethereum
 
 ---
 
 **On Ethereum, building this would require:**
-
 - ✗ Chainlink oracle → centralized, expensive, another trust assumption
-- ✗ Multisig bridge for vDOT → counterparty risk defeats the purpose
-- ✗ Wrapped stablecoin for HOLLAR → peg risk, custodian risk
-
----
+- ✗ Bridge for vDOT → counterparty risk defeats the purpose
+- ✗ Wrapped HOLLAR → peg risk, custodian risk
 
 **On Polkadot Hub:**
+- ✓ vDOT and HOLLAR are native assets — no wrapping, no bridges
+- ✓ XCM makes them natively composable across all parachains
+- ✓ Hyperbridge ISMP delivers trustless price feeds on mainnet
 
-- ✓ vDOT price via XCM from Bifrost — native, no bridge, no custodian
-- ✓ HOLLAR is a native Polkadot asset — no wrapping required
-- ✓ Hyperbridge ISMP delivers trustless cross-chain state proofs on mainnet
-
----
-
-**This is not "EVM on another chain."**
-
-This is Polkadot-native composability. vDOT and HOLLAR exist here. The lending market belongs here too.
+**This isn't "EVM on another chain." This is Polkadot-native composability.**
 
 ---
 
 ---
 
-## SLIDE 7 — TECHNICAL ARCHITECTURE
+## SLIDE 7 — REVENUE MODEL & TREASURY
 
-# Clean, Auditable, PolkaVM-Ready
+# How the Money Works — Complete Transparency
 
 ---
+
+**Current (testnet):** 100% of stability fees → protocol treasury. Zero HOLLAR burn.
+
+**Why no burn?** HOLLAR is a stablecoin. Burning it destroys borrowing capacity for zero value. MakerDAO doesn't burn DAI — they burn MKR using DAI revenue. We follow the same model.
+
+---
+
+**Mainnet tokenomics (DOTLEND governance token):**
 
 ```
-User Wallet (MetaMask)
-    │
-    ├─ approve(MockvDOT, CollateralVault)
-    ├─ CollateralVault.deposit(amount)   → records collateral
-    ├─ LendingPool.borrow(hollarAmount)  → mints MockHOLLAR
-    └─ LendingPool.repay(amount)         → burns MockHOLLAR
-
-                    ┌───────────────────────────────────┐
-                    │         Polkadot Hub TestNet       │
-                    │         Chain ID: 420420417        │
-    CollateralVault ◄──────── PriceOracle               │
-          │                      ▲                      │
-          │                      │ oracle.py (30m)      │
-          ▼                      │                      │
-    LendingPool ────────────► MockHOLLAR                │
-          │                                             │
-          ▼                                             │
-   SolvencyGateway ◄── MockSolvencyVerifier             │
-          │               (testnet; real verifier       │
-          ▼                on mainnet w/ BN254)         │
-   SolvencyProven event                                 │
-   (Railway cron, every 6h)                             │
-                    └───────────────────────────────────┘
+User repays stability fee (e.g. 100 USDC)
+         ↓
+70%  → Treasury reserve (operations, insurance fund, audits)
+20%  → Buy DOT on Hydration DEX via XCM → Stake → vDOT → Distribute to DOTLEND stakers
+10%  → Liquidity mining rewards (bootstrap new collateral markets)
 ```
 
----
-
-**7 contracts. No SELFDESTRUCT. No EXTCODECOPY. No assembly.**
-
-OpenZeppelin `ReentrancyGuard` on all state-changing functions.
-BN254 precompile-ready for mainnet ZK verifier deployment.
+**No burning of anything. Every dollar does real work.**
 
 ---
 
----
+**Team incentive — honest disclosure:**
 
-## SLIDE 8 — BUILT FOR THIS ECOSYSTEM
+There is no team allocation from protocol fees today. The team's incentive is:
+1. **Hackathon prize** ($3K–$4K if we win)
+2. **W3F grant** (applying Q2 2026)
+3. **Future governance token allocation** (standard 15–20% team allocation with 2-year vesting, publicly disclosed at launch)
 
-# What the Ecosystem is Saying
-
----
-
-**Victor Ji (Bifrost)**
-vDOT IS the collateral on day one. DotLend is the first protocol to productize vDOT as DeFi collateral on Polkadot Hub. Integration path: Bifrost SLPx one-click — mint vDOT and post it as collateral in a single transaction.
-
----
-
-**Nicolas Arevalo (Velocity Labs)**
-You said money markets are #1 on Polkadot's DeFi needed list. We built one. 7 contracts, 76 tests, live frontend, ZK solvency proof. Applying for DeFi Builders Cohort 2.
-
----
-
-**Radha (W3F)**
-HOLLAR has $330M TVL and no native collateral utility outside Hydration. DotLend is the missing primitive. Without a lending market, HOLLAR cannot scale. W3F grant application in progress.
-
----
-
-**Valery (PAL)**
-4 core contracts, no assembly, no exotic opcodes, full reentrancy protection, 76 tests including edge cases. Clean separation of concerns. Ready for formal verification. Interested in the PAL audit subsidy path.
-
----
-
-**Alberto (Papermoon)**
-Deployed and battle-tested on Paseo first. Every PolkaVM opcode constraint respected by design. No SELFDESTRUCT, no CREATE2, no EXTCODECOPY, OZ v4.x only.
+We don't take a salary from the protocol until it's self-sustaining. That's the commitment.
 
 ---
 
 ---
 
-## SLIDE 9 — MARKET SIZE
+## SLIDE 8 — THE V2 VISION
+
+# Snowbridge Just Made This a $100M Opportunity
+
+---
+
+**Snowbridge** — live for over a year, $75M+ TVL, zero on-chain downtime, ~24 parachain integrations.
+
+wETH, wBTC, and USDC are **already bridgeable** to Polkadot Hub.
+
+---
+
+**DotLend V2 — full two-sided market:**
+
+| Collateral (deposit) | Borrow |
+|---------------------|--------|
+| vDOT (Bifrost) | USDC (Snowbridge) |
+| vDOT | wETH (Snowbridge) |
+| DOT (native) | USDC |
+| wBTC (Snowbridge) | USDC |
+
+This is exactly what Aave does. But on Polkadot Hub, where nobody has built it.
+
+---
+
+**The treasury flywheel (MakerDAO model):**
+
+Stability fees → Treasury → Buy DOT on Hydration DEX → Stake via Bifrost → vDOT → Distributed to DOTLEND governance stakers → More TVL → More fees → More DOT bought → Token price rises
+
+**Every dollar borrowed on DotLend eventually becomes DOT demand.**
+
+That's the pitch Polkadot's ecosystem will care about.
+
+---
+
+---
+
+## SLIDE 9 — COMPETITIVE ADVANTAGES
+
+# What We Fix That Aave Can't
+
+---
+
+| Aave Weakness | DotLend Advantage |
+|--------------|-------------------|
+| Liquidations are chaotic — MEV bots front-run each other | ZK-proven health factor alerts via XCM (architecture ready) |
+| AAVE token has weak value accrual | Treasury flywheel directly buys DOT — real backing |
+| No Polkadot-native assets | vDOT, HOLLAR, native DOT as first-class collateral |
+| No staking yield passthrough | Lenders earn base interest + share of vDOT yield (~15%) |
+
+---
+
+**Parallel Finance** tried this on Polkadot and collapsed with $29M TVL — before Polkadot Hub EVM existed. We're building at the right moment, on the right infrastructure.
+
+---
+
+---
+
+## SLIDE 10 — MARKET SIZE
 
 # The TAM Is Proven
 
 ---
 
-**Lending protocols on Ethereum:**
-
-| Protocol | TVL |
-|----------|-----|
-| Aave | $20B |
-| Morpho | $3B |
-| Compound | $3B |
-
-**Lending protocols on Polkadot: $0**
-
----
-
-**Polkadot DeFi today:**
-
 | Asset | TVL |
 |-------|-----|
-| Polkadot total TVL | $800M+ |
-| vDOT TVL on Bifrost | $200M+ |
-| HOLLAR TVL | $330M |
-| Native lending markets | 0 |
+| Polkadot total TVL | **$800M+** |
+| vDOT on Bifrost | **$200M+** |
+| HOLLAR | **$330M** |
+| Native lending markets | **$0** |
 
 ---
 
 **Conservative target: 5% of Polkadot TVL = $40M**
-**Year 1 target: $10M TVL**
 
-Protocol revenue at $10M TVL, 0.5% stability fee: **$50,000/year**
-At $40M TVL: **$200,000/year** — fully self-sustaining.
+| TVL | Annual Revenue (0.5% fee) | Status |
+|-----|--------------------------|--------|
+| $10M | $50,000/yr | Self-sustaining |
+| $40M | $200,000/yr | Profitable |
+| $100M | $500,000/yr | Competitive with mid-tier DeFi |
 
 ---
 
 ---
 
-## SLIDE 10 — TRACTION & ROADMAP
+## SLIDE 11 — TRACTION & ROADMAP
 
 # Testnet → Mainnet → Ecosystem
 
 ---
 
-**NOW (March 2026) — DONE:**
-
-- ✓ 7 contracts deployed on Polkadot Hub TestNet (Chain ID 420420417)
-- ✓ 76 tests passing, 0 failures
+**March 2026 — DONE:**
+- ✓ 12 contracts deployed (2 collateral markets: vDOT + native DOT)
+- ✓ 92 Hardhat + 6 Forge fuzz tests — 0 failures
 - ✓ Live frontend at nexucore.xyz
-- ✓ ZK solvency proof pipeline (Noir circuit + Railway cron)
-- ✓ Full crisis simulation: $8.50 → $6.00 price crash, HF 1.214 → 0.857, liquidation confirmed
+- ✓ TreasuryRouter deployed — 100% fees to treasury
+- ✓ ZK solvency proof pipeline (Noir + Railway)
+- ✓ Full crisis simulation: price crash → liquidation confirmed
 
 ---
 
-**Q2 2026:**
+**Q2 2026:** W3F grant + PAL security audit + Velocity Labs cohort
 
-- → W3F grant application (ecosystem-critical primitive)
-- → PAL security audit (Valery subsidy path)
-- → Velocity Labs DeFi Builders Cohort 2
+**Q3 2026:** Mainnet + Snowbridge multi-asset markets (USDC, wETH, wBTC)
 
----
-
-**Q3 2026:**
-
-- → Mainnet deployment with Hyperbridge ISMP oracle
-- → Bifrost SLPx one-click: mint vDOT + collateralize in one transaction
-- → Target: $10M TVL
+**Q4 2026:** DOTLEND governance token + treasury flywheel live
 
 ---
 
 ---
 
-## SLIDE 11 — TEAM
+## SLIDE 12 — OPENZEPPELIN USAGE
 
-# Orthonode
+# Deep OZ Composition, Not Surface-Level Imports
+
+---
+
+| OZ Contract | Used In | Purpose |
+|------------|---------|--------|
+| `Ownable` | 5 contracts | Admin functions |
+| `ReentrancyGuard` | LendingPool | Reentrancy protection |
+| `ERC20` | 3 contracts | Token standards |
+
+---
+
+**The constraint story:** When adding fee logic to `LendingPool`, the combined bytecode from Ownable + ReentrancyGuard + fee logic exceeded PolkaVM's 24KB initcode limit. The solution: `TreasuryRouter` — a separate contract implementing `IMintBurn` that sits between LendingPool and HOLLAR.
+
+This pattern exists *because* OZ composition consumed enough bytecode that fee logic had to be externalized. The result is cleaner: more testable, more upgradeable, more auditable.
+
+**v4.9.6 only.** PolkaVM's resolc compiler doesn't support v5.x import patterns.
+
+---
+
+---
+
+## SLIDE 13 — TEAM
+
+# Solo Founder, Full Stack
 
 ---
 
 **Arhant Barmate** — Founder & Lead Engineer
+Orthonode Infrastructure Labs | Bhopal, India
 
-Building verification and governance infrastructure across multiple chains.
-
-**DotLend** — this project, built natively for PolkaVM constraints.
-7 contracts, 76 tests. Live on Westend Testnet.
+Built every contract, every test, every frontend component, every script, this pitch — alone.
 
 ---
 
-**Current Focus:**
-- Zero-knowledge solvency proofs
-- On-chain oracle architectures
-- Gas-optimized state execution
+**By the numbers:**
+- 12 deployed contracts on Polkadot Hub TestNet
+- 92 Hardhat + 6 Forge fuzz tests
+- Live frontend, live oracle, live ZK pipeline
+- Built from scratch during the hackathon window
+- Commit history proves it
 
 ---
-
-**Contact**
 
 research@orthonode.xyz
 orthonode.xyz | nexucore.xyz
 github.com/orthonode
-Bhopal, India
 
 ---
 
 ---
 
-## SLIDE 12 — NEXT STEPS
+## SLIDE 14 — THE ASK
 
-# Where DotLend Goes From Here
-
----
-
-**1. Mainnet Deployment**
-Finalizing the Hyperbridge ISMP integration to pull trustless TWAP prices from Hydration. The technical design is complete; implementation is next.
+# What DotLend Needs Next
 
 ---
 
-**2. W3F Grant Application**
-Applying for a grant to fund a formal security audit. Since DotLend uses standard OpenZeppelin contracts and avoids complex assembly, an audit via PAL is the last major hurdle before a safe mainnet launch.
+**1. Win this hackathon** → Validation + initial funding to continue building
 
----
+**2. W3F grant** → Fund the PAL security audit for mainnet readiness
 
-**3. Liquidity Bootstrapping**
-Looking to connect with early liquidity providers and ecosystem builders (like Velocity Labs) who want to see vDOT utilization increase.
+**3. Early vDOT depositors** → Bootstrap the first $1M TVL
 
 ---
 
 DotLend is a complete technical foundation for a missing primitive.
 
-vDOT earns yield. HOLLAR needs collateral. Polkadot Hub needs a lending market.
+vDOT earns yield. HOLLAR needs collateral utility. Polkadot Hub needs a lending market.
 
-**DotLend connects them.**
+**DotLend connects them. And nobody else is building this.**
 
 ---
 

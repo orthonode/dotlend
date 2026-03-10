@@ -88,11 +88,11 @@ Crisis simulation live on Polkadot Hub TestNet:
 - [x] `test/SolvencyProof.test.js` — 14 tests: valid proof, invalid proof, stale timestamp, permissionless, input validation
 - [x] `railway.json` — Railway cron config (every 30 minutes, auto-submit proof)
 - [x] `frontend/src/components/SolvencyStatus.tsx` — live SOLVENT badge widget for nexucore.xyz
-- [x] All 76 tests passing (62 original + 14 new), 0 failures
+- [x] All 92 tests passing (62 original + 14 ZK + 16 TreasuryRouter), 0 failures
 
 ### Done Criteria ✅
 - `nargo compile` exits 0, ACIR artifact: circuits/solvency/target/solvency.json
-- 76 tests green: `npx hardhat test`
+- 92 tests green: `npx hardhat test`
 - `publishSolvencyProof()` emits `SolvencyProven(totalCollateral, totalDebt, timestamp)`
 - Railway cron submits proof every 30 minutes (judges see live SolvencyProven events)
 - SolvencyStatus.tsx widget shows SOLVENT badge on nexucore.xyz
@@ -145,8 +145,13 @@ DoraHacks submission confirmed. README has all deployed addresses. Video uploade
 | PriceOracle | 0xc12D24cD6DF4521C9A453a325751bB1f38326a91 | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
 | MockvDOT | 0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
 | MockHOLLAR | 0xA94f7464F3a2cA966CB31881A1614A9CF97859ca | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
-| CollateralVault | 0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8 | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
-| LendingPool | 0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419 | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
+| TreasuryRouter (vDOT) | 0x68099740bb099970c62F231fE5d8A08ae58de9AA | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
+| CollateralVault (vDOT) | 0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8 | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
+| LendingPool (vDOT) | 0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419 | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
+| WPAS | 0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6 | [view](https://blockscout-testnet.polkadot.io/address/0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6) |
+| TreasuryRouter (WPAS) | 0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba | [view](https://blockscout-testnet.polkadot.io/address/0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba) |
+| CollateralVault (WPAS) | 0x4131788B3A068Acf9758C740826A368bf9FBaE4D | [view](https://blockscout-testnet.polkadot.io/address/0x4131788B3A068Acf9758C740826A368bf9FBaE4D) |
+| LendingPool (WPAS) | 0xC557C3869B6B7572a81dB50C61A369682C035EAD | [view](https://blockscout-testnet.polkadot.io/address/0xC557C3869B6B7572a81dB50C61A369682C035EAD) |
 | MockSolvencyVerifier | 0xED2676C995BAA392093Ac0b907EA216c2B8C52cc | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
 | SolvencyGateway | 0x3e7D948769818C71075E38bbAA6198908Ba6CFAa | [view](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) |
 | Deployer | 0xb947dF17869fAB2DF223a38F28f38b40ca636d4e | — |

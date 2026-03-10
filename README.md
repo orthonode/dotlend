@@ -64,17 +64,20 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 
 ## Deployed Contracts
 
-All 9 contracts deployed and verified on Polkadot Hub TestNet.
+All 12 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT + WPAS).
 
 | Contract | Address | Blockscout |
 |----------|---------|------------|
 | PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
 | MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
 | MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
-| TreasuryRouter | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
-| CollateralVault | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
-| LendingPool | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
-| WPAS | *(WPAS market — deploy separately)* | — |
+| TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
+| CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
+| LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
+| WPAS | `0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6` | [view](https://blockscout-testnet.polkadot.io/address/0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6) |
+| TreasuryRouter (WPAS) | `0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba` | [view](https://blockscout-testnet.polkadot.io/address/0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba) |
+| CollateralVault (WPAS) | `0x4131788B3A068Acf9758C740826A368bf9FBaE4D` | [view](https://blockscout-testnet.polkadot.io/address/0x4131788B3A068Acf9758C740826A368bf9FBaE4D) |
+| LendingPool (WPAS) | `0xC557C3869B6B7572a81dB50C61A369682C035EAD` | [view](https://blockscout-testnet.polkadot.io/address/0xC557C3869B6B7572a81dB50C61A369682C035EAD) |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
 | SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` | [view](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) |
 
@@ -663,7 +666,7 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 
 | Phase | Timeline | Milestone |
 |-------|----------|-----------|
-| **1 — Testnet** | March 2026 | 9 contracts on Polkadot Hub TestNet, 92 tests, 2 collateral markets ✓ |
+| **1 — Testnet** | March 2026 | 12 contracts on Polkadot Hub TestNet, 92 tests, 2 collateral markets ✓ |
 | **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
 | **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace HOLLAR with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
 | **4 — Treasury Flywheel** | Q3 2026 | Treasury buys DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers |

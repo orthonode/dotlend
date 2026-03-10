@@ -21,7 +21,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Explore SLPx integration for one-transaction minting and collateralization.
 
 **Draft Message:**
-> Hey Victor — I'm Arhant, building DotLend, the first money market on Polkadot Hub. vDOT is our primary collateral asset — 9 contracts deployed, 92 tests passing, live at nexucore.xyz. Our V2 vision: 100% of stability fees flow to a treasury that buys DOT on Hydration, stakes via Bifrost, and distributes vDOT to governance holders. Every dollar borrowed on DotLend becomes DOT demand. I'd love to discuss SLPx integration for one-click mint + collateralize. Is that something the Bifrost team would be open to?
+> Hey Victor — I'm Arhant, building DotLend, the first money market on Polkadot Hub. vDOT is our primary collateral asset — 12 contracts deployed, 92 tests passing, live at nexucore.xyz. Our V2 vision: 100% of stability fees flow to a treasury that buys DOT on Hydration, stakes via Bifrost, and distributes vDOT to governance holders. Every dollar borrowed on DotLend becomes DOT demand. I'd love to discuss SLPx integration for one-click mint + collateralize. Is that something the Bifrost team would be open to?
 
 ---
 
@@ -31,7 +31,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Application for go-to-market support and liquidity bootstrapping.
 
 **Draft Message:**
-> Hey Nico — Arhant from Orthonode. You've mentioned money markets being a top need for Polkadot — I've built DotLend, the first one. Two collateral markets live (vDOT + native DOT), 9 contracts, 92 tests, ZK solvency proofs, treasury router with MakerDAO-style fee model. With Snowbridge now live ($75M TVL), the V2 plan adds wETH/wBTC/USDC collateral — becoming a full Aave-like two-sided market on Polkadot Hub. Would love to explore liquidity bootstrapping support.
+> Hey Nico — Arhant from Orthonode. You've mentioned money markets being a top need for Polkadot — I've built DotLend, the first one. Two collateral markets live (vDOT + native DOT), 12 contracts, 92 tests, ZK solvency proofs, treasury router with MakerDAO-style fee model. With Snowbridge now live ($75M TVL), the V2 plan adds wETH/wBTC/USDC collateral — becoming a full Aave-like two-sided market on Polkadot Hub. Would love to explore liquidity bootstrapping support.
 
 ---
 
@@ -49,7 +49,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Secure a security audit subsidy.
 
 **Draft Message:**
-> Hi — Arhant from Orthonode. DotLend is a money market on Polkadot Hub with 9 contracts, 92 tests (including Forge fuzz tests), and full PolkaVM compatibility (OZ v4.x, no assembly, no forbidden opcodes). Looking to move toward mainnet and would like to explore the PAL audit subsidy path.
+> Hi — Arhant from Orthonode. DotLend is a money market on Polkadot Hub with 12 contracts, 92 tests (including Forge fuzz tests), and full PolkaVM compatibility (OZ v4.x, no assembly, no forbidden opcodes). Looking to move toward mainnet and would like to explore the PAL audit subsidy path.
 
 ---
 

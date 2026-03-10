@@ -56,7 +56,7 @@ The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amoun
 
 ### Traction
 
-Nine contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 92 Hardhat tests + 6 Forge fuzz tests pass with 0 failures, covering every state transition including a complete price-crash liquidation cycle. Two collateral markets live (vDOT + native DOT via WPAS). Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts prices every 30 minutes. ZK proof pipeline runs automatically on Railway.
+Twelve contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 92 Hardhat tests + 6 Forge fuzz tests pass with 0 failures, covering every state transition including a complete price-crash liquidation cycle. Two collateral markets live (vDOT + native DOT via WPAS). Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts prices every 30 minutes. ZK proof pipeline runs automatically on Railway.
 
 ---
 
@@ -119,10 +119,13 @@ Every contract was built with PolkaVM constraints as hard requirements. No `SELF
 | PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` |
 | MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
 | MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
-| TreasuryRouter | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` |
+| TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` |
 | CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` |
 | LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` |
-| WPAS | *(WPAS market — native DOT collateral)* |
+| WPAS | `0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6` |
+| TreasuryRouter (WPAS) | `0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba` |
+| CollateralVault (WPAS) | `0x4131788B3A068Acf9758C740826A368bf9FBaE4D` |
+| LendingPool (WPAS) | `0xC557C3869B6B7572a81dB50C61A369682C035EAD` |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
 | SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` |
 
