@@ -1,8 +1,8 @@
 const { ethers } = require("hardhat");
 
 const RECIPIENT = "0x30e3f8b3Be42182984E89797e470120e8976E70C";
-const VDOT_ADDR  = "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA";
-const HOLLAR_ADDR = "0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf";
+const VDOT_ADDR  = "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F";
+const HOLLAR_ADDR = "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca";
 const AMOUNT = ethers.parseEther("1000");
 
 async function main() {

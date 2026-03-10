@@ -1,9 +1,10 @@
 "use client";
 
 // ProtocolStats.tsx
-// Shows live protocol revenue stats — treasury fees collected, HOLLAR burned,
-// total borrows, TVL. Reads directly from LendingPool and CollateralVault.
-// Designed to show judges the revenue model is live and verifiable on-chain.
+// Shows live protocol revenue stats — total revenue collected, treasury balance,
+// TVL, borrowers. Reads directly from TreasuryRouter, LendingPool, CollateralVault.
+// Revenue model: 100% of stability fees → treasury. Treasury governance directs
+// funds to DOT buybacks on mainnet (MakerDAO-style).
 
 import { useReadContracts, usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
@@ -17,17 +18,9 @@ import {
 import { useMarket } from "@/src/lib/market-context";
 
 // ── Treasury Router ABI ────────────────────────────────────────
-// Add these to your contracts.ts ROUTER_ABI as well
 const ROUTER_ABI = [
   {
     name: "totalFeesCollected",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ type: "uint256" }],
-  },
-  {
-    name: "totalHollarBurned",
     type: "function",
     stateMutability: "view",
     inputs: [],
@@ -84,7 +77,6 @@ function Stat({
 export function ProtocolStats() {
   const client = usePublicClient();
   const [uniqueBorrowers, setUniqueBorrowers] = useState<number | null>(null);
-  const [treasury, setTreasury] = useState<string | null>(null);
   const { addresses, assetSymbol } = useMarket();
 
   // Core stats from contracts
@@ -94,11 +86,6 @@ export function ProtocolStats() {
         address: addresses.treasuryRouter,
         abi: ROUTER_ABI,
         functionName: "totalFeesCollected",
-      },
-      {
-        address: addresses.treasuryRouter,
-        abi: ROUTER_ABI,
-        functionName: "totalHollarBurned",
       },
       {
         address: addresses.treasuryRouter,
@@ -116,9 +103,8 @@ export function ProtocolStats() {
   });
 
   const feesCollected = (data?.[0]?.result as bigint) ?? 0n;
-  const hollarBurned = (data?.[1]?.result as bigint) ?? 0n;
-  const treasuryAddr = (data?.[2]?.result as string) ?? null;
-  const vdotPrice = (data?.[3]?.result as bigint) ?? 0n;
+  const treasuryAddr = (data?.[1]?.result as string) ?? null;
+  const collateralPrice = (data?.[2]?.result as bigint) ?? 0n;
 
   // Treasury HOLLAR balance — only fetch once we have the address
   const { data: treasuryBalData } = useReadContracts({
@@ -157,9 +143,8 @@ export function ProtocolStats() {
     })();
   }, [client]);
 
-  // Scan Deposited events for TVL (total vDOT deposited - withdrawn)
-  // Simpler: just read vault total supply via collateral events
-  const [tvlVdot, setTvlVdot] = useState<bigint | null>(null);
+  // Scan Deposited events for TVL (total collateral deposited - withdrawn)
+  const [tvlCollateral, setTvlCollateral] = useState<bigint | null>(null);
   useEffect(() => {
     if (!client) return;
     (async () => {
@@ -188,25 +173,21 @@ export function ProtocolStats() {
           (s, l) => s + (l.args.amount as bigint),
           0n,
         );
-        setTvlVdot(totalDeposited - totalWithdrawn);
+        setTvlCollateral(totalDeposited - totalWithdrawn);
       } catch {
-        setTvlVdot(0n);
+        setTvlCollateral(0n);
       }
     })();
   }, [client]);
 
   const tvlUSD =
-    tvlVdot !== null && vdotPrice > 0n
-      ? Number(formatEther((tvlVdot * vdotPrice) / BigInt(1e18))).toFixed(2)
+    tvlCollateral !== null && collateralPrice > 0n
+      ? Number(formatEther((tvlCollateral * collateralPrice) / BigInt(1e18))).toFixed(2)
       : "--";
 
-  const feesF = Number(formatEther(feesCollected)).toFixed(4);
-  const burnedF = Number(formatEther(hollarBurned)).toFixed(4);
+  const revenueF = Number(formatEther(feesCollected)).toFixed(4);
   const treasF = Number(formatEther(treasuryBalance)).toFixed(4);
 
-  // Annualised fee projection — rough: if fees collected since first borrow
-  // Just show raw numbers for testnet; projections are misleading at low TVL
-  const protocolFeeRate = "10% of stability fee";
   const stabilityFeeRate = "0.5%/yr on all debt";
 
   return (
@@ -233,22 +214,17 @@ export function ProtocolStats() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
         <Stat
-          label="Treasury Fees Collected"
-          value={`${feesF} HOLLAR`}
-          sub={`Current balance: ${treasF} HOLLAR`}
+          label="Total Protocol Revenue"
+          value={`${revenueF} HOLLAR`}
+          sub={`Treasury balance: ${treasF} HOLLAR`}
           accent
-        />
-        <Stat
-          label="HOLLAR Burned"
-          value={`${burnedF} HOLLAR`}
-          sub="Deflationary — removed from supply"
         />
         <Stat
           label="TVL"
           value={`$${tvlUSD}`}
           sub={
-            tvlVdot !== null
-              ? `${Number(formatEther(tvlVdot)).toFixed(4)} ${assetSymbol} locked`
+            tvlCollateral !== null
+              ? `${Number(formatEther(tvlCollateral)).toFixed(4)} ${assetSymbol} locked`
               : "Loading..."
           }
         />
@@ -257,12 +233,17 @@ export function ProtocolStats() {
           value={uniqueBorrowers !== null ? String(uniqueBorrowers) : "--"}
           sub="All-time, from Borrowed events"
         />
+        <Stat
+          label="Stability Fee"
+          value={stabilityFeeRate}
+          sub="Accrued continuously on all debt"
+        />
       </div>
 
       {/* Revenue model explainer */}
       <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 text-xs font-mono space-y-3">
         <div className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">
-          Revenue Model
+          Revenue Model — MakerDAO-Style
         </div>
         <div className="space-y-2 text-gray-500">
           <div className="flex justify-between">
@@ -270,30 +251,30 @@ export function ProtocolStats() {
             <span className="text-white">{stabilityFeeRate}</span>
           </div>
           <div className="flex justify-between">
-            <span>Protocol cut of stability fee</span>
-            <span className="text-[#E6007A]">{protocolFeeRate}</span>
+            <span>Revenue to treasury</span>
+            <span className="text-[#E6007A]">100%</span>
           </div>
           <div className="flex justify-between">
-            <span>Remainder</span>
-            <span className="text-white">Burned (deflationary)</span>
+            <span>Mainnet use</span>
+            <span className="text-white">DOT/vDOT buybacks</span>
           </div>
         </div>
         <div className="border-t border-[#1a1a1a] pt-3 space-y-1 text-gray-600">
           <div>
-            At <span className="text-gray-400">$10M TVL</span>: ~$500/yr gross
-            interest →{" "}
-            <span className="text-[#E6007A]">~$50/yr to treasury</span>,
-            ~$450/yr burned
+            Treasury governance directs accumulated fees to{" "}
+            <span className="text-[#E6007A]">buy DOT/vDOT on open market</span>{" "}
+            and distribute to stakers — identical to how MakerDAO uses DAI fees
+            to buy and burn MKR.
           </div>
-          <div>
-            At <span className="text-gray-400">$100M TVL</span>: ~$5,000/yr
-            gross interest →{" "}
-            <span className="text-[#E6007A]">~$500/yr to treasury</span>,
-            ~$4,500/yr burned
-          </div>
-          <div>
-            At <span className="text-gray-400">$1B TVL</span> (Aave-scale): →{" "}
-            <span className="text-[#E6007A]">~$50,000/yr to treasury</span>
+          <div className="mt-2">
+            At <span className="text-gray-400">$10M TVL</span>:{" "}
+            <span className="text-[#E6007A]">~$500/yr</span> to treasury
+            &nbsp;·&nbsp;
+            At <span className="text-gray-400">$100M TVL</span>:{" "}
+            <span className="text-[#E6007A]">~$5K/yr</span>
+            &nbsp;·&nbsp;
+            At <span className="text-gray-400">$1B TVL</span>:{" "}
+            <span className="text-[#E6007A]">~$50K/yr</span>
           </div>
         </div>
       </div>

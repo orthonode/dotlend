@@ -34,10 +34,10 @@ CHAIN_ID  = 420420417
 INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
 SOLVENCY_INTERVAL = 30 * 60  # 30 minutes between solvency proofs
 
-PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D")
-VDOT_ADDRESS             = Web3.to_checksum_address("0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA")
-COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07")
-SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address("0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0")
+PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address("0xc12D24cD6DF4521C9A453a325751bB1f38326a91")
+VDOT_ADDRESS             = Web3.to_checksum_address("0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F")
+COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address("0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8")
+SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address("0x3e7D948769818C71075E38bbAA6198908Ba6CFAa")
 
 # WPAS contract address — set via WPAS_ADDRESS in .env after running deploy-wpas.js
 # Leave empty string to disable WPAS price posting until deployed.

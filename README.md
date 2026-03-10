@@ -1,11 +1,10 @@
-# DotLend
-### The first money market on Polkadot Hub. Borrow HOLLAR against vDOT.
+# DotLend — The Aave of Polkadot
+### The first money market on Polkadot Hub. Deposit vDOT or native DOT, borrow HOLLAR.
 
 [![CI](https://github.com/orthonode/dotlend/actions/workflows/ci.yml/badge.svg)](https://github.com/orthonode/dotlend/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Chain: Polkadot Hub TestNet](https://img.shields.io/badge/Chain-Polkadot%20Hub%20TestNet-E6007A)](https://blockscout-testnet.polkadot.io)
-[![Tests: 76 Hardhat + 6 Forge fuzz](https://img.shields.io/badge/Tests-76%20Hardhat%20%2B%206%20Forge%20fuzz-brightgreen)]()
-[![Hackathon: Polkadot Solidity 2026](https://img.shields.io/badge/Hackathon-Polkadot%20Solidity%202026-pink)](https://dorahacks.io)
+[![Tests: 92 Hardhat + 6 Forge fuzz](https://img.shields.io/badge/Tests-92%20Hardhat%20%2B%206%20Forge%20fuzz-brightgreen)]()
 
 ---
 
@@ -65,18 +64,19 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 
 ## Deployed Contracts
 
-All 8 contracts deployed and verified on Polkadot Hub TestNet.
+All 9 contracts deployed and verified on Polkadot Hub TestNet.
 
 | Contract | Address | Blockscout |
 |----------|---------|------------|
-| PriceOracle | `0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D` | [view](https://blockscout-testnet.polkadot.io/address/0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D) |
-| MockvDOT | `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA` | [view](https://blockscout-testnet.polkadot.io/address/0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA) |
-| MockHOLLAR | `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf` | [view](https://blockscout-testnet.polkadot.io/address/0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf) |
-| CollateralVault | `0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07` | [view](https://blockscout-testnet.polkadot.io/address/0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07) |
-| TreasuryRouter | `0x000ae32C07F153aF485505d63364f49dEBF9518f` | [view](https://blockscout-testnet.polkadot.io/address/0x000ae32C07F153aF485505d63364f49dEBF9518f) |
-| LendingPool | `0x76316a10e293A33Aa89843Fe4d390787ceEEEEa2` | [view](https://blockscout-testnet.polkadot.io/address/0x76316a10e293A33Aa89843Fe4d390787ceEEEEa2) |
-| MockSolvencyVerifier | `0x541051e3d31ef573e7Ff76d67809704b92c6cc0e` | [view](https://blockscout-testnet.polkadot.io/address/0x541051e3d31ef573e7Ff76d67809704b92c6cc0e) |
-| SolvencyGateway | `0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0` | [view](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) |
+| PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
+| MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
+| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
+| TreasuryRouter | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
+| CollateralVault | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
+| LendingPool | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
+| WPAS | *(WPAS market — deploy separately)* | — |
+| MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
+| SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` | [view](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) |
 
 ---
 
@@ -104,7 +104,7 @@ All 8 contracts deployed and verified on Polkadot Hub TestNet.
 ### ZK solvency proof — automated every 30 minutes
 
 The Railway cron job submits a `SolvencyProven` event to `SolvencyGateway` every 30 minutes.
-Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) under the contract's Events tab.
+Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) under the contract's Events tab.
 
 ---
 
@@ -117,6 +117,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B68283
 | Stability Fee | 0.5% / year (5 bps) | Minimal cost of capital — vDOT staking yield (~15%) far exceeds it |
 | Liquidation Bonus | 5% | Competitive incentive for liquidators; covered by collateral buffer |
 | Oracle Stale Threshold | 1 hour | Prevents stale price exploitation |
+| Treasury Fee | 100% of stability fees | MakerDAO-style — no stablecoin burn; treasury funds DOT buybacks |
 
 ---
 
@@ -139,12 +140,12 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x6B68283
        │                                                    (every 30m)            │
        ├──repay(HOLLAR)───────────────► LendingPool                                │
        │                                    │                                      │
-       │                               burn() / transfer()                         │
+       │                            transferFrom() / burn()                        │
        │                                    ▼                                      │
-       │                              TreasuryRouter  (10% fee split)              │
+       │                              TreasuryRouter  (100% to treasury)           │
        │                                    │                                      │
-       │                              burn()│                                      │
-       │                                MockHOLLAR                                 │
+       │                          transfer()│  (no HOLLAR burn)                    │
+       │                               Treasury Wallet                             │
        │                                                                           │
        └──liquidate(borrower)─────────► LendingPool                                │
                                             │                                      │
@@ -337,7 +338,7 @@ cd circuits/solvency && nargo compile
 ### Test
 
 ```bash
-# Hardhat unit tests (76 tests)
+# Hardhat unit tests (92 tests)
 npx hardhat test
 
 # Forge property-based fuzz tests (6 tests, 512 runs each)
@@ -346,10 +347,11 @@ forge test --match-path "test/fuzz/**" -v
 ```
 
 ```
-Hardhat — 76 passing:
+Hardhat — 92 passing:
   PriceOracle     — 12 tests: access control, staleness, price submission
   CollateralVault — 18 tests: deposit, withdraw, health factor math, LTV enforcement
-  LendingPool     — 22 tests: borrow, repay, liquidate, interest accrual
+  LendingPool     — 21 tests: borrow, repay, liquidate, interest accrual
+  TreasuryRouter  — 15 tests: 100% treasury routing, no-op burn, passthrough, admin
   Integration     — 10 tests: full deposit → borrow → price crash → liquidate
   SolvencyProof   — 14 tests: gateway setup, valid/invalid proof, permissionless,
                               wrong input count, stale timestamp
@@ -366,8 +368,11 @@ Forge fuzz — 6 tests × 512 runs:
 ### Deploy
 
 ```bash
-# Full protocol deploy (7 contracts)
+# Full protocol deploy (8 contracts, including TreasuryRouter)
 npx hardhat run scripts/deploy-protocol.js --network polkadotHubTestnet
+
+# WPAS parallel market (native DOT collateral)
+npx hardhat run scripts/deploy-wpas-market.js --network polkadotHubTestnet
 ```
 
 ### Run Oracle
@@ -412,6 +417,7 @@ dotlend/
 │   ├── PriceOracle.sol          # authorized price feed, staleness guard
 │   ├── CollateralVault.sol      # vDOT deposit, health factor, liquidation seizure
 │   ├── LendingPool.sol          # borrow / repay / liquidate / interest
+│   ├── TreasuryRouter.sol       # 100% fee routing to treasury (MakerDAO model)
 │   ├── WPAS.sol                 # Wrapped PAS — WETH9-style native DOT collateral
 │   ├── SolvencyGateway.sol      # ZK proof submission, SolvencyProven event
 │   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
@@ -424,7 +430,8 @@ dotlend/
 │       ├── Nargo.toml
 │       └── target/solvency.json # ACIR artifact (committed for Railway)
 ├── scripts/
-│   ├── deploy-protocol.js       # deploy all 7 contracts
+│   ├── deploy-protocol.js       # deploy all 8 contracts (incl. TreasuryRouter)
+│   ├── deploy-wpas-market.js    # WPAS parallel market deploy (native DOT collateral)
 │   ├── deploy-wpas.js           # deploy WPAS + seed price in PriceOracle
 │   ├── interact.js              # deposit → borrow → repay → withdraw
 │   ├── simulate-crisis.js       # price crash → liquidation demo
@@ -437,6 +444,7 @@ dotlend/
 │   ├── PriceOracle.test.js
 │   ├── CollateralVault.test.js
 │   ├── LendingPool.test.js
+│   ├── TreasuryRouter.test.js   # 15 tests: fee routing, no-op burn, passthrough
 │   ├── Integration.test.js
 │   ├── SolvencyProof.test.js
 │   └── fuzz/
@@ -445,12 +453,13 @@ dotlend/
 │   └── forge-std/               # Foundry standard library (git submodule)
 ├── frontend/
 │   ├── src/components/          # React components (see Frontend section)
-│   ├── src/lib/contracts.ts     # ABIs + deployed addresses
+│   ├── src/lib/contracts.ts     # ABIs + deployed addresses + multi-market config
+│   ├── src/lib/market-context.tsx # Market switcher (vDOT / WPAS)
 │   └── src/lib/wagmi.ts         # chain config + wagmi setup
 ├── docs/
 │   ├── WHITEPAPER.md            # protocol mechanics and math
 │   ├── ARCHITECTURE.md          # system diagrams and data flow
-│   └── ROADMAP.md               # sprint milestones
+│   ├── ROADMAP.md               # sprint milestones
 ├── foundry.toml                 # Forge config (src, test/fuzz, OZ remappings)
 ├── hardhat.config.js            # resolc compiler + network config
 ├── railway.json                 # Railway cron deployment config
@@ -461,7 +470,7 @@ dotlend/
 
 ## Tests
 
-**76 Hardhat unit tests** — all run locally on Hardhat without testnet access.
+**92 Hardhat unit tests** — all run locally on Hardhat without testnet access.
 
 ```bash
 npx hardhat test
@@ -504,9 +513,34 @@ The Forge fuzz suite discovered a real arithmetic boundary in the health factor 
 
 ---
 
+## OpenZeppelin Usage
+
+DotLend uses **OpenZeppelin v4.9.6** as its security foundation. Every contract in the protocol builds on OZ primitives — and one critical engineering constraint forced an architectural innovation that demonstrates deep, non-trivial composition.
+
+### Primitives Used
+
+| OZ Contract | Used In | Purpose |
+|------------|---------|--------|
+| `Ownable` | LendingPool, CollateralVault, PriceOracle, TreasuryRouter, SolvencyGateway | Privileged admin functions (price posting, pool wiring) |
+| `ReentrancyGuard` | LendingPool | Prevents reentrancy on borrow/repay/liquidate |
+| `ERC20` | MockvDOT, MockHOLLAR, WPAS | Standard token implementations |
+
+### The TreasuryRouter Constraint — OZ Composition Under PolkaVM Limits
+
+The most interesting OZ interaction in DotLend is the one that **didn't work** as expected.
+
+When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a **strict 24KB initcode size limit** — significantly smaller than Ethereum's 24.576KB limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
+
+The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockHOLLAR` and sits between `LendingPool` and the real HOLLAR token. When `LendingPool` calls `hollar.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and routes 100% to the treasury. When `LendingPool` calls `hollar.burn()`, the router returns a no-op.
+
+This pattern exists *specifically because* OpenZeppelin's composition model (Ownable + ReentrancyGuard + ERC20 interactions) consumed enough bytecode that the fee logic had to be externalized. It's a real constraint that produced a cleaner architecture — the router pattern is now more testable, more upgradeable, and more auditable than inline fee logic would have been.
+
+> **v4.x, not v5.x:** PolkaVM's `resolc` compiler does not support OpenZeppelin v5.x import patterns. All OZ usage is pinned to v4.9.6.
+
+
 ## Testing the Protocol — Step by Step
 
-This section is written for judges and testers who want to interact with the live deployment on Polkadot Hub TestNet.
+This section is written for developers and testers who want to interact with the live deployment on Polkadot Hub TestNet.
 
 ### Step 1 — Add the network to MetaMask
 
@@ -557,11 +591,11 @@ Your wallet now has 1000 vDOT and 1000 HOLLAR. Gas (WND) is deducted from the si
 
 #### Option B — Blockscout (no code, no setup)
 
-1. Go to [MockvDOT on Blockscout](https://blockscout-testnet.polkadot.io/address/0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA)
+1. Go to [MockvDOT on Blockscout](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F)
 2. Click **Write Contract** → connect MetaMask → call `mint(to, amount)`
    - `to`: your MetaMask address
    - `amount`: `1000000000000000000000` (1000 tokens in wei)
-3. Repeat for [MockHOLLAR](https://blockscout-testnet.polkadot.io/address/0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf)
+3. Repeat for [MockHOLLAR](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca)
 
 ### Step 3 — Import tokens into MetaMask
 
@@ -569,8 +603,8 @@ In MetaMask → Import tokens → add each address:
 
 | Token | Contract Address |
 |-------|-----------------|
-| MockvDOT | `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA` |
-| MockHOLLAR | `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf` |
+| MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
+| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
 
 ### Step 4 — Use the frontend
 
@@ -629,11 +663,18 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 
 | Phase | Timeline | Milestone |
 |-------|----------|-----------|
-| **1 — Testnet** | March 2026 | 7 contracts on Polkadot Hub TestNet, 76 tests ✓ |
+| **1 — Testnet** | March 2026 | 9 contracts on Polkadot Hub TestNet, 92 tests, 2 collateral markets ✓ |
 | **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
-| **3 — Mainnet** | Q2–Q3 2026 | Deploy with Hyperbridge ISMP oracle; real SolvencyVerifier (BN254 precompile) |
-| **4 — Bifrost** | Q3 2026 | SLPx one-click: mint vDOT + post as collateral in one tx |
-| **5 — Scale** | Q3 2026 | Velocity Labs DeFi Builders Cohort 2; target $10M TVL |
+| **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace HOLLAR with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
+| **4 — Treasury Flywheel** | Q3 2026 | Treasury buys DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers |
+| **5 — Governance Token** | Q4 2026 | DOTLEND token launch; treasury fee split: 70% reserve, 20% DOT buyback, 10% liquidity mining |
+| **6 — Scale** | Q4 2026 | Velocity Labs DeFi Builders Cohort; target $10M TVL |
+
+**Snowbridge multi-asset vision (Phase 3):**
+Snowbridge has $75M+ TVL and zero on-chain downtime. wETH, wBTC, and USDC are already bridgeable to Polkadot Hub. DotLend becomes a full two-sided market: deposit vDOT/wETH/wBTC, borrow USDC. Identical to Aave — but on Polkadot Hub, where nobody has built this yet.
+
+**Treasury flywheel (Phase 4, MakerDAO model):**
+Stability fees accumulate in treasury (100%, no stablecoin burn) → Treasury governance buys DOT on Hydration DEX via XCM → Bought DOT gets staked → becomes vDOT → vDOT distributed to DOTLEND governance token holders → More TVL → more fees → more DOT bought → token price rises. Every dollar borrowed on DotLend eventually becomes DOT demand.
 
 **Hyperbridge ISMP oracle (mainnet):**
 Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOracle.onAccept()` → CollateralVault + LendingPool. No Chainlink. No bridge. 100% Polkadot-native.
@@ -643,12 +684,12 @@ Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOra
 ## Docs
 
 - [docs/WHITEPAPER.md](./docs/WHITEPAPER.md) — protocol mechanics, math, ZK circuit, oracle design, mainnet roadmap
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — full system diagrams: contract interactions, user flows, ZK pipeline, deployment topology
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — system diagrams: contract interactions, user flows, ZK pipeline, deployment topology
 - [docs/PITCH_DECK.md](./docs/PITCH_DECK.md) — 12-slide pitch deck (markdown source)
 - [docs/DORAHACKS_SUBMISSION.md](./docs/DORAHACKS_SUBMISSION.md) — DoraHacks submission text
-- [docs/JUDGE_OUTREACH.md](./docs/JUDGE_OUTREACH.md) — judge DM templates
-- [PHASES.md](./PHASES.md) — project phases with completion criteria and deployed addresses
+- [docs/ECOSYSTEM_OUTREACH.md](./docs/ECOSYSTEM_OUTREACH.md) — strategic ecosystem outreach guide
 - [docs/ROADMAP.md](./docs/ROADMAP.md) — sprint milestones
+- [PHASES.md](./PHASES.md) — project phases with completion criteria and deployed addresses
 
 ---
 

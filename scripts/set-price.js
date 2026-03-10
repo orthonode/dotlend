@@ -5,8 +5,8 @@
  */
 const { ethers } = require("hardhat");
 
-const PRICE_ORACLE = "0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D";
-const VDOT_ADDR    = "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA";
+const PRICE_ORACLE = "0xc12D24cD6DF4521C9A453a325751bB1f38326a91";
+const VDOT_ADDR    = "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F";
 const PRICE_USD    = process.env.VDOT_PRICE || "2.45";
 
 async function main() {

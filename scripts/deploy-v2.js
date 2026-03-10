@@ -9,10 +9,10 @@
 const { ethers } = require("hardhat");
 
 // Existing deployed — unchanged
-const PRICE_ORACLE = "0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D";
-const VDOT         = "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA";
-const HOLLAR       = "0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf";
-const SOLVENCY_GW  = "0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0";
+const PRICE_ORACLE = "0xc12D24cD6DF4521C9A453a325751bB1f38326a91";
+const VDOT         = "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F";
+const HOLLAR       = "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca";
+const SOLVENCY_GW  = "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa";
 
 async function main() {
   const [deployer] = await ethers.getSigners();

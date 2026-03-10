@@ -6,11 +6,11 @@
 const hre = require("hardhat");
 
 const ADDRESSES = {
-  priceOracle:     "0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D",
-  vdot:            "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA",
-  hollar:          "0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf",
-  collateralVault: "0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c",
-  lendingPool:     "0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b",
+  priceOracle:     "0xc12D24cD6DF4521C9A453a325751bB1f38326a91",
+  vdot:            "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
+  hollar:          "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca",
+  collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
+  lendingPool:     "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
 };
 
 const EXPLORER = "https://blockscout-testnet.polkadot.io";

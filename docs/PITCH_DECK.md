@@ -108,12 +108,12 @@ HF < 1.0  →  Liquidatable (5% bonus to liquidators)
 **Deployed contracts (Polkadot Hub TestNet):**
 
 ```
-PriceOracle:     0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D
-MockvDOT:        0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA
-MockHOLLAR:      0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf
-CollateralVault: 0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c
-LendingPool:     0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b
-SolvencyGateway: 0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0
+PriceOracle:     0xc12D24cD6DF4521C9A453a325751bB1f38326a91
+MockvDOT:        0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F
+MockHOLLAR:      0xA94f7464F3a2cA966CB31881A1614A9CF97859ca
+CollateralVault: 0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8
+LendingPool:     0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419
+SolvencyGateway: 0x3e7D948769818C71075E38bbAA6198908Ba6CFAa
 ```
 
 Explorer: blockscout-testnet.polkadot.io

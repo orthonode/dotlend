@@ -1,8 +1,8 @@
 export const COMMON_ADDRESSES = {
-  priceOracle:     "0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D" as `0x${string}`,
-  hollar:          "0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf" as `0x${string}`,
-  treasuryRouter:  "0x000ae32C07F153aF485505d63364f49dEBF9518f" as `0x${string}`,
-  solvencyGateway: "0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0" as `0x${string}`,
+  priceOracle:     "0xc12D24cD6DF4521C9A453a325751bB1f38326a91" as `0x${string}`,
+  hollar:          "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca" as `0x${string}`,
+  treasuryRouter:  "0x68099740bb099970c62F231fE5d8A08ae58de9AA" as `0x${string}`,
+  solvencyGateway: "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa" as `0x${string}`,
 };
 
 export type MarketAddresses = {
@@ -13,9 +13,9 @@ export type MarketAddresses = {
 
 export const MARKETS: Record<"vdot" | "wpas", MarketAddresses> = {
   vdot: {
-    collateral: "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA",
-    collateralVault: "0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07",
-    lendingPool: "0x76316a10e293A33Aa89843Fe4d390787ceEEEEa2",
+    collateral: "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
+    collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
+    lendingPool: "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
   },
   wpas: {
     collateral: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
@@ -27,9 +27,9 @@ export const MARKETS: Record<"vdot" | "wpas", MarketAddresses> = {
 // Kept for backward compat inside specific files temporarily if needed, but we will migrate out of this
 export const ADDRESSES = {
   ...COMMON_ADDRESSES,
-  vdot: "0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA" as `0x${string}`,
-  collateralVault: "0x6616cAD74C6fDfd0e64D5e605F4CB241e838aC07" as `0x${string}`,
-  lendingPool: "0x76316a10e293A33Aa89843Fe4d390787ceEEEEa2" as `0x${string}`,
+  vdot: "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F" as `0x${string}`,
+  collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8" as `0x${string}`,
+  lendingPool: "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419" as `0x${string}`,
 };
 
 export const EXPLORER = "https://blockscout-testnet.polkadot.io";

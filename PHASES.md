@@ -142,11 +142,11 @@ DoraHacks submission confirmed. README has all deployed addresses. Video uploade
 ## Deployed Contracts — Polkadot Hub TestNet (Chain ID 420420417)
 | Contract | Address | Explorer |
 |----------|---------|---------|
-| PriceOracle | 0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D | [view](https://blockscout-testnet.polkadot.io/address/0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D) |
-| MockvDOT | 0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA | [view](https://blockscout-testnet.polkadot.io/address/0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA) |
-| MockHOLLAR | 0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf | [view](https://blockscout-testnet.polkadot.io/address/0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf) |
-| CollateralVault | 0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c | [view](https://blockscout-testnet.polkadot.io/address/0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c) |
-| LendingPool | 0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b | [view](https://blockscout-testnet.polkadot.io/address/0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b) |
-| MockSolvencyVerifier | 0x541051e3d31ef573e7Ff76d67809704b92c6cc0e | [view](https://blockscout-testnet.polkadot.io/address/0x541051e3d31ef573e7Ff76d67809704b92c6cc0e) |
-| SolvencyGateway | 0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0 | [view](https://blockscout-testnet.polkadot.io/address/0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0) |
+| PriceOracle | 0xc12D24cD6DF4521C9A453a325751bB1f38326a91 | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
+| MockvDOT | 0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
+| MockHOLLAR | 0xA94f7464F3a2cA966CB31881A1614A9CF97859ca | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
+| CollateralVault | 0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8 | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
+| LendingPool | 0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419 | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
+| MockSolvencyVerifier | 0xED2676C995BAA392093Ac0b907EA216c2B8C52cc | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
+| SolvencyGateway | 0x3e7D948769818C71075E38bbAA6198908Ba6CFAa | [view](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) |
 | Deployer | 0xb947dF17869fAB2DF223a38F28f38b40ca636d4e | — |

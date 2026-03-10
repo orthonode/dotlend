@@ -34,6 +34,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -42,8 +47,7 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
       - name: Run Forge fuzz tests
-        run: forge test --match-path "test/fuzz/**" -v
+        run: |
+          forge --version
+          forge test --match-path "test/fuzz/**" -v

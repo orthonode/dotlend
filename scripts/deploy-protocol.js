@@ -1,19 +1,21 @@
 // scripts/deploy-protocol.js
 // Deploys full DotLend protocol stack:
-//   PriceOracle → MockvDOT → MockHOLLAR → CollateralVault → LendingPool
-// Then wires: vault.setLendingPool, oracle.setAuthorizedOracle (deployer as oracle for now)
-// Prints explorer links for all deployed contracts.
+//   PriceOracle → MockvDOT → MockHOLLAR → TreasuryRouter → CollateralVault → LendingPool
+// Then wires: vault.setLendingPool, router.setLendingPool, oracle.setAuthorizedOracle
+// Revenue model: 100% of stability fees → treasury (MakerDAO-style, no HOLLAR burn)
 
 const hre = require("hardhat");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
   const network = hre.network.name;
+  const treasuryAddr = process.env.TREASURY_ADDRESS || deployer.address;
 
   console.log("=".repeat(60));
   console.log("DotLend Protocol Deploy");
-  console.log(`Network:  ${network}`);
-  console.log(`Deployer: ${deployer.address}`);
+  console.log(`Network:   ${network}`);
+  console.log(`Deployer:  ${deployer.address}`);
+  console.log(`Treasury:  ${treasuryAddr}`);
   console.log("=".repeat(60));
 
   const isPolkadotHub = network === "polkadotHubTestnet";
@@ -26,37 +28,44 @@ async function main() {
     : "https://assethub-westend.subscan.io/account";
 
   // 1. PriceOracle
-  console.log("\n[1/5] Deploying PriceOracle...");
+  console.log("\n[1/7] Deploying PriceOracle...");
   const PriceOracle = await hre.ethers.getContractFactory("PriceOracle");
   const oracle = await PriceOracle.deploy();
   await oracle.waitForDeployment();
   console.log(`  PriceOracle:      ${oracle.target}`);
 
   // 2. MockvDOT
-  console.log("[2/5] Deploying MockvDOT...");
+  console.log("[2/7] Deploying MockvDOT...");
   const MockvDOT = await hre.ethers.getContractFactory("MockvDOT");
   const vdot = await MockvDOT.deploy();
   await vdot.waitForDeployment();
   console.log(`  MockvDOT:         ${vdot.target}`);
 
   // 3. MockHOLLAR
-  console.log("[3/5] Deploying MockHOLLAR...");
+  console.log("[3/7] Deploying MockHOLLAR...");
   const MockHOLLAR = await hre.ethers.getContractFactory("MockHOLLAR");
   const hollar = await MockHOLLAR.deploy();
   await hollar.waitForDeployment();
   console.log(`  MockHOLLAR:       ${hollar.target}`);
 
-  // 4. CollateralVault
-  console.log("[4/5] Deploying CollateralVault...");
+  // 4. TreasuryRouter — 100% of fees to treasury, no HOLLAR burn
+  console.log("[4/7] Deploying TreasuryRouter...");
+  const TreasuryRouter = await hre.ethers.getContractFactory("TreasuryRouter");
+  const router = await TreasuryRouter.deploy(hollar.target, treasuryAddr);
+  await router.waitForDeployment();
+  console.log(`  TreasuryRouter:   ${router.target}`);
+
+  // 5. CollateralVault
+  console.log("[5/7] Deploying CollateralVault...");
   const CollateralVault = await hre.ethers.getContractFactory("CollateralVault");
   const vault = await CollateralVault.deploy(vdot.target, oracle.target);
   await vault.waitForDeployment();
   console.log(`  CollateralVault:  ${vault.target}`);
 
-  // 5. LendingPool
-  console.log("[5/5] Deploying LendingPool...");
+  // 6. LendingPool — uses TreasuryRouter, not raw MockHOLLAR
+  console.log("[6/7] Deploying LendingPool...");
   const LendingPool = await hre.ethers.getContractFactory("LendingPool");
-  const pool = await LendingPool.deploy(vault.target, hollar.target, oracle.target, vdot.target);
+  const pool = await LendingPool.deploy(vault.target, router.target, oracle.target, vdot.target);
   await pool.waitForDeployment();
   console.log(`  LendingPool:      ${pool.target}`);
 
@@ -64,6 +73,12 @@ async function main() {
   console.log("\n[Wire] vault.setLendingPool(pool)...");
   const tx1 = await vault.setLendingPool(pool.target);
   await tx1.wait();
+  console.log("  Done.");
+
+  // Wire: router → pool
+  console.log("[Wire] router.setLendingPool(pool)...");
+  const tx1b = await router.setLendingPool(pool.target);
+  await tx1b.wait();
   console.log("  Done.");
 
   // Wire: oracle → deployer as authorized price poster (replace with oracle.py address later)
@@ -79,8 +94,8 @@ async function main() {
   await tx3.wait();
   console.log("  vDOT price set to $8.50");
 
-  // Deploy SolvencyGateway + MockSolvencyVerifier
-  console.log("\n[ZK] Deploying MockSolvencyVerifier...");
+  // 7. Deploy SolvencyGateway + MockSolvencyVerifier
+  console.log("\n[7/7] Deploying MockSolvencyVerifier...");
   const MockVerifier = await hre.ethers.getContractFactory("MockSolvencyVerifier");
   const verifier = await MockVerifier.deploy(true);
   await verifier.waitForDeployment();
@@ -104,6 +119,7 @@ async function main() {
   console.log(`PriceOracle:          ${oracle.target}`);
   console.log(`MockvDOT:             ${vdot.target}`);
   console.log(`MockHOLLAR:           ${hollar.target}`);
+  console.log(`TreasuryRouter:       ${router.target}`);
   console.log(`CollateralVault:      ${vault.target}`);
   console.log(`LendingPool:          ${pool.target}`);
   console.log(`MockSolvencyVerifier: ${verifier.target}`);
@@ -114,13 +130,14 @@ async function main() {
     console.log(`  PriceOracle:          ${explorerBase}/${oracle.target}`);
     console.log(`  MockvDOT:             ${explorerBase}/${vdot.target}`);
     console.log(`  MockHOLLAR:           ${explorerBase}/${hollar.target}`);
+    console.log(`  TreasuryRouter:       ${explorerBase}/${router.target}`);
     console.log(`  CollateralVault:      ${explorerBase}/${vault.target}`);
     console.log(`  LendingPool:          ${explorerBase}/${pool.target}`);
     console.log(`  MockSolvencyVerifier: ${explorerBase}/${verifier.target}`);
     console.log(`  SolvencyGateway:      ${explorerBase}/${gateway.target}`);
   }
 
-  console.log("\nNext: update PHASES.md with deployed addresses.");
+  console.log("\nNext: update frontend/src/lib/contracts.ts with deployed addresses.");
   console.log("Next: run oracle/oracle.py with LendingPool address.");
 }
 
@@ -130,3 +147,4 @@ main()
     console.error(err);
     process.exit(1);
   });
+

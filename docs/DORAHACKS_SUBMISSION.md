@@ -4,7 +4,7 @@
 
 ## Tagline
 
-The first money market on Polkadot Hub. Solvency cryptographic proofs generated every 30 minutes.
+The Aave of Polkadot — the first native money market on Polkadot Hub. Built at the exact moment Snowbridge made multi-asset DeFi possible.
 
 ---
 
@@ -14,37 +14,65 @@ The first money market on Polkadot Hub. Solvency cryptographic proofs generated 
 
 Polkadot has $330M in HOLLAR and vDOT at 76% utilization on Hydration — the supply cap is hit, demand is there, and capital is just waiting around. Yet there are **zero native lending markets on Polkadot Hub**. It really bothered me seeing all this yield-bearing vDOT collateral sitting idle. I built DotLend to fix this.
 
-### The ZK Layer — What's Built and What's Mocked
-
-The ZK solvency circuit is written in Noir (UltraHonk proving system). It constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and per-user positions as private witnesses. The circuit compiles cleanly and generates valid proofs off-chain.
-
-**What works today:** A Railway worker generates a proof every 30 minutes and calls `SolvencyGateway.publishSolvencyProof()`. A `SolvencyProven` event is emitted on-chain and visible on Blockscout with collateral/debt totals.
-
-**Honest caveat:** On-chain verification uses `MockSolvencyVerifier`, which accepts all proofs without cryptographic checking. The production `SolvencyVerifier.sol` — the Noir-generated UltraHonk verifier — requires BN254 elliptic curve precompiles (EVM opcodes 0x06/0x07/0x08). PolkaVM does not yet support these precompiles. The real verifier contract is in the repo and will deploy as soon as PolkaVM adds BN254 support.
-
-The architecture, circuit, and proof pipeline are production-ready. The on-chain verification step is blocked by a PolkaVM platform limitation — which we consider worth surfacing rather than obscuring.
-
 ### What DotLend Does
 
-DotLend is a non-custodial money market protocol where users deposit vDOT as collateral and borrow HOLLAR at up to 70% LTV, while continuing to earn Bifrost staking yield on their deposited assets. The protocol tracks each user's health factor — (Collateral Value × 0.80) / Debt — and opens the position to liquidation when it falls below 1.0, with a 5% bonus to incentivize liquidators. Interest accrues continuously at 0.5% per year via a lazy timestamp-based model, keeping gas costs low and the accounting trustless. Every component — deposit, borrow, repay, liquidate, accrue interest — is handled by four auditable Solidity contracts deployed on Polkadot Hub.
+DotLend is a non-custodial money market protocol where users deposit **vDOT** (Bifrost's liquid staking token) or **native DOT/PAS** (via WPAS wrapper) as collateral and borrow **HOLLAR** at up to 70% LTV, while continuing to earn Bifrost staking yield (~15% APY) on their deposited assets.
+
+The protocol tracks each user's health factor — `(Collateral Value × 0.80) / Debt` — and opens the position to liquidation when it falls below 1.0, with a 5% bonus to incentivize liquidators. Interest accrues continuously at 0.5% per year via a lazy timestamp-based model, keeping gas costs low and the accounting trustless. 100% of stability fees flow to the protocol treasury (MakerDAO-style — no stablecoin burn).
+
+### Revenue Model — MakerDAO-Style Treasury
+
+100% of stability fees go to the protocol treasury via `TreasuryRouter`. No HOLLAR is burned — burning a stablecoin destroys borrowing capacity for zero token-value benefit (MakerDAO burns MKR, not DAI).
+
+On mainnet, treasury governance directs accumulated fees to:
+- **Phase 1 (testnet):** Operations, hackathon prizes, liquidity bootstrapping
+- **Phase 2 (mainnet):** Buy DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers
+- **Phase 3 (token):** Buy DOTLEND governance token → burn
+
+This creates a self-reinforcing flywheel: every dollar borrowed on DotLend eventually becomes DOT demand.
+
+### The V2 Vision — Snowbridge Makes This Real
+
+Snowbridge has been live for over a year with zero on-chain downtime, $75M+ TVL, and ~24 parachain integrations. wETH, wBTC, and USDC are already bridgeable to Polkadot Hub. DotLend V2 replaces HOLLAR with real borrowable assets:
+
+| Collateral (deposit) | Borrow |
+|---------------------|--------|
+| vDOT (Bifrost) | USDC (Snowbridge) |
+| vDOT | wETH (Snowbridge) |
+| DOT (native, via WPAS) | USDC |
+| wBTC (Snowbridge) | USDC |
+
+This is exactly what Aave does — deposit one asset, borrow another. But on Polkadot Hub, where nobody has built this yet. Parallel Finance tried and collapsed with $29M TVL before Polkadot Hub EVM even existed.
+
+### The ZK Layer — What's Built and What's Mocked
+
+The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amounts)` with aggregate totals as public inputs and per-user positions as private witnesses. The circuit compiles and generates valid proofs off-chain every 30 minutes via a Railway worker.
+
+**Honest caveat:** On-chain verification uses `MockSolvencyVerifier`. The real verifier requires BN254 precompiles (0x06/0x07/0x08), which PolkaVM doesn't support yet. The real verifier is in the repo and deploys the moment BN254 support lands.
 
 ### Why Not Hydration?
 
-I hear this question constantly. The reality is simple: **Hydration is an AMM. DotLend is a collateralized debt position engine. They are complementary, not competing.**
-
-A vDOT holder on Hydration can supply to a pool — but they can't borrow against their position. Honestly, it frustrated me that I couldn't get liquidity without selling my staked DOT. DotLend unlocks that: deposit vDOT, borrow HOLLAR, and you can deploy that HOLLAR right back into Hydration's pools if you want. DotLend is actually a liquidity source for Hydration, not a competitor. Even Victor Xu from Bifrost confirmed that vDOT lending is the #1 requested feature from the community — Hydration's AMM model just isn't built to provide it right now.
-
-### Why It's Only Possible on Polkadot
-
-vDOT and HOLLAR are native Polkadot assets. On any other chain, building a lending market for these assets would require bridges — introducing trust assumptions and counterparty risk that a lending protocol cannot safely absorb. On Polkadot Hub, XCM makes vDOT and HOLLAR natively composable, and on mainnet, Hyperbridge ISMP will deliver trustless cross-chain price feeds from Hydration's Omnipool directly to the PriceOracle — no Chainlink dependency, no centralized oracle, 100% Polkadot-native architecture.
+**Hydration is an AMM. DotLend is a collateralized debt position engine.** They are complementary, not competing. DotLend is actually a liquidity source for Hydration — borrow HOLLAR on DotLend, deploy it into Hydration pools.
 
 ### Traction
 
-Seven contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 76 tests pass with 0 failures covering every state transition including a complete price-crash liquidation cycle. Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts vDOT prices every 30 minutes. ZK proof pipeline runs automatically on Railway every 30 minutes.
+Nine contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 92 Hardhat tests + 6 Forge fuzz tests pass with 0 failures, covering every state transition including a complete price-crash liquidation cycle. Two collateral markets live (vDOT + native DOT via WPAS). Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts prices every 30 minutes. ZK proof pipeline runs automatically on Railway.
 
-### Next Steps
+---
 
-I plan to apply for a W3F grant to keep pushing this forward. The goal is to get a formal security audit through the Polkadot Assurance Legion (PAL) subsidy and see if I can get into the Velocity Labs DeFi Builders Cohort to help bootstrap initial liquidity.
+## OpenZeppelin Sponsor Track
+
+DotLend uses **OpenZeppelin v4.9.6** as its security foundation across every contract:
+
+| OZ Contract | Used In | Purpose |
+|------------|---------|--------|
+| `Ownable` | LendingPool, CollateralVault, PriceOracle, TreasuryRouter, SolvencyGateway | Privileged admin functions |
+| `ReentrancyGuard` | LendingPool | Prevents reentrancy on borrow/repay/liquidate |
+| `ERC20` | MockvDOT, MockHOLLAR, WPAS | Standard token implementations |
+
+**The TreasuryRouter constraint story:** When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a strict 24KB initcode size limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
+
+The solution was `TreasuryRouter` — a separate contract implementing the same `IMintBurn` interface as `MockHOLLAR`, sitting between `LendingPool` and the real HOLLAR token. When `LendingPool` calls `hollar.transferFrom()` during repayment, it's actually calling the router, which intercepts and routes 100% to treasury. This pattern exists *specifically because* OpenZeppelin's composition model consumed enough bytecode that fee logic had to be externalized — producing a cleaner, more testable, more auditable architecture than inline fee logic would have been.
 
 ---
 
@@ -52,47 +80,26 @@ I plan to apply for a W3F grant to keep pushing this forward. The goal is to get
 
 ### EVM on Polkadot Hub (not a sidechain)
 
-DotLend is deployed on Polkadot Hub — the system parachain with native EVM execution via PolkaVM. This is not an EVM sidechain or appchain: it is Hub-native, meaning it benefits from Polkadot's shared security, relay chain finality, and direct XCM connectivity to every parachain. The contract architecture was designed specifically for PolkaVM's execution environment.
+DotLend is deployed on Polkadot Hub — the system parachain with native EVM execution via PolkaVM. Not a sidechain or appchain: Hub-native, with Polkadot's shared security, relay chain finality, and direct XCM connectivity to every parachain.
 
-### XCM-Readiness for vDOT Price Feeds
+### XCM-Readiness for Cross-Chain Assets
 
-On mainnet, the `PriceOracle` contract will be replaced by a Hyperbridge ISMP adapter that receives vDOT price state proofs from Bifrost via XCM. The interface is already abstracted: `IPriceOracle` exposes a single `getPrice(address token)` function, making the oracle backend swappable without touching CollateralVault or LendingPool. The testnet uses an authorized oracle posting prices every 30 minutes as a direct functional equivalent.
+On mainnet, `PriceOracle` will be replaced by a Hyperbridge ISMP adapter receiving vDOT price state proofs from Bifrost via XCM. The interface is already abstracted: `IPriceOracle` exposes `getPrice(address token)`, making the oracle backend swappable without touching any core contracts.
 
-### Hyperbridge ISMP Integration (Mainnet Oracle Path)
+### Native Asset Support via WPAS
 
-The mainnet oracle architecture:
-1. Hydration's Omnipool publishes vDOT/USD price as XCM state data on Polkadot
-2. Hyperbridge ISMP relayer picks up the state proof
-3. `PriceOracle.sol` implements `IIsmpModule.onAccept(ISMPMessage)` to receive and store the price
-4. CollateralVault and LendingPool consume the trustlessly-delivered price via `getPrice()`
-
-This design eliminates Chainlink, eliminates bridges, and makes DotLend's oracle as trust-minimized as the Polkadot relay chain itself.
-
-### Native Asset Support
-
-MockvDOT and MockHOLLAR are ERC-20 representations used on testnet. On mainnet, these will be replaced by the actual Polkadot-native vDOT and HOLLAR tokens accessed via their XCM-minted ERC-20 interfaces on Polkadot Hub — not wrapped versions with custodians or synthetic representations with counterparty risk.
+WPAS is a zero-admin, permissionless WETH9-style wrapper deployed on Polkadot Hub. Users `deposit{value: x}()` to receive WPAS 1:1, then deposit into CollateralVault. This enables native DOT/PAS as collateral without modifying any existing contracts — a second collateral market alongside vDOT.
 
 ### PolkaVM Compatibility
 
-Every contract was written with PolkaVM's execution constraints as a hard requirement. Specifically avoided:
-
-| Forbidden | Reason |
-|-----------|--------|
-| `SELFDESTRUCT` / `selfdestruct()` | Not supported by PolkaVM |
-| `EXTCODECOPY` | Not supported by PolkaVM |
-| `CREATE2` / factory patterns | Not supported by PolkaVM |
-| `assembly {}` blocks | Bypasses PolkaVM safety guarantees |
-| `block.prevrandao` / `block.difficulty` | Not reliable on PolkaVM |
-| OpenZeppelin v5.x | Imports patterns incompatible with resolc |
-
-All math is performed in 1e18 fixed-point using Solidity 0.8.20's built-in checked arithmetic. Interest accrual uses `block.timestamp` (safe on PolkaVM). The compiler is `resolc 0.5.0` via `@parity/hardhat-polkadot`, producing `hh-resolc-artifact-1` format artifacts with the `0x50564d00` PolkaVM bytecode prefix.
+Every contract was built with PolkaVM constraints as hard requirements. No `SELFDESTRUCT`, `CREATE2`, `EXTCODECOPY`, `assembly {}`, or `block.prevrandao`. OpenZeppelin v4.x only (v5.x incompatible with resolc). Compiler: `resolc 0.5.0` via `@parity/hardhat-polkadot`.
 
 ---
 
 ## Technical Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|-----------| 
 | Contracts | Solidity 0.8.20, OpenZeppelin v4.9.6, Hardhat |
 | Compiler | resolc 0.5.0 via @parity/hardhat-polkadot |
 | ZK Layer | Noir 1.0.0-beta.19, UltraHonk, nargo |
@@ -109,13 +116,15 @@ All math is performed in 1e18 fixed-point using Solidity 0.8.20's built-in check
 
 | Contract | Address |
 |----------|---------|
-| PriceOracle | `0xea7a8D7Dad04fD3B3Bf0242F3b7114b7CfcCBc1D` |
-| MockvDOT | `0x95Fa043b8acA6F73AfE03a3085E7Bfe53A5715CA` |
-| MockHOLLAR | `0x2C8C4b2F63E50E566f9BA87EA4f75Caa368c2AAf` |
-| CollateralVault | `0xc8cdEF13677bEA21e8b8282c9cE118EbBE4fA14c` |
-| LendingPool | `0xd8e2bE395Cb8F54BEDfBc6ed6C249Ad43A4fa52b` |
-| MockSolvencyVerifier | `0x541051e3d31ef573e7Ff76d67809704b92c6cc0e` |
-| SolvencyGateway | `0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0` |
+| PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` |
+| MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
+| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
+| TreasuryRouter | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` |
+| CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` |
+| LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` |
+| WPAS | *(WPAS market — native DOT collateral)* |
+| MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
+| SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` |
 
 ---
 

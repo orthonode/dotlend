@@ -18,7 +18,7 @@ const POLKADOT_HUB_TESTNET = {
   },
 };
 
-const SOLVENCY_GATEWAY_ADDRESS = "0x6B682835bB25f7cA9e69D54B4B26e3A238Df66C0" as `0x${string}`;
+const SOLVENCY_GATEWAY_ADDRESS = "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa" as `0x${string}`;
 
 const SOLVENCY_PROVEN_ABI = parseAbiItem(
   "event SolvencyProven(uint256 totalCollateral, uint256 totalDebt, uint256 timestamp)"
