@@ -33,7 +33,7 @@ export function MintTokens() {
 
   useEffect(() => {
     if (isSuccess && txHash && minting) {
-      const tokenNames = { vdot: "MockvDOT", hollar: "MockHOLLAR", wpas: "WPAS" };
+      const tokenNames = { vdot: "MockvDOT", hollar: "MockUSDH", wpas: "WPAS" };
       setLastTx({ token: tokenNames[minting], hash: txHash });
       setMinting(null);
       refetch();
@@ -77,7 +77,7 @@ export function MintTokens() {
         <div className="text-xs text-gray-400 space-y-2">
           <p>
             Both <span className="text-white font-mono">MockvDOT</span> and{" "}
-            <span className="text-white font-mono">MockHOLLAR</span> have a public{" "}
+            <span className="text-white font-mono">MockUSDH</span> have a public{" "}
             <span className="text-white font-mono">mint(address, amount)</span> function.
             Anyone can call it — no deployer key required. This is intentional for testnet testing.
           </p>
@@ -179,10 +179,10 @@ export function MintTokens() {
             )}
           </div>
 
-          {/* HOLLAR */}
+          {/* USDH */}
           <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
             <div>
-              <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">MockHOLLAR</div>
+              <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">MockUSDH</div>
               <div className="text-2xl font-bold text-white">
                 {Number(formatEther(hollarBal)).toFixed(2)}
               </div>
@@ -198,7 +198,7 @@ export function MintTokens() {
                   <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   {isPending ? "Waiting for wallet…" : "Confirming…"}
                 </span>
-              ) : "Mint 1000 MockHOLLAR"}
+              ) : "Mint 1000 MockUSDH"}
             </button>
           </div>
         </div>
@@ -262,7 +262,7 @@ export function MintTokens() {
                 rel="noopener noreferrer"
                 className="text-[#E6007A] hover:underline"
               >
-                MockHOLLAR → Write Contract on Blockscout →
+                MockUSDH → Write Contract on Blockscout →
               </a>
             </div>
           </div>

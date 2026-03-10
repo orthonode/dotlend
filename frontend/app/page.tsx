@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { LendingDashboard } from "@/src/components/LendingDashboard";
 import { DepositCollateral } from "@/src/components/DepositCollateral";
-import { BorrowHOLLAR } from "@/src/components/BorrowHOLLAR";
+import { BorrowUSDH } from "@/src/components/BorrowUSDH";
 import { RepayAndWithdraw } from "@/src/components/RepayAndWithdraw";
 import { LiquidationMonitor } from "@/src/components/LiquidationMonitor";
 import { ProtocolStats } from "@/src/components/ProtocolStats";
+import { Markets } from "@/src/components/Markets";
 
 export default function Home() {
   return (
@@ -43,13 +44,14 @@ export default function Home() {
       {/* Action grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DepositCollateral />
-        <BorrowHOLLAR />
+        <BorrowUSDH />
       </div>
       
       <ProtocolStats />
 
       <RepayAndWithdraw />
       <LiquidationMonitor />
+      <Markets />
 
       {/* Footer */}
       <div className="text-center text-xs text-gray-600 pt-4 border-t border-[#111]">

@@ -88,11 +88,11 @@ function AccruedInterestBadge({ debt }: { debt: bigint }) {
       </div>
       <div className="flex justify-between">
         <span className="text-gray-500">Accruing per day</span>
-        <span className="text-white">~${perDay.toFixed(4)} HOLLAR</span>
+        <span className="text-white">~${perDay.toFixed(4)} USDH</span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-500">Accruing per hour</span>
-        <span className="text-white">~${perHour.toFixed(6)} HOLLAR</span>
+        <span className="text-white">~${perHour.toFixed(6)} USDH</span>
       </div>
       <div className="text-gray-600 pt-1 border-t border-[#1a1a1a]">
         Accrues every second on-chain. Auto-applied on borrow, repay, and liquidation calls via <span className="text-gray-400">accrueInterest()</span>.
@@ -101,15 +101,15 @@ function AccruedInterestBadge({ debt }: { debt: bigint }) {
   );
 }
 
-function Hero({ assetSymbol }: { assetSymbol: string }) {
+function Hero() {
   const heroText = useSolvencyHeroText();
   return (
     <div className="mb-2">
       <h1 className="text-3xl font-bold leading-tight">
-        The First Money Market on <span className="text-[#E6007A]">Polkadot Hub</span>
+        The Liquidity Layer for <span className="text-[#E6007A]">Polkadot Hub</span>
       </h1>
       <p className="text-gray-400 mt-2 font-mono text-sm">
-        Deposit {assetSymbol}. Borrow HOLLAR.{" "}
+        Deposit any Polkadot asset. Borrow any Polkadot asset.{" "}
         <span className="text-gray-300">{heroText}</span>
       </p>
     </div>
@@ -155,13 +155,13 @@ export function LendingDashboard() {
 
   const collateralDisplay = `${Number(formatEther(collateral)).toFixed(4)} ${assetSymbol}`;
   const collUSDDisplay    = `$${Number(formatEther(collUSD)).toFixed(2)}`;
-  const debtDisplay       = `${Number(formatEther(debt)).toFixed(6)} HOLLAR`;
+  const debtDisplay       = `${Number(formatEther(debt)).toFixed(6)} USDH`;
   const ltvDisplay        = ltv > 0 ? `${ltv.toFixed(1)}%` : "--";
   const priceDisplay      = vdotPrice > 0n ? `$${Number(formatEther(vdotPrice)).toFixed(2)}` : "--";
 
   return (
     <div className="space-y-6">
-      <Hero assetSymbol={assetSymbol} />
+      <Hero />
       
       {/* Market Selector */}
       <div className="bg-[#111] border border-[#222] rounded-xl p-2 flex gap-2">

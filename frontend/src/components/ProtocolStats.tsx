@@ -35,7 +35,7 @@ const ROUTER_ABI = [
   },
 ] as const;
 
-// ── ERC20 balanceOf for treasury HOLLAR balance ───────────────────────────────
+// ── ERC20 balanceOf for treasury USDH balance ───────────────────────────────
 const ERC20_BALANCE_ABI = [
   {
     name: "balanceOf",
@@ -106,7 +106,7 @@ export function ProtocolStats() {
   const treasuryAddr = (data?.[1]?.result as string) ?? null;
   const collateralPrice = (data?.[2]?.result as bigint) ?? 0n;
 
-  // Treasury HOLLAR balance — only fetch once we have the address
+  // Treasury USDH balance — only fetch once we have the address
   const { data: treasuryBalData } = useReadContracts({
     contracts: treasuryAddr
       ? [
@@ -215,8 +215,8 @@ export function ProtocolStats() {
       <div className="grid grid-cols-2 gap-3">
         <Stat
           label="Total Protocol Revenue"
-          value={`${revenueF} HOLLAR`}
-          sub={`Treasury balance: ${treasF} HOLLAR`}
+          value={`${revenueF} USDH`}
+          sub={`Treasury balance: ${treasF} USDH`}
           accent
         />
         <Stat

@@ -189,7 +189,7 @@ export function LiquidationMonitor() {
                     </div>
                     <div>
                       <div className="text-gray-500">Debt</div>
-                      <div className="text-[#E6007A]">{Number(formatEther(pos.debt)).toFixed(2)} HOLLAR</div>
+                      <div className="text-[#E6007A]">{Number(formatEther(pos.debt)).toFixed(2)} USDH</div>
                     </div>
                     <div>
                       <div className="text-gray-500">Bonus</div>
@@ -238,7 +238,7 @@ export function LiquidationMonitor() {
           </summary>
           <div className="px-3 pb-3 pt-2 border-t border-[#1a1a1a] space-y-2 text-gray-500">
             <div><span className="text-gray-300">Trigger</span> — health factor drops below 1.0 (LTV exceeds 80%). Anyone can call <span className="text-gray-400">liquidate(borrower)</span>.</div>
-            <div><span className="text-gray-300">What happens</span> — the liquidator repays the borrower's full HOLLAR debt and receives their {assetSymbol} collateral plus a 5% bonus.</div>
+            <div><span className="text-gray-300">What happens</span> — the liquidator repays the borrower's full USDH debt and receives their {assetSymbol} collateral plus a 5% bonus.</div>
             <div><span className="text-gray-300">Why 80% threshold</span> — collateral is priced at the oracle's last on-chain value. Price feeds update every 30 minutes via the Python oracle; the 80% liquidation threshold gives a buffer against price drops between updates.</div>
             <div><span className="text-gray-300">This monitor</span> — scans all <span className="text-gray-400">Deposited</span> events from block 0, re-reads every 15 seconds. Health factors are computed client-side using the same formula as <span className="text-gray-400">CollateralVault.sol</span>.</div>
             <div className="pt-1 border-t border-[#1a1a1a] text-gray-600">

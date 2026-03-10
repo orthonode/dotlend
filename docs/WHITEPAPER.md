@@ -25,7 +25,7 @@
 
 ## 1. Abstract
 
-DotLend is a native money market I built for Polkadot Hub. It lets holders of vDOT (Bifrost's liquid staking derivative) borrow HOLLAR (Hydration's stablecoin) without giving up their staking yield. I added lazy interest accrual, a straightforward liquidation engine, and a cryptographic solvency proof that gets pushed on-chain every 30 minutes using a Noir ZK circuit.
+DotLend is a native money market I built for Polkadot Hub. It lets holders of vDOT (Bifrost's liquid staking derivative) borrow USDH (Hydration's stablecoin) without giving up their staking yield. I added lazy interest accrual, a straightforward liquidation engine, and a cryptographic solvency proof that gets pushed on-chain every 30 minutes using a Noir ZK circuit.
 
 The architecture was entirely dictated by PolkaVM's current limits. I had to avoid some opcodes, stuck to OpenZeppelin v4.x, and built a pure state machine with no proxies, assembly, or floating-point math. I also had to split the ZK verifier out into its own gateway contract just to stay under PolkaVM's 100 KB initcode cap.
 
@@ -37,7 +37,7 @@ All five protocol contracts and both ZK infrastructure contracts are deployed on
 
 ### 2.1 The Polkadot DeFi Gap
 
-Polkadot's asset ecosystem has matured significantly. DOT is staked at scale. Bifrost's vDOT gives stakers liquidity while preserving yield. Hydration has deployed HOLLAR, a native USD stablecoin backed by Polkadot-native assets, with $330M TVL. Yet no protocol exists that lets vDOT holders borrow HOLLAR on-chain. The entire borrowing demand exits the Polkadot ecosystem to Ethereum or BNB Chain, where DOT is wrapped, bridged, and deposited into foreign money markets.
+Polkadot's asset ecosystem has matured significantly. DOT is staked at scale. Bifrost's vDOT gives stakers liquidity while preserving yield. Hydration has deployed USDH, a native USD stablecoin backed by Polkadot-native assets, with $330M TVL. Yet no protocol exists that lets vDOT holders borrow USDH on-chain. The entire borrowing demand exits the Polkadot ecosystem to Ethereum or BNB Chain, where DOT is wrapped, bridged, and deposited into foreign money markets.
 
 This is a structural inefficiency — and it is quantified.
 
@@ -45,23 +45,23 @@ This is a structural inefficiency — and it is quantified.
 
 **vDOT supply cap on Hydration:** Hydration's current lending market for vDOT has reached its supply cap. Utilization sits at 76%. Every new vDOT depositor who arrives today is turned away. There is no alternative on-chain destination. Demand is not theoretical — it is actively being rationed.
 
-**HOLLAR borrowing demand:** HOLLAR has $330M TVL with zero native money market outside Hydration's Omnipool. Users who hold HOLLAR and need leverage have no native Polkadot option. Users who want to borrow HOLLAR against yield-bearing collateral have no protocol to go to.
+**USDH borrowing demand:** USDH has $330M TVL with zero native money market outside Hydration's Omnipool. Users who hold USDH and need leverage have no native Polkadot option. Users who want to borrow USDH against yield-bearing collateral have no protocol to go to.
 
-**DotLend fills both sides of this gap** — it is the supply outlet for vDOT depositors and the borrow channel for HOLLAR demand, both operating natively on Polkadot Hub.
+**DotLend fills both sides of this gap** — it is the supply outlet for vDOT depositors and the borrow channel for USDH demand, both operating natively on Polkadot Hub.
 
 ### 2.3 Why Polkadot Hub
 
 Polkadot Hub (AssetHub) is the canonical cross-chain asset layer of the Polkadot network. It runs PolkaVM via a Solidity-compatible EVM layer compiled by `resolc`. Deploying on Hub means:
 
 - Direct access to native DOT and vDOT balances via XCM
-- Composability with Hydration's HOLLAR via the Polkadot relay chain
+- Composability with Hydration's USDH via the Polkadot relay chain
 - No bridge trust assumption — all assets are native, not wrapped ERC-20 shadows
 
 The EVM-compatible surface (via resolc) allows Solidity contracts to be deployed without rewriting in ink! or Rust, dramatically lowering time-to-market while preserving all Polkadot-native asset properties.
 
 ### 2.4 Protocol Thesis
 
-A vDOT holder should never have to choose between staking yield and liquidity. DotLend makes that choice unnecessary. Deposit vDOT, borrow HOLLAR at 0.5% per year, keep accruing staking yield on the deposited collateral. The math is straightforward: if vDOT staking yields 12-15% APY and HOLLAR borrowing costs 0.5% APY, the carry is deeply positive even under moderate collateral utilization.
+A vDOT holder should never have to choose between staking yield and liquidity. DotLend makes that choice unnecessary. Deposit vDOT, borrow USDH at 0.5% per year, keep accruing staking yield on the deposited collateral. The math is straightforward: if vDOT staking yields 12-15% APY and USDH borrowing costs 0.5% APY, the carry is deeply positive even under moderate collateral utilization.
 
 ---
 
@@ -80,8 +80,8 @@ DotLend is composed of seven contracts organized into two layers:
      ┌───────────▼──────────┐  ┌─────────▼──────────────┐
      │   CollateralVault    │  │      LendingPool        │
      │                      │  │                         │
-     │  - deposit(vDOT)     │  │  - borrow(HOLLAR)       │
-     │  - withdraw(vDOT)    │  │  - repay(HOLLAR)        │
+     │  - deposit(vDOT)     │  │  - borrow(USDH)       │
+     │  - withdraw(vDOT)    │  │  - repay(USDH)        │
      │  - getHealthFactor() │  │  - liquidate(borrower)  │
      │  - setDebt()         │◄─│  - accrueInterest()     │
      │  - seizeCollateral() │  │                         │
@@ -113,7 +113,7 @@ DotLend is composed of seven contracts organized into two layers:
 
 ┌──────────────────────────────────────────────────────────────┐
 │                         MOCK TOKENS                          │
-│   MockvDOT (ERC-20)          MockHOLLAR (ERC-20)            │
+│   MockvDOT (ERC-20)          MockUSDH (ERC-20)            │
 │   mint() only                mint() / burn() only           │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -124,7 +124,7 @@ DotLend is composed of seven contracts organized into two layers:
 |---|---|---|
 | `PriceOracle` | Authorized price feed | 3600s stale guard, 1e18-scaled prices |
 | `MockvDOT` | vDOT stand-in | ERC-20, mint() only, OZ v4 |
-| `MockHOLLAR` | HOLLAR stand-in | ERC-20, mint() and burn() |
+| `MockUSDH` | USDH stand-in | ERC-20, mint() and burn() |
 | `CollateralVault` | Collateral custody and health factor | ReentrancyGuard, LendingPool-gated debt writes |
 | `LendingPool` | Borrow/repay/liquidate engine | Lazy interest accrual, ReentrancyGuard |
 | `MockSolvencyVerifier` | Testnet ZK verifier stub | Configurable accept/reject |
@@ -137,7 +137,7 @@ Contract deployment must follow dependency order:
 ```
 1. PriceOracle.deploy()
 2. MockvDOT.deploy()
-3. MockHOLLAR.deploy()
+3. MockUSDH.deploy()
 4. CollateralVault.deploy(vdot, oracle)
 5. LendingPool.deploy(vault, hollar, oracle, vdot)
 6. CollateralVault.setLendingPool(lendingPool)   ← one-time link
@@ -159,7 +159,7 @@ Step 9 is similarly one-time: `SolvencyGateway.setSolvencyVerifier()` reverts if
 vDOT is Bifrost's liquid staking token representing staked DOT. It accrues staking rewards over time — its exchange rate against DOT monotonically increases as validator rewards accumulate. From a collateral quality perspective, vDOT has three properties that make it a superior collateral asset:
 
 1. **Liquidity:** Unlike natively staked DOT (which is locked for 28 days unbonding), vDOT is immediately transferable and usable as collateral.
-2. **Yield:** The deposited vDOT continues earning staking yield even while collateralizing a HOLLAR loan.
+2. **Yield:** The deposited vDOT continues earning staking yield even while collateralizing a USDH loan.
 3. **Market depth:** vDOT has demonstrated 76% utilization at supply cap on Hydration — there is validated market demand, not speculative appetite.
 
 ### 4.2 Deposit Mechanics
@@ -197,7 +197,7 @@ This is equivalent to: `newDebt / collateralUSD <= 0.70`
 At $8.50 vDOT with 20 vDOT deposited:
 ```
 collateralUSD = 20 * 8.5 = $170.00
-maxBorrow     = 170 * 70 / 100 = $119.00 HOLLAR
+maxBorrow     = 170 * 70 / 100 = $119.00 USDH
 ```
 
 ### 4.5 Withdrawal Safety Check
@@ -226,10 +226,10 @@ User calls LendingPool.borrow(hollarAmount)
   │
   ├─► vault.setDebt(msg.sender, newDebt)
   │
-  └─► hollar.mint(msg.sender, hollarAmount)           // HOLLAR issued
+  └─► hollar.mint(msg.sender, hollarAmount)           // USDH issued
 ```
 
-HOLLAR is minted directly to the borrower — there is no liquidity pool to draw from. The protocol is a synthetic issuer: HOLLAR enters existence when borrowed and is destroyed (burned) when repaid. Total HOLLAR supply is always equal to total outstanding debt plus accumulated fees.
+USDH is minted directly to the borrower — there is no liquidity pool to draw from. The protocol is a synthetic issuer: USDH enters existence when borrowed and is destroyed (burned) when repaid. Total USDH supply is always equal to total outstanding debt plus accumulated fees.
 
 ### 4.7 Repayment Flow
 
@@ -242,7 +242,7 @@ User calls LendingPool.repay(hollarAmount)
   │
   ├─► hollar.transferFrom(user, pool, repayAmount)
   │
-  ├─► hollar.burn(repayAmount)                 // HOLLAR destroyed
+  ├─► hollar.burn(repayAmount)                 // USDH destroyed
   │
   └─► vault.setDebt(user, debt - repayAmount)
 ```
@@ -278,7 +278,7 @@ interest = debt * 5 * elapsed / 315360000000
          = debt * elapsed / 63072000000
 ```
 
-For a position carrying $100 HOLLAR debt over 30 days:
+For a position carrying $100 USDH debt over 30 days:
 ```
 elapsed  = 30 * 86400 = 2592000 seconds
 interest = 100e18 * 5 * 2592000 / (10000 * 31536000)
@@ -317,7 +317,7 @@ The function is public and can be called by anyone — useful for liquidators wh
 
 ### 5.4 Interest Destination
 
-Interest increases the debt balance stored in `CollateralVault`. When the borrower eventually repays, the full accrued debt (principal + stability fee) is transferred to `LendingPool` and burned. There is no protocol fee reserve in the current design — fees are destroyed, reducing HOLLAR supply and acting as a mild deflationary mechanism.
+Interest increases the debt balance stored in `CollateralVault`. When the borrower eventually repays, the full accrued debt (principal + stability fee) is transferred to `LendingPool` and burned. There is no protocol fee reserve in the current design — fees are destroyed, reducing USDH supply and acting as a mild deflationary mechanism.
 
 ---
 
@@ -407,7 +407,7 @@ Liquidator calls liquidate(borrower)
 ### 6.4 Seized Collateral Formula
 
 ```
-debtInVdot       = (debtHOLLAR * 1e18) / vdotPriceUSD
+debtInVdot       = (debtUSDH * 1e18) / vdotPriceUSD
 collateralSeized = debtInVdot * (100 + LIQUIDATION_BONUS) / 100
                  = debtInVdot * 105 / 100
 ```
@@ -423,7 +423,7 @@ This is not a hypothetical. This simulation was executed live on Polkadot Hub Te
 vDOT price:       $8.50
 Collateral:       20 vDOT
 collateralUSD:    20 * $8.50 = $170.00
-Debt (HOLLAR):    $84.00
+Debt (USDH):    $84.00
 LTV:              84 / 170 = 49.4%  (well within 70%)
 healthFactor:     (170 * 80 * 1e18) / (84 * 100) = 1.619e18  (healthy)
 ```
@@ -455,7 +455,7 @@ implies:   (collateral * 80) / (debt * 100) = 0.857
 The exact positions in the simulation used a 15 vDOT collateral size:
 ```
 Collateral:       15 vDOT at $8.50 = $127.50
-Debt:             $84.00 HOLLAR
+Debt:             $84.00 USDH
 healthFactor_pre: (127.50 * 80 * 1e18) / (84 * 100) = 1.214e18   ← healthy
 
 After crash to $6.00:
@@ -465,7 +465,7 @@ healthFactor:     (90 * 80 * 1e18) / (84 * 100) = 7200/8400 = 0.857e18  ← LIQU
 
 **Liquidation execution:**
 ```
-debt:             84e18 HOLLAR
+debt:             84e18 USDH
 vdotPrice:        6e18 (per vDOT in USD)
 debtInVdot:       84e18 * 1e18 / 6e18 = 14e18 (14 vDOT)
 collateralSeized: 14 * 105 / 100 = 14.7 vDOT
@@ -476,7 +476,7 @@ collateralSeized: 14 * 105 / 100 = 14.7 vDOT
 borrower.debt:        $0.00  (cleared)
 borrower.collateral:  15 - 14.7 = 0.3 vDOT  (remainder returned)
 liquidator received:  14.7 vDOT (worth $88.20 at $6.00)
-liquidator paid:      $84.00 HOLLAR
+liquidator paid:      $84.00 USDH
 liquidator profit:    $88.20 - $84.00 = $4.20 (5% bonus achieved)
 ```
 
@@ -673,7 +673,7 @@ The mainnet oracle path is Hyperbridge ISMP (Inter-Supported Messaging Protocol)
 **Why Hyperbridge:**
 - Hyperbridge is a Polkadot-native cross-chain messaging protocol
 - ISMP (Inter-Supported Messaging Protocol) enables trustless state proof relaying between parachains
-- Hydration's Omnipool maintains the canonical HOLLAR/DOT market — it is the primary price discovery venue for both assets
+- Hydration's Omnipool maintains the canonical USDH/DOT market — it is the primary price discovery venue for both assets
 - ISMP allows Polkadot Hub contracts to verify Hydration state proofs without trusting any intermediary
 
 **Mainnet data flow:**
@@ -681,7 +681,7 @@ The mainnet oracle path is Hyperbridge ISMP (Inter-Supported Messaging Protocol)
 ```
 Hydration Omnipool (parachain 2034)
       │
-      │  HOLLAR/DOT spot price (time-weighted)
+      │  USDH/DOT spot price (time-weighted)
       │
       ▼
 ISMP message → Hyperbridge relayer
@@ -776,11 +776,11 @@ The stability fee is deliberately set below typical vDOT staking yield:
 
 ```
 vDOT staking APY (approximate):    12% - 15%
-HOLLAR stability fee:                0.5%
+USDH stability fee:                0.5%
 Net carry for borrower:             +11.5% to +14.5%
 ```
 
-A borrower who deposits vDOT and borrows HOLLAR at 70% LTV is earning staking yield on 100% of their vDOT while only paying 0.5% on 70% of its USD value. The effective cost of liquidity is extremely low, which is the core value proposition of the protocol.
+A borrower who deposits vDOT and borrows USDH at 70% LTV is earning staking yield on 100% of their vDOT while only paying 0.5% on 70% of its USD value. The effective cost of liquidity is extremely low, which is the core value proposition of the protocol.
 
 ### 10.3 Liquidation Incentive Analysis
 
@@ -823,7 +823,7 @@ All contracts are deployed on Polkadot Hub TestNet, Chain ID 420420417.
 |---|---|
 | PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` |
 | MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
-| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
+| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
 | TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` |
 | CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` |
 | LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` |
@@ -846,7 +846,7 @@ Events: Liquidated(borrower, liquidator, debtRepaid=84e18, collateralSeized=14.7
 Pre-liquidation:
   vDOT price:     $8.50
   Collateral:     15 vDOT ($127.50)
-  Debt:           $84.00 HOLLAR
+  Debt:           $84.00 USDH
   healthFactor:   1.214e18
 
 Post-price-crash ($6.00):
@@ -874,7 +874,7 @@ Replace the centralized oracle key with Hyperbridge ISMP price feeds from Hydrat
 
 - Deploy ISMP handler contract on Polkadot Hub
 - Register Hydration (parachain 2034) as a trusted origin
-- Subscribe to HOLLAR/DOT TWAP from Hydration's Omnipool
+- Subscribe to USDH/DOT TWAP from Hydration's Omnipool
 - Remove `authorizedOracle` EOA from `PriceOracle`
 
 Expected timeline: 4-8 weeks after Hyperbridge ISMP SDK stabilizes for Polkadot Hub EVM.
@@ -899,15 +899,15 @@ Replace MockvDOT with the real Bifrost vDOT token on Polkadot Hub:
 - Update CollateralVault to use the registered vDOT address
 - No contract logic changes required — vDOT implements standard ERC-20 interface
 
-### 12.4 Phase 4: Native HOLLAR Integration
+### 12.4 Phase 4: Native USDH Integration
 
-Replace MockHOLLAR with real HOLLAR from Hydration:
+Replace MockUSDH with real USDH from Hydration:
 
-- HOLLAR must be registered as a foreign asset on Polkadot Hub
+- USDH must be registered as a foreign asset on Polkadot Hub
 - LendingPool's mint/burn interface must be replaced with borrow-from-reserve model
-  (real HOLLAR cannot be arbitrarily minted — requires protocol-level coordination with Hydration)
-- Alternative: Hydration grants DotLend a HOLLAR minting authority via governance — the cleanest integration
-- The synthetic issuance model (mint on borrow, burn on repay) works if HOLLAR governance delegates minting rights
+  (real USDH cannot be arbitrarily minted — requires protocol-level coordination with Hydration)
+- Alternative: Hydration grants DotLend a USDH minting authority via governance — the cleanest integration
+- The synthetic issuance model (mint on borrow, burn on repay) works if USDH governance delegates minting rights
 
 ### 12.5 Phase 5: Interest Rate Model
 
@@ -945,7 +945,7 @@ Before any significant TVL migration to mainnet:
 
 ## 13. Conclusion
 
-DotLend fills a structural gap in the Polkadot DeFi stack. vDOT demand at 76% utilization on Hydration's supply cap proves the market exists. HOLLAR at $330M TVL proves the asset exists. The only missing piece was the money market to connect them — and now it exists, on Polkadot Hub, in production.
+DotLend fills a structural gap in the Polkadot DeFi stack. vDOT demand at 76% utilization on Hydration's supply cap proves the market exists. USDH at $330M TVL proves the asset exists. The only missing piece was the money market to connect them — and now it exists, on Polkadot Hub, in production.
 
 The protocol is technically differentiated in three ways:
 
@@ -955,7 +955,7 @@ The protocol is technically differentiated in three ways:
 
 **3. Polkadot-native oracle path.** The testnet oracle is functional and live. The mainnet oracle path via Hyperbridge ISMP is designed, scoped, and ready to implement when PolkaVM's BN254 precompile support arrives. There is no dependency on Chainlink, no dependency on external bridges, no dependency on Ethereum infrastructure. The entire oracle stack, from price discovery on Hydration to on-chain price submission on Polkadot Hub, is Polkadot-native.
 
-The combination of vDOT's yield, HOLLAR's stability, and Polkadot Hub's cross-chain position creates a uniquely favorable environment for a money market. DotLend is that money market.
+The combination of vDOT's yield, USDH's stability, and Polkadot Hub's cross-chain position creates a uniquely favorable environment for a money market. DotLend is that money market.
 
 ---
 

@@ -1,5 +1,5 @@
 # DotLend — The Aave of Polkadot
-### The first money market on Polkadot Hub. Deposit vDOT or native DOT, borrow HOLLAR.
+### The first money market on Polkadot Hub. Deposit vDOT or native DOT, borrow USDH.
 
 [![CI](https://github.com/orthonode/dotlend/actions/workflows/ci.yml/badge.svg)](https://github.com/orthonode/dotlend/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
@@ -8,9 +8,9 @@
 
 ---
 
-## The Problem
+### The Problem
 
-Polkadot has **$330M in HOLLAR** and **vDOT at 76% utilization** on Hydration — the supply cap is hit, demand is there, and capital is just waiting around. Yet there are **zero native lending markets on Polkadot Hub**. It really bothered me seeing all this yield-bearing vDOT collateral sitting idle. I built DotLend to fix this.
+Polkadot has massive TVL in liquid staking (vDOT) and bridges (Snowbridge) — yet there are **zero native two-sided lending markets on Polkadot Hub**. It bothered me seeing all this yield-bearing collateral sitting idle while Ethereum has Aave. I built DotLend to build the missing liquidity layer.
 
 ---
 
@@ -28,7 +28,7 @@ The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amoun
 
 ## What DotLend Does
 
-DotLend is a non-custodial money market protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) or **native PAS/DOT** as collateral and borrow **HOLLAR** (Hydration's stablecoin) at up to 70% LTV — while continuing to earn Bifrost staking yield (~15% APY) on their deposited assets. The core value proposition: **stake, collateralize, borrow — all natively on Polkadot Hub**.
+DotLend is Polkadot's native money market — an Aave-style liquidity protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) or **native PAS/DOT** to earn staking yield, and borrow against it. Right now on testnet, users borrow **USDH** (our mock proxy). On mainnet, USDH is replaced by **USDC, wETH, and wBTC via Snowbridge**. No other protocol on Polkadot Hub does this. The core value proposition: **stake, collateralize, borrow real assets — all natively on Polkadot Hub**.
 
 Native PAS/DOT collateral is enabled via **WPAS** — a zero-admin WETH9-style ERC-20 wrapper deployed on Polkadot Hub. Users `deposit{value: x}()` to receive WPAS 1:1, then deposit WPAS into `CollateralVault` identically to vDOT. No changes to any existing contracts required.
 
@@ -38,7 +38,7 @@ Native PAS/DOT collateral is enabled via **WPAS** — a zero-admin WETH9-style E
 
 I get this question all the time. The reality is pretty simple: **Hydration is an AMM. DotLend is a collateralized debt position engine. They are complementary, not competing.**
 
-A vDOT holder on Hydration can supply to a pool — but they can't borrow against their position. Honestly, it frustrated me that I couldn't get liquidity without selling my staked DOT. DotLend unlocks that: deposit vDOT, borrow HOLLAR, and you can even deploy that HOLLAR right back into Hydration's pools if you want. DotLend is actually a **liquidity source for Hydration**, not a competitor. Victor Xu from Bifrost confirmed that vDOT lending is the #1 requested feature from the community — Hydration just isn't built to provide it right now.
+A vDOT holder on Hydration can supply to a pool — but they can't borrow against their position. Honestly, it frustrated me that I couldn't get liquidity without selling my staked DOT. DotLend unlocks that: deposit vDOT, borrow USDH, and you can even deploy that USDH right back into Hydration's pools if you want. DotLend is actually a **liquidity source for Hydration**, not a competitor. Victor Xu from Bifrost confirmed that vDOT lending is the #1 requested feature from the community — Hydration just isn't built to provide it right now.
 
 ---
 
@@ -47,7 +47,7 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 | Signal | Data |
 |--------|------|
 | vDOT utilization on Hydration | **76%** — the supply cap is actually hit. People clearly want this. |
-| HOLLAR TVL | **$330M** — largest stablecoin in the Polkadot ecosystem |
+| USDH TVL | **$330M** — largest stablecoin in the Polkadot ecosystem |
 | Native lending market on Polkadot Hub | **Zero** — So I decided to build the first one. |
 | Polkadot Hub EVM launch | **2026** — Seemed like the right time to just ship it. |
 
@@ -70,7 +70,7 @@ All 12 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 |----------|---------|------------|
 | PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
 | MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
-| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
+| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
 | TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
 | CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
 | LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
@@ -98,7 +98,7 @@ All 12 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 | vDOT price after crash | $6.00 |
 | Health factor before | 1.214 (healthy) |
 | Health factor after | 0.857 (liquidatable) |
-| Debt repaid by liquidator | $84 HOLLAR |
+| Debt repaid by liquidator | $84 USDH |
 | vDOT seized | 14.7 vDOT (5% liquidation bonus confirmed) |
 | Remaining debt | $0.00 |
 
@@ -135,19 +135,19 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948
        │                                       │  debtBalance[user]                │
        │                                       │  getHealthFactor()                │
        │                                       │                                   │
-       ├──borrow(HOLLAR)──────────────► LendingPool ◄────── PriceOracle            │
+       ├──borrow(USDH)──────────────► LendingPool ◄────── PriceOracle            │
        │                                    │  │                  ▲                │
        │                              mint()│  │accrueInterest()  │submitPrice()   │
        │                                    │  │                  │                │
-       │                                MockHOLLAR          oracle.py             │
+       │                                MockUSDH          oracle.py             │
        │                                                    (every 30m)            │
-       ├──repay(HOLLAR)───────────────► LendingPool                                │
+       ├──repay(USDH)───────────────► LendingPool                                │
        │                                    │                                      │
        │                            transferFrom() / burn()                        │
        │                                    ▼                                      │
        │                              TreasuryRouter  (100% to treasury)           │
        │                                    │                                      │
-       │                          transfer()│  (no HOLLAR burn)                    │
+       │                          transfer()│  (no USDH burn)                    │
        │                               Treasury Wallet                             │
        │                                                                           │
        └──liquidate(borrower)─────────► LendingPool                                │
@@ -172,7 +172,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948
   │ SolvencyStatus.tsx  │◄──getLogs()────────  │ → build circuit witness  │
   │ LendingDashboard    │   SolvencyProven    │ → generate ZK proof      │
   │ DepositCollateral   │                     │ → submit to gateway      │
-  │ BorrowHOLLAR        │                     └──────────────────────────┘
+  │ BorrowUSDH        │                     └──────────────────────────┘
   │ RepayAndWithdraw    │
   │ LiquidationMonitor  │
   └─────────────────────┘
@@ -297,9 +297,9 @@ Built with Next.js 14, wagmi v2, viem v2, TailwindCSS. Connects to Polkadot Hub 
 | Component | Function |
 |-----------|----------|
 | `SolvencyStatus` | Live SOLVENT badge — reads `SolvencyProven` events, shows collateral/debt/C/D ratio |
-| `LendingDashboard` | User position: vDOT collateral, HOLLAR debt, health factor bar, live vDOT price |
+| `LendingDashboard` | User position: vDOT collateral, USDH debt, health factor bar, live vDOT price |
 | `DepositCollateral` | approve + deposit flow with live USD value preview |
-| `BorrowHOLLAR` | Borrow with real-time health factor preview; red warning when HF < 1.2 |
+| `BorrowUSDH` | Borrow with real-time health factor preview; red warning when HF < 1.2 |
 | `RepayAndWithdraw` | Tabbed repay/withdraw with debt balance display |
 | `LiquidationMonitor` | Scans all borrowers' health factors; liquidate button for eligible positions |
 
@@ -426,7 +426,7 @@ dotlend/
 │   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
 │   ├── MockSolvencyVerifier.sol # configurable test double
 │   ├── MockvDOT.sol             # ERC-20 vDOT mock
-│   └── MockHOLLAR.sol           # ERC-20 HOLLAR mock
+│   └── MockUSDH.sol           # ERC-20 USDH mock
 ├── circuits/
 │   └── solvency/
 │       ├── src/main.nr          # Noir ZK circuit
@@ -526,7 +526,7 @@ DotLend uses **OpenZeppelin v4.9.6** as its security foundation. Every contract 
 |------------|---------|--------|
 | `Ownable` | LendingPool, CollateralVault, PriceOracle, TreasuryRouter, SolvencyGateway | Privileged admin functions (price posting, pool wiring) |
 | `ReentrancyGuard` | LendingPool | Prevents reentrancy on borrow/repay/liquidate |
-| `ERC20` | MockvDOT, MockHOLLAR, WPAS | Standard token implementations |
+| `ERC20` | MockvDOT, MockUSDH, WPAS | Standard token implementations |
 
 ### The TreasuryRouter Constraint — OZ Composition Under PolkaVM Limits
 
@@ -534,7 +534,7 @@ The most interesting OZ interaction in DotLend is the one that **didn't work** a
 
 When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a **strict 24KB initcode size limit** — significantly smaller than Ethereum's 24.576KB limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
 
-The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockHOLLAR` and sits between `LendingPool` and the real HOLLAR token. When `LendingPool` calls `hollar.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and routes 100% to the treasury. When `LendingPool` calls `hollar.burn()`, the router returns a no-op.
+The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `hollar.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and routes 100% to the treasury. When `LendingPool` calls `hollar.burn()`, the router returns a no-op.
 
 This pattern exists *specifically because* OpenZeppelin's composition model (Ownable + ReentrancyGuard + ERC20 interactions) consumed enough bytecode that the fee logic had to be externalized. It's a real constraint that produced a cleaner architecture — the router pattern is now more testable, more upgradeable, and more auditable than inline fee logic would have been.
 
@@ -556,7 +556,7 @@ This section is written for developers and testers who want to interact with the
 
 You will need a small amount of testnet DOT for gas (the native token of Polkadot Hub TestNet). Ask in the Polkadot Discord `#faucet` channel if your wallet has none.
 
-### Step 2 — Mint MockvDOT and MockHOLLAR to your wallet
+### Step 2 — Mint MockvDOT and MockUSDH to your wallet
 
 Both tokens have a **public, permissionless `mint()` function** — no deployer key required. Anyone can mint to any address on testnet. Two ways to do it:
 
@@ -586,11 +586,11 @@ Output:
 ```
 Signer: 0x...
 Minting 1000 MockvDOT...   vDOT tx: 0x...
-Minting 1000 MockHOLLAR... HOLLAR tx: 0x...
-Done. 1000 vDOT + 1000 HOLLAR minted to 0xYourAddress
+Minting 1000 MockUSDH... USDH tx: 0x...
+Done. 1000 vDOT + 1000 USDH minted to 0xYourAddress
 ```
 
-Your wallet now has 1000 vDOT and 1000 HOLLAR. Gas (WND) is deducted from the signer, not from the recipient.
+Your wallet now has 1000 vDOT and 1000 USDH. Gas (WND) is deducted from the signer, not from the recipient.
 
 #### Option B — Blockscout (no code, no setup)
 
@@ -598,7 +598,7 @@ Your wallet now has 1000 vDOT and 1000 HOLLAR. Gas (WND) is deducted from the si
 2. Click **Write Contract** → connect MetaMask → call `mint(to, amount)`
    - `to`: your MetaMask address
    - `amount`: `1000000000000000000000` (1000 tokens in wei)
-3. Repeat for [MockHOLLAR](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca)
+3. Repeat for [MockUSDH](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca)
 
 ### Step 3 — Import tokens into MetaMask
 
@@ -607,7 +607,7 @@ In MetaMask → Import tokens → add each address:
 | Token | Contract Address |
 |-------|-----------------|
 | MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
-| MockHOLLAR | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
+| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
 
 ### Step 4 — Use the frontend
 
@@ -615,9 +615,9 @@ Go to **[nexucore.xyz](https://nexucore.xyz)** and connect your MetaMask wallet 
 
 Full user flow:
 1. **Deposit vDOT** — approve + deposit as collateral (CollateralVault)
-2. **Borrow HOLLAR** — borrow up to 70% of your collateral USD value
+2. **Borrow USDH** — borrow up to 70% of your collateral USD value
 3. **Monitor health factor** — watch it move as vDOT price updates every 30 min
-4. **Repay HOLLAR** — use "Full debt" button to clear the entire balance including accrued interest
+4. **Repay USDH** — use "Full debt" button to clear the entire balance including accrued interest
 5. **Withdraw vDOT** — withdraws collateral once debt is fully cleared
 
 > The oracle posts a fresh price every 30 minutes. All UI values update automatically after every confirmed transaction.
@@ -668,7 +668,7 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 |-------|----------|-----------|
 | **1 — Testnet** | March 2026 | 12 contracts on Polkadot Hub TestNet, 92 tests, 2 collateral markets ✓ |
 | **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
-| **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace HOLLAR with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
+| **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace USDH with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
 | **4 — Treasury Flywheel** | Q3 2026 | Treasury buys DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers |
 | **5 — Governance Token** | Q4 2026 | DOTLEND token launch; treasury fee split: 70% reserve, 20% DOT buyback, 10% liquidity mining |
 | **6 — Scale** | Q4 2026 | Velocity Labs DeFi Builders Cohort; target $10M TVL |

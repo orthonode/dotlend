@@ -37,7 +37,7 @@ function ProtocolFAQ() {
             <span className="text-gray-300">You never overpay</span> — the contract caps repayment
             at your exact on-chain debt:{" "}
             <span className="text-gray-400">repayAmount = min(sent, actualDebt)</span>.
-            Any excess HOLLAR stays in your wallet untouched.
+            Any excess USDH stays in your wallet untouched.
           </div>
           <div>
             <span className="text-gray-300">Why withdrawal is blocked</span> — the contract
@@ -121,13 +121,13 @@ export function RepayAndWithdraw() {
   }, [writeError, receiptError, setStatus, clearOptimistic]);
 
   function handleApprove() {
-    setStatus("signing", "Approving HOLLAR…");
+    setStatus("signing", "Approving USDH…");
     writeContract({ address: addresses.hollar, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256] });
   }
 
   function handleRepay() {
     setOptimistic(0n, -parsedRepay);
-    setStatus("signing", `Repaying ${Number(repayAmount).toFixed(2)} HOLLAR…`);
+    setStatus("signing", `Repaying ${Number(repayAmount).toFixed(2)} USDH…`);
     writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay] });
   }
 
@@ -162,7 +162,7 @@ export function RepayAndWithdraw() {
                 ? "bg-[#E6007A] text-white"
                 : "border border-[#333] text-gray-400 hover:border-[#E6007A]"
             }`}>
-            {tab === "repay" ? "Repay HOLLAR" : `Withdraw ${assetSymbol}`}
+            {tab === "repay" ? "Repay USDH" : `Withdraw ${assetSymbol}`}
           </button>
         ))}
       </div>
@@ -173,10 +173,10 @@ export function RepayAndWithdraw() {
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="bg-[#0a0a0a] rounded-lg p-2">
               <div className="text-gray-500">Outstanding Debt</div>
-              <div className="font-bold text-[#E6007A] font-mono">{Number(formatEther(debt)).toFixed(6)} HOLLAR</div>
+              <div className="font-bold text-[#E6007A] font-mono">{Number(formatEther(debt)).toFixed(6)} USDH</div>
             </div>
             <div className="bg-[#0a0a0a] rounded-lg p-2">
-              <div className="text-gray-500">HOLLAR Balance</div>
+              <div className="text-gray-500">USDH Balance</div>
               <div className="font-bold font-mono">{Number(formatEther(hollarBal)).toFixed(6)}</div>
             </div>
           </div>
@@ -212,7 +212,7 @@ export function RepayAndWithdraw() {
           <div className="text-xs text-gray-600 font-mono space-y-1">
             <div>• Buffer covers interest accrued during tx confirmation (~2–10s)</div>
             <div>• Contract charges only exact debt: <span className="text-gray-400">min(sent, actualDebt)</span></div>
-            <div>• Excess HOLLAR stays in your wallet — you are never overcharged</div>
+            <div>• Excess USDH stays in your wallet — you are never overcharged</div>
           </div>
 
           {needsApproval ? (
@@ -223,7 +223,7 @@ export function RepayAndWithdraw() {
                     <span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
                     {isPending ? "Waiting for wallet…" : "Confirming…"}
                   </span>
-                : "Approve HOLLAR"}
+                : "Approve USDH"}
             </button>
           ) : (
             <button onClick={handleRepay} disabled={busy || !repayAmount}
@@ -233,7 +233,7 @@ export function RepayAndWithdraw() {
                     <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
                   </span>
-                : "Repay HOLLAR"}
+                : "Repay USDH"}
             </button>
           )}
 
@@ -248,7 +248,7 @@ export function RepayAndWithdraw() {
             <div className="font-bold text-white">{Number(formatEther(collateral)).toFixed(4)} {assetSymbol}</div>
             {debt > 0n && (
               <div className="text-yellow-500 mt-2">
-                ⚠ Outstanding debt: {Number(formatEther(debt)).toFixed(6)} HOLLAR.
+                ⚠ Outstanding debt: {Number(formatEther(debt)).toFixed(6)} USDH.
                 Repay in full before withdrawing collateral.
               </div>
             )}

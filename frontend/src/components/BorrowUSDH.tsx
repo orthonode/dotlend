@@ -12,7 +12,7 @@ import { useMarket } from "@/src/lib/market-context";
 const MAX_LTV = 0.70;
 const LIQ_THRESHOLD = 0.80;
 
-export function BorrowHOLLAR() {
+export function BorrowUSDH() {
   const { address } = useAccount();
   const [amount, setAmount] = useState("");
   const queryClient = useQueryClient();
@@ -68,7 +68,7 @@ export function BorrowHOLLAR() {
   function handleBorrow() {
     const parsed = parseEther(amount);
     setOptimistic(0n, parsed);
-    setStatus("signing", `Borrowing ${Number(amount).toFixed(2)} HOLLAR…`);
+    setStatus("signing", `Borrowing ${Number(amount).toFixed(2)} USDH…`);
     writeContract({
       address: addresses.lendingPool,
       abi: POOL_ABI,
@@ -89,7 +89,7 @@ export function BorrowHOLLAR() {
 
   return (
     <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
-      <div className="text-sm font-bold text-white">Borrow HOLLAR</div>
+      <div className="text-sm font-bold text-white">Borrow USDH</div>
 
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div className="bg-[#0a0a0a] rounded-lg p-3">
@@ -98,7 +98,7 @@ export function BorrowHOLLAR() {
         </div>
         <div className="bg-[#0a0a0a] rounded-lg p-3">
           <div className="text-gray-500">Max Borrow (70% LTV)</div>
-          <div className="font-bold text-[#E6007A]">${maxBorrow.toFixed(2)} HOLLAR</div>
+          <div className="font-bold text-[#E6007A]">${maxBorrow.toFixed(2)} USDH</div>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export function BorrowHOLLAR() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Cost on this borrow / day</span>
-              <span className="text-white">~${perDay.toFixed(4)} HOLLAR</span>
+              <span className="text-white">~${perDay.toFixed(4)} USDH</span>
             </div>
             <div className="text-gray-600 pt-1">
               Interest accrues every second on-chain from the moment you borrow. Applied automatically on repay via <span className="text-gray-400">accrueInterest()</span>.
@@ -171,7 +171,7 @@ export function BorrowHOLLAR() {
             <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
             {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
           </span>
-        ) : "Borrow HOLLAR"}
+        ) : "Borrow USDH"}
       </button>
 
       {isSuccess && txHash && (
