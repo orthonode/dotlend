@@ -18,9 +18,9 @@ export const MARKETS: Record<"vdot" | "wpas", MarketAddresses> = {
     lendingPool: "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
   },
   wpas: {
-    collateral: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-    collateralVault: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-    lendingPool: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+    collateral: "0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6",
+    collateralVault: "0x4131788B3A068Acf9758C740826A368bf9FBaE4D",
+    lendingPool: "0xC557C3869B6B7572a81dB50C61A369682C035EAD",
   }
 };
 
