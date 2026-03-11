@@ -56,7 +56,7 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 ## Live Demo
 
 - **Frontend:** [nexucore.xyz](https://nexucore.xyz)
-- **Demo video:** [youtu.be/nCcKqU8otWM](https://youtu.be/nCcKqU8otWM)
+- **Demo video:** [youtu.be/Oj9luiA8mJM](https://youtu.be/Oj9luiA8mJM)
 - **Explorer:** [blockscout-testnet.polkadot.io](https://blockscout-testnet.polkadot.io)
 - **Network:** Polkadot Hub TestNet | Chain ID `420420417`
 
