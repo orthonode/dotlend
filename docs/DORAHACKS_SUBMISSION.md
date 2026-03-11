@@ -149,6 +149,6 @@ https://github.com/orthonode/dotlend
 **Orthonode**
 **Arhant Barmate** (Founder & Lead Engineer)
 Bhopal, India
-research@orthonode.xyz
+infrastructure@orthonode.xyz
 orthonode.xyz | nexucore.xyz
 github.com/orthonode

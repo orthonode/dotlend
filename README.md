@@ -707,7 +707,7 @@ Building verification and governance infrastructure across multiple chains.
 |-|-|
 | **On-chain identity** | Display name: **Orthonode Labs** · Legal name: **Arhant Barmate** |
 | **Deployer wallet** | `0xb947dF17869fAB2DF223a38F28f38b40ca636d4e` — [view on Blockscout](https://blockscout-testnet.polkadot.io/address/0xb947dF17869fAB2DF223a38F28f38b40ca636d4e) |
-| **Contact** | research@orthonode.xyz |
+| **Contact** | infrastructure@orthonode.xyz |
 | **Website** | orthonode.xyz · nexucore.xyz |
 | **GitHub** | github.com/orthonode |
 

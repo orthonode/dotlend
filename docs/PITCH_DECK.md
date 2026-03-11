@@ -19,7 +19,7 @@ nexucore.xyz | github.com/orthonode/dotlend
 
 Orthonode | Arhant Barmate (Solo Founder & Engineer) | March 2026
 
-research@orthonode.xyz
+infrastructure@orthonode.xyz
 
 ---
 
@@ -365,7 +365,7 @@ Built every contract, every test, every frontend component, every script, this p
 
 ---
 
-research@orthonode.xyz
+infrastructure@orthonode.xyz
 orthonode.xyz | nexucore.xyz
 github.com/orthonode
 
@@ -397,4 +397,4 @@ vDOT earns yield. USDH needs collateral utility. Polkadot Hub needs a lending ma
 
 nexucore.xyz
 github.com/orthonode/dotlend
-research@orthonode.xyz
+infrastructure@orthonode.xyz
