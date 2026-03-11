@@ -15,7 +15,7 @@
 
 ---
 
-nexucore.xyz | github.com/orthonode/dotlend
+nexucore.xyz | github.com/orthonode/dotlend | [Pitch Deck (PDF)](./assets/DotLend_Native_Polkadot_Lending.pdf)
 
 Orthonode | Arhant Barmate (Solo Founder & Engineer) | March 2026
 

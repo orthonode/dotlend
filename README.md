@@ -691,6 +691,7 @@ Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOra
 - [docs/WHITEPAPER.md](./docs/WHITEPAPER.md) — protocol mechanics, math, ZK circuit, oracle design, mainnet roadmap
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — system diagrams: contract interactions, user flows, ZK pipeline, deployment topology
 - [docs/PITCH_DECK.md](./docs/PITCH_DECK.md) — 12-slide pitch deck (markdown source)
+- [Pitch Deck (PDF)](./docs/assets/DotLend_Native_Polkadot_Lending.pdf) — visual presentation of the protocol
 - [docs/DORAHACKS_SUBMISSION.md](./docs/DORAHACKS_SUBMISSION.md) — DoraHacks submission text
 - [docs/ECOSYSTEM_OUTREACH.md](./docs/ECOSYSTEM_OUTREACH.md) — strategic ecosystem outreach guide
 - [docs/ROADMAP.md](./docs/ROADMAP.md) — sprint milestones
