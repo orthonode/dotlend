@@ -81,6 +81,8 @@ All 12 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
 | SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` | [view](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) |
 
+![DotLend Protocol Overview](./docs/infographic.png)
+
 ---
 
 ## On-Chain Evidence
