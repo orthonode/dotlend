@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { LendingDashboard } from "@/src/components/LendingDashboard";
 import { DepositCollateral } from "@/src/components/DepositCollateral";
@@ -9,7 +10,11 @@ import { LiquidationMonitor } from "@/src/components/LiquidationMonitor";
 import { ProtocolStats } from "@/src/components/ProtocolStats";
 import { Markets } from "@/src/components/Markets";
 
+type Tab = "dashboard" | "markets" | "analytics";
+
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+
   return (
     <div className="space-y-8">
       {/* Testnet notice */}
@@ -38,28 +43,60 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Dashboard — Hero is rendered inside LendingDashboard */}
-      <LendingDashboard />
+      {/* Hero & Navigation Tabs */}
+      <div>
+        <LendingDashboard />
 
-      {/* Action grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <DepositCollateral />
-        <BorrowUSDH />
+        <div className="flex gap-4 border-b border-[#222] mt-8 mb-6">
+          {(["dashboard", "markets", "analytics"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 text-sm font-bold capitalize transition-colors border-b-2 ${
+                activeTab === tab
+                  ? "border-[#E6007A] text-white"
+                  : "border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-700"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
-      
-      <ProtocolStats />
 
-      <RepayAndWithdraw />
-      <LiquidationMonitor />
-      <Markets />
+      {/* Tab Content */}
+      <div className="min-h-[400px]">
+        {activeTab === "dashboard" && (
+          <div className="space-y-6 slide-enter">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DepositCollateral />
+              <BorrowUSDH />
+            </div>
+            <RepayAndWithdraw />
+          </div>
+        )}
+
+        {activeTab === "markets" && (
+          <div className="slide-enter">
+            <Markets />
+          </div>
+        )}
+
+        {activeTab === "analytics" && (
+          <div className="space-y-6 slide-enter">
+            <ProtocolStats />
+            <LiquidationMonitor />
+          </div>
+        )}
+      </div>
 
       {/* Footer */}
-      <div className="text-center text-xs text-gray-600 pt-4 border-t border-[#111]">
+      <div className="text-center text-xs text-gray-600 pt-8 mt-12 border-t border-[#111]">
         <p>Orthonode Systems | Polkadot Solidity Hackathon 2026</p>
-        <div className="flex justify-center gap-4 mt-2">
-          <a href="https://blockscout-testnet.polkadot.io/address/0xA8b36339C55c664BBe7C59d2d59Abf91f472C8d0" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">LendingPool</a>
-          <a href="https://blockscout-testnet.polkadot.io/address/0xff58177D585b5dB022B0773405a40bEC443E512a" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">CollateralVault</a>
-          <a href="https://youtu.be/WYxeeyrQLWc" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">Demo Video</a>
+        <div className="flex justify-center flex-wrap gap-4 mt-3">
+          <a href="https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">vDOT LendingPool</a>
+          <a href="https://blockscout-testnet.polkadot.io/address/0xC557C3869B6B7572a81dB50C61A369682C035EAD" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">WPAS LendingPool</a>
+          <a href="https://youtu.be/Oj9luiA8mJM" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">Demo Video</a>
           <a href="https://github.com/orthonode/dotlend" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">GitHub</a>
         </div>
       </div>
