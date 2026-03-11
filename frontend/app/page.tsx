@@ -9,6 +9,7 @@ import { RepayAndWithdraw } from "@/src/components/RepayAndWithdraw";
 import { LiquidationMonitor } from "@/src/components/LiquidationMonitor";
 import { ProtocolStats } from "@/src/components/ProtocolStats";
 import { Markets } from "@/src/components/Markets";
+import { MARKETS } from "@/src/lib/contracts";
 
 type Tab = "dashboard" | "markets" | "analytics";
 
@@ -94,8 +95,8 @@ export default function Home() {
       <div className="text-center text-xs text-gray-600 pt-8 mt-12 border-t border-[#111]">
         <p>Orthonode Systems | Polkadot Solidity Hackathon 2026</p>
         <div className="flex justify-center flex-wrap gap-4 mt-3">
-          <a href="https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">vDOT LendingPool</a>
-          <a href="https://blockscout-testnet.polkadot.io/address/0xC557C3869B6B7572a81dB50C61A369682C035EAD" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">WPAS LendingPool</a>
+          <a href={`https://blockscout-testnet.polkadot.io/address/${MARKETS.vdot.lendingPool}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">vDOT LendingPool</a>
+          <a href={`https://blockscout-testnet.polkadot.io/address/${MARKETS.wpas.lendingPool}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">WPAS LendingPool</a>
           <a href="https://youtu.be/Oj9luiA8mJM" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">Demo Video</a>
           <a href="https://github.com/orthonode/dotlend" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">GitHub</a>
         </div>

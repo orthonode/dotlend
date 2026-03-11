@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createPublicClient, http, parseAbiItem, formatEther } from "viem";
+import { COMMON_ADDRESSES } from "@/src/lib/contracts";
 
 // ── Chain config ─────────────────────────────────────────────────────────────
 
@@ -18,7 +19,7 @@ const POLKADOT_HUB_TESTNET = {
   },
 };
 
-const SOLVENCY_GATEWAY_ADDRESS = "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa" as `0x${string}`;
+const SOLVENCY_GATEWAY_ADDRESS = COMMON_ADDRESSES.solvencyGateway;
 
 const SOLVENCY_PROVEN_ABI = parseAbiItem(
   "event SolvencyProven(uint256 totalCollateral, uint256 totalDebt, uint256 timestamp)"
