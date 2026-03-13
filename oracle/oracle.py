@@ -139,6 +139,23 @@ def fetch_vdot_price() -> Decimal:
         log.info(f"Using env override: VDOT_PRICE_USD={override}")
         return Decimal(override)
 
+    # Source 0: DeFiLlama — vDOT directly (no API key, no geo-block, highly reliable)
+    try:
+        url = "https://coins.llama.fi/prices/current/coingecko:bifrost-voucher-dot,coingecko:polkadot"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        coins = resp.json().get("coins", {})
+        if "coingecko:bifrost-voucher-dot" in coins:
+            price = Decimal(str(coins["coingecko:bifrost-voucher-dot"]["price"]))
+            log.info(f"[price] DeFiLlama vDOT: ${price}")
+            return price
+        if "coingecko:polkadot" in coins:
+            price = Decimal(str(coins["coingecko:polkadot"]["price"]))
+            log.info(f"[price] DeFiLlama DOT (proxy): ${price}")
+            return price
+    except Exception as e:
+        log.warning(f"DeFiLlama failed: {e}")
+
     # Source 1: CoinGecko — vDOT directly, then DOT as proxy
     try:
         url = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd"
@@ -186,8 +203,8 @@ def fetch_vdot_price() -> Decimal:
     except Exception as e:
         log.warning(f"Binance failed: {e}")
 
-    log.warning("All price sources failed — using fallback $2.45")
-    return Decimal("2.45")
+    log.warning("All price sources failed — using fallback $1.50")
+    return Decimal("1.50")
 
 
 def fetch_dot_price() -> Decimal:
@@ -198,6 +215,19 @@ def fetch_dot_price() -> Decimal:
     if override:
         log.info(f"Using env override: DOT_PRICE_USD={override}")
         return Decimal(override)
+
+    # Source 0: DeFiLlama — no API key, no geo-block
+    try:
+        url = "https://coins.llama.fi/prices/current/coingecko:polkadot"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        coins = resp.json().get("coins", {})
+        if "coingecko:polkadot" in coins:
+            price = Decimal(str(coins["coingecko:polkadot"]["price"]))
+            log.info(f"[wpas-price] DeFiLlama DOT: ${price}")
+            return price
+    except Exception as e:
+        log.warning(f"[wpas-price] DeFiLlama failed: {e}")
 
     # Source 1: CoinGecko — DOT directly
     try:
