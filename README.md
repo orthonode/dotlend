@@ -28,7 +28,7 @@ The Noir circuit (UltraHonk) constrains `sum(collateral_values) > sum(debt_amoun
 
 ## What DotLend Does
 
-DotLend is Polkadot's native money market — an Aave-style liquidity protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) or **native PAS/DOT** to earn staking yield, and borrow against it. Right now on testnet, users borrow **USDH** (our mock proxy). On mainnet, USDH is replaced by **USDC, wETH, and wBTC via Snowbridge**. No other protocol on Polkadot Hub does this. The core value proposition: **stake, collateralize, borrow real assets — all natively on Polkadot Hub**.
+DotLend is Polkadot's native money market — an Aave-style liquidity protocol deployed on **Polkadot Hub** with **two live collateral markets**: vDOT (Bifrost liquid staking) and WPAS (native PAS wrapped as ERC-20). Users deposit collateral, retain staking yield, and borrow against it. Right now on testnet, users borrow **USDH** (our mock proxy). On mainnet, USDH is replaced by **USDC, wETH, and wBTC via Snowbridge**. No other protocol on Polkadot Hub does this. The core value proposition: **stake, collateralize, borrow real assets — all natively on Polkadot Hub**.
 
 Native PAS/DOT collateral is enabled via **WPAS** — a zero-admin WETH9-style ERC-20 wrapper deployed on Polkadot Hub. Users `deposit{value: x}()` to receive WPAS 1:1, then deposit WPAS into `CollateralVault` identically to vDOT. No changes to any existing contracts required.
 
@@ -56,7 +56,8 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 ## Live Demo
 
 - **Frontend:** [nexucore.xyz](https://nexucore.xyz)
-- **Demo video:** [youtu.be/Oj9luiA8mJM](https://youtu.be/Oj9luiA8mJM)
+- **Demo video (protocol overview):** [youtu.be/nCcKqU8otWM](https://youtu.be/nCcKqU8otWM)
+- **Demo video (live walkthrough):** Coming March 19
 - **Explorer:** [blockscout-testnet.polkadot.io](https://blockscout-testnet.polkadot.io)
 - **Network:** Polkadot Hub TestNet | Chain ID `420420417`
 
@@ -125,6 +126,20 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948
 | Treasury Fee | 100% of stability fees | MakerDAO-style — no stablecoin burn; treasury funds DOT buybacks |
 
 ---
+
+## Competitive Landscape
+
+| Protocol | Status | Why DotLend Is Different |
+|----------|--------|--------------------------|
+| **Acala** | Live but crippled — aUSD depegged 2022, now aSEED recovery asset. ACA at $0.00078 | Substrate-based, not EVM-native. Stablecoin effectively dead. |
+| **Parallel Finance** | $0 TVL, functionally dead | Raised $22M before Polkadot Hub EVM existed. Right product, wrong infrastructure, wrong time. |
+| **Bifrost** | Active, $55M TVL | Liquid staking only. Not a lending market. vUSD CDP in development, not live. |
+| **Hydration** | Active DEX, ~$55M TVL | AMM, not a money market. Complementary — DotLend is a liquidity source for Hydration. |
+
+DotLend is the only active lending protocol on Polkadot Hub EVM. The right product, on the right infrastructure, at the right time.
+
+---
+
 
 ## Architecture
 
@@ -219,7 +234,7 @@ Constraints:
 ### Proof Generation Pipeline
 
 ```
-Railway Cron (every 6h)
+Railway Cron (every 30m)
         │
         ▼
 CoinGecko API → fresh DOT/USD price
@@ -722,8 +737,26 @@ Building verification and governance infrastructure across multiple chains.
 **Polkadot Solidity Hackathon 2026** — EVM Track — DeFi/Stablecoin-enabled dApps
 **Submission deadline:** March 20, 2026 23:59
 **Demo Day:** March 24–25, 2026
+**Commit history:** 80+ commits from Feb 15 onward — full build log on [GitHub](https://github.com/orthonode/dotlend/commits/main)
+**OpenZeppelin track:** Claiming — DotLend uses `Ownable`, `ReentrancyGuard`, `ERC20`, `SafeERC20` from OZ v4.9.6 as core primitives. The `TreasuryRouter` bypass pattern was architected specifically to work around PolkaVM's initcode size limit while keeping OZ-based `LendingPool.sol` byte-for-byte unchanged — non-trivial composition of OZ tooling within a real constraint.
 
 ---
+
+## OpenZeppelin Track
+
+DotLend uses OpenZeppelin v4.9.6 as a core dependency — not as decoration.
+
+| OZ Primitive | Used In | How |
+|-------------|---------|-----|
+| `Ownable` | LendingPool, CollateralVault, TreasuryRouter, SolvencyGateway | Access control for admin functions |
+| `ReentrancyGuard` | LendingPool, CollateralVault | Prevents reentrancy on deposit/borrow/repay/liquidate |
+| `ERC20` | MockUSDH, MockvDOT, WPAS | Token implementations |
+| `SafeERC20` | CollateralVault | Safe token transfers for collateral |
+
+**Non-trivial usage:** PolkaVM's `resolc` compiler imposes a strict initcode bytecode size limit. Our `LendingPool.sol` (OZ `Ownable` + `ReentrancyGuard` composed with lending logic) hit this limit when we added treasury fee logic. The solution was `TreasuryRouter.sol` — a proxy contract that intercepts `transferFrom()` calls and routes fees to treasury, keeping `LendingPool.sol` byte-for-byte unchanged and within the size limit. This is a real architectural consequence of composing OZ primitives under PolkaVM constraints — exactly the kind of thoughtful composition the OZ track is looking for.
+
+---
+
 
 ## License
 
