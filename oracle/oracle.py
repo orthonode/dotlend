@@ -156,52 +156,45 @@ def fetch_vdot_price() -> Decimal:
     except Exception as e:
         log.warning(f"DeFiLlama failed: {e}")
 
-    # Source 1: CoinGecko — vDOT directly, then DOT as proxy
+    # Source 1: Bybit — no auth, no geo-block
     try:
-        url = "https://api.coingecko.com/api/v3/simple/price?ids=bifrost-voucher-dot,polkadot&vs_currencies=usd"
-        resp = requests.get(url, timeout=10)
+        resp = requests.get("https://api.bybit.com/v5/market/tickers?category=spot&symbol=DOTUSDT", timeout=10)
         resp.raise_for_status()
-        data = resp.json()
-        if "bifrost-voucher-dot" in data and "usd" in data["bifrost-voucher-dot"]:
-            price = Decimal(str(data["bifrost-voucher-dot"]["usd"]))
-            log.info(f"[price] CoinGecko vDOT: ${price}")
-            return price
-        if "polkadot" in data and "usd" in data["polkadot"]:
-            price = Decimal(str(data["polkadot"]["usd"]))
-            log.info(f"[price] CoinGecko DOT (proxy): ${price}")
-            return price
-    except Exception as e:
-        log.warning(f"CoinGecko failed: {e}")
-
-    # Source 2: KuCoin — DOT/USDT (no geo-block, no API key)
-    try:
-        resp = requests.get("https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=DOT-USDT", timeout=10)
-        resp.raise_for_status()
-        price = Decimal(resp.json()["data"]["price"])
-        log.info(f"[price] KuCoin DOT/USDT (proxy): ${price:.4f}")
+        price = Decimal(resp.json()["result"]["list"][0]["lastPrice"])
+        log.info(f"[price] Bybit DOT/USDT: ${price:.4f}")
         return price
     except Exception as e:
-        log.warning(f"KuCoin failed: {e}")
+        log.warning(f"Bybit failed: {e}")
 
-    # Source 3: OKX — DOT/USDT
+    # Source 2: MEXC — no auth, no geo-block
     try:
-        resp = requests.get("https://www.okx.com/api/v5/market/ticker?instId=DOT-USDT", timeout=10)
-        resp.raise_for_status()
-        price = Decimal(resp.json()["data"][0]["last"])
-        log.info(f"[price] OKX DOT/USDT (proxy): ${price:.4f}")
-        return price
-    except Exception as e:
-        log.warning(f"OKX failed: {e}")
-
-    # Source 4: Binance — DOT/USDT
-    try:
-        resp = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
+        resp = requests.get("https://api.mexc.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
         resp.raise_for_status()
         price = Decimal(resp.json()["price"])
-        log.info(f"[price] Binance DOT/USDT (proxy): ${price:.4f}")
+        log.info(f"[price] MEXC DOT/USDT: ${price:.4f}")
         return price
     except Exception as e:
-        log.warning(f"Binance failed: {e}")
+        log.warning(f"MEXC failed: {e}")
+
+    # Source 3: Gate.io — no auth
+    try:
+        resp = requests.get("https://api.gateio.ws/api/v4/spot/tickers?currency_pair=DOT_USDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()[0]["last"])
+        log.info(f"[price] Gate.io DOT/USDT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"Gate.io failed: {e}")
+
+    # Source 4: HTX (Huobi) — no auth
+    try:
+        resp = requests.get("https://api.huobi.pro/market/detail/merged?symbol=dotusdt", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(str(resp.json()["tick"]["close"]))
+        log.info(f"[price] HTX DOT/USDT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"HTX failed: {e}")
 
     log.warning("All price sources failed — using fallback $1.50")
     return Decimal("1.50")
@@ -242,38 +235,38 @@ def fetch_dot_price() -> Decimal:
     except Exception as e:
         log.warning(f"[wpas-price] CoinGecko failed: {e}")
 
-    # Source 2: KuCoin
+    # Source 2: Bybit — no auth, no geo-block
     try:
-        resp = requests.get("https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=DOT-USDT", timeout=10)
+        resp = requests.get("https://api.bybit.com/v5/market/tickers?category=spot&symbol=DOTUSDT", timeout=10)
         resp.raise_for_status()
-        price = Decimal(resp.json()["data"]["price"])
-        log.info(f"[wpas-price] KuCoin DOT/USDT: ${price:.4f}")
+        price = Decimal(resp.json()["result"]["list"][0]["lastPrice"])
+        log.info(f"[wpas-price] Bybit DOT/USDT: ${price:.4f}")
         return price
     except Exception as e:
-        log.warning(f"[wpas-price] KuCoin failed: {e}")
+        log.warning(f"[wpas-price] Bybit failed: {e}")
 
-    # Source 3: OKX
+    # Source 3: MEXC — no auth
     try:
-        resp = requests.get("https://www.okx.com/api/v5/market/ticker?instId=DOT-USDT", timeout=10)
-        resp.raise_for_status()
-        price = Decimal(resp.json()["data"][0]["last"])
-        log.info(f"[wpas-price] OKX DOT/USDT: ${price:.4f}")
-        return price
-    except Exception as e:
-        log.warning(f"[wpas-price] OKX failed: {e}")
-
-    # Source 4: Binance
-    try:
-        resp = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
+        resp = requests.get("https://api.mexc.com/api/v3/ticker/price?symbol=DOTUSDT", timeout=10)
         resp.raise_for_status()
         price = Decimal(resp.json()["price"])
-        log.info(f"[wpas-price] Binance DOT/USDT: ${price:.4f}")
+        log.info(f"[wpas-price] MEXC DOT/USDT: ${price:.4f}")
         return price
     except Exception as e:
-        log.warning(f"[wpas-price] Binance failed: {e}")
+        log.warning(f"[wpas-price] MEXC failed: {e}")
 
-    log.warning("[wpas-price] All price sources failed — using fallback $5.00")
-    return Decimal("5.00")
+    # Source 4: Gate.io — no auth
+    try:
+        resp = requests.get("https://api.gateio.ws/api/v4/spot/tickers?currency_pair=DOT_USDT", timeout=10)
+        resp.raise_for_status()
+        price = Decimal(resp.json()[0]["last"])
+        log.info(f"[wpas-price] Gate.io DOT/USDT: ${price:.4f}")
+        return price
+    except Exception as e:
+        log.warning(f"[wpas-price] Gate.io failed: {e}")
+
+    log.warning("[wpas-price] All price sources failed — using fallback $1.50")
+    return Decimal("1.50")
 
 
 def price_to_wei(price_usd: Decimal) -> int:
