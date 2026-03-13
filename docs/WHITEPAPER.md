@@ -800,7 +800,7 @@ The testnet oracle is a single authorized EOA. Oracle key compromise would allow
 
 ### 10.5 Smart Contract Risk
 
-All contracts have been tested against 92 passing Hardhat unit/integration tests + 6 Forge fuzz tests. Tests cover:
+All contracts have been tested against 102 passing Hardhat unit/integration tests + 6 Forge fuzz tests. Tests cover:
 
 - Access control on all privileged functions
 - Price staleness reversion
@@ -821,18 +821,19 @@ All contracts are deployed on Polkadot Hub TestNet, Chain ID 420420417.
 
 | Contract | Address |
 |---|---|
-| PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` |
-| MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
-| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
-| TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` |
-| CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` |
-| LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` |
-| WPAS | `0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6` |
-| TreasuryRouter (WPAS) | `0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba` |
-| CollateralVault (WPAS) | `0x4131788B3A068Acf9758C740826A368bf9FBaE4D` |
-| LendingPool (WPAS) | `0xC557C3869B6B7572a81dB50C61A369682C035EAD` |
+| PriceOracle | `0xb422522F5eB930e417652deb747956545A969F63` |
+| MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` |
+| MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` |
+| TreasuryRouter (vDOT) | `0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281` |
+| CollateralVault (vDOT) | `0x73b41E4815114859FB0c0CD4F504Ed27CBd37219` |
+| LendingPool (vDOT) | `0xf909F5096700439E621B83F826Ee6Ff02047381B` |
+| WPAS | `0x83754cfC4501dc098d5bf37605E77e3bF83a1556` |
+| TreasuryRouter (WPAS) | `0x6007cDBEc7D6D114adc68191465c392Bd29d42cf` |
+| CollateralVault (WPAS) | `0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B` |
+| LendingPool (WPAS) | `0x86a97A53304c20122850cD6b80ccCA2d50A90683` |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
-| SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` |
+| SolvencyGateway | `0x199E3E7c1f1382bc389b495B927B0535B390Acd0` |
+| XCMTreasuryDispatch | `0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d` |
 | Deployer | `0xb947dF17869fAB2DF223a38F28f38b40ca636d4e` |
 
 ### 11.1 On-Chain Evidence
@@ -861,7 +862,7 @@ Post-liquidation:
 
 **Solvency proofs:** `SolvencyProven` events are emitted by `SolvencyGateway` every 30 minutes, visible at:
 ```
-https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa
+https://blockscout-testnet.polkadot.io/address/0x199E3E7c1f1382bc389b495B927B0535B390Acd0
 ```
 
 ---
