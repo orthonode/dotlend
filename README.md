@@ -47,7 +47,7 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 | Signal | Data |
 |--------|------|
 | vDOT utilization on Hydration | **76%** — the supply cap is actually hit. People clearly want this. |
-| USDH TVL | **$330M** — largest stablecoin in the Polkadot ecosystem |
+| Hollar (USDH) TVL | **$330M** — largest stablecoin in the Polkadot ecosystem; DotLend's testnet borrow asset becomes a Hollar liquidity sink on mainnet |
 | Native lending market on Polkadot Hub | **Zero** — So I decided to build the first one. |
 | Polkadot Hub EVM launch | **2026** — Seemed like the right time to just ship it. |
 
@@ -181,7 +181,7 @@ DotLend is the only active lending protocol on Polkadot Hub EVM. The right produ
                                                                                    │
                     └─────────────────────────────────────────────────────────────┘
 
-  Frontend (nexucore.xyz)                     Railway Cron (every 6h)
+  Frontend (nexucore.xyz)                     Railway Cron (every 30m)
   ┌─────────────────────┐                     ┌──────────────────────────┐
   │ Next.js 14 + wagmi  │                     │ generate-solvency-       │
   │ viem + TailwindCSS  │──reads on-chain──►  │ proof.js                 │
