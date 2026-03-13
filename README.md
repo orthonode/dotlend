@@ -4,7 +4,7 @@
 [![CI](https://github.com/orthonode/dotlend/actions/workflows/ci.yml/badge.svg)](https://github.com/orthonode/dotlend/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Chain: Polkadot Hub TestNet](https://img.shields.io/badge/Chain-Polkadot%20Hub%20TestNet-E6007A)](https://blockscout-testnet.polkadot.io)
-[![Tests: 92 Hardhat + 6 Forge fuzz](https://img.shields.io/badge/Tests-92%20Hardhat%20%2B%206%20Forge%20fuzz-brightgreen)]()
+[![Tests: 102 Hardhat + 6 Forge fuzz](https://img.shields.io/badge/Tests-102%20Hardhat%20%2B%206%20Forge%20fuzz-brightgreen)]()
 
 ---
 
@@ -65,22 +65,23 @@ A vDOT holder on Hydration can supply to a pool — but they can't borrow agains
 
 ## Deployed Contracts
 
-All 12 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT + WPAS).
+All 13 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT + WPAS).
 
 | Contract | Address | Blockscout |
 |----------|---------|------------|
-| PriceOracle | `0xc12D24cD6DF4521C9A453a325751bB1f38326a91` | [view](https://blockscout-testnet.polkadot.io/address/0xc12D24cD6DF4521C9A453a325751bB1f38326a91) |
-| MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` | [view](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F) |
-| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` | [view](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca) |
-| TreasuryRouter (vDOT) | `0x68099740bb099970c62F231fE5d8A08ae58de9AA` | [view](https://blockscout-testnet.polkadot.io/address/0x68099740bb099970c62F231fE5d8A08ae58de9AA) |
-| CollateralVault (vDOT) | `0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8` | [view](https://blockscout-testnet.polkadot.io/address/0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8) |
-| LendingPool (vDOT) | `0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419` | [view](https://blockscout-testnet.polkadot.io/address/0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419) |
-| WPAS | `0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6` | [view](https://blockscout-testnet.polkadot.io/address/0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6) |
-| TreasuryRouter (WPAS) | `0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba` | [view](https://blockscout-testnet.polkadot.io/address/0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba) |
-| CollateralVault (WPAS) | `0x4131788B3A068Acf9758C740826A368bf9FBaE4D` | [view](https://blockscout-testnet.polkadot.io/address/0x4131788B3A068Acf9758C740826A368bf9FBaE4D) |
-| LendingPool (WPAS) | `0xC557C3869B6B7572a81dB50C61A369682C035EAD` | [view](https://blockscout-testnet.polkadot.io/address/0xC557C3869B6B7572a81dB50C61A369682C035EAD) |
+| PriceOracle | `0xb422522F5eB930e417652deb747956545A969F63` | [view](https://blockscout-testnet.polkadot.io/address/0xb422522F5eB930e417652deb747956545A969F63) |
+| MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` | [view](https://blockscout-testnet.polkadot.io/address/0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544) |
+| MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` | [view](https://blockscout-testnet.polkadot.io/address/0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683) |
+| TreasuryRouter (vDOT) | `0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281` | [view](https://blockscout-testnet.polkadot.io/address/0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281) |
+| CollateralVault (vDOT) | `0x73b41E4815114859FB0c0CD4F504Ed27CBd37219` | [view](https://blockscout-testnet.polkadot.io/address/0x73b41E4815114859FB0c0CD4F504Ed27CBd37219) |
+| LendingPool (vDOT) | `0xf909F5096700439E621B83F826Ee6Ff02047381B` | [view](https://blockscout-testnet.polkadot.io/address/0xf909F5096700439E621B83F826Ee6Ff02047381B) |
+| WPAS | `0x83754cfC4501dc098d5bf37605E77e3bF83a1556` | [view](https://blockscout-testnet.polkadot.io/address/0x83754cfC4501dc098d5bf37605E77e3bF83a1556) |
+| TreasuryRouter (WPAS) | `0x6007cDBEc7D6D114adc68191465c392Bd29d42cf` | [view](https://blockscout-testnet.polkadot.io/address/0x6007cDBEc7D6D114adc68191465c392Bd29d42cf) |
+| CollateralVault (WPAS) | `0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B` | [view](https://blockscout-testnet.polkadot.io/address/0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B) |
+| LendingPool (WPAS) | `0x86a97A53304c20122850cD6b80ccCA2d50A90683` | [view](https://blockscout-testnet.polkadot.io/address/0x86a97A53304c20122850cD6b80ccCA2d50A90683) |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
-| SolvencyGateway | `0x3e7D948769818C71075E38bbAA6198908Ba6CFAa` | [view](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) |
+| SolvencyGateway | `0x199E3E7c1f1382bc389b495B927B0535B390Acd0` | [view](https://blockscout-testnet.polkadot.io/address/0x199E3E7c1f1382bc389b495B927B0535B390Acd0) |
+| XCMTreasuryDispatch | `0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d` | [view](https://blockscout-testnet.polkadot.io/address/0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d) |
 
 ![DotLend Protocol Overview](./docs/infographic.png)
 
@@ -183,7 +184,7 @@ DotLend is the only active lending protocol on Polkadot Hub EVM. The right produ
 
   Frontend (nexucore.xyz)                     Railway Cron (every 30m)
   ┌─────────────────────┐                     ┌──────────────────────────┐
-  │ Next.js 14 + wagmi  │                     │ generate-solvency-       │
+  │ Next.js 16 + wagmi  │                     │ generate-solvency-       │
   │ viem + TailwindCSS  │──reads on-chain──►  │ proof.js                 │
   │                     │    state directly   │ → refresh oracle price   │
   │ SolvencyStatus.tsx  │◄──getLogs()────────  │ → build circuit witness  │
@@ -309,18 +310,20 @@ On mainnet, `PriceOracle` will be replaced with a Hyperbridge ISMP adapter:
 
 Live at **[nexucore.xyz](https://nexucore.xyz)**
 
-Built with Next.js 14, wagmi v2, viem v2, TailwindCSS. Connects to Polkadot Hub TestNet (Chain ID 420420417).
+Built with Next.js 16 (Turbopack), wagmi v2, viem v2, TailwindCSS. Connects to Polkadot Hub TestNet (Chain ID 420420417).
 
 | Component | Function |
 |-----------|----------|
+| `NavBar` | Route-based navigation with usePathname active state; mobile hamburger dropdown |
 | `SolvencyStatus` | Live SOLVENT badge — reads `SolvencyProven` events, shows collateral/debt/C/D ratio |
-| `LendingDashboard` | User position: vDOT collateral, USDH debt, health factor bar, live vDOT price |
-| `DepositCollateral` | approve + deposit flow with live USD value preview |
+| `LendingDashboard` | User position: collateral, USDH debt, health factor bar with color/label, liq price, max borrow |
+| `DepositCollateral` | approve + deposit flow; 6s auto-hide success toast; inline mapError display |
 | `BorrowUSDH` | Borrow with real-time health factor preview; red warning when HF < 1.2 |
 | `RepayAndWithdraw` | Tabbed repay/withdraw with debt balance display |
 | `LiquidationMonitor` | Scans all borrowers' health factors; liquidate button for eligible positions |
+| `AiAdvisor` | Streaming AI chat (Claude Sonnet); position panel with live on-chain data; quick chips |
 
-All reads are direct on-chain calls via wagmi hooks. No backend. No subgraph. Fully decentralized.
+All reads are direct on-chain calls via wagmi hooks. AI route (`/api/advisor`) is server-side only — API key never exposed to client.
 
 ---
 
@@ -367,14 +370,17 @@ forge test --match-path "test/fuzz/**" -v
 ```
 
 ```
-Hardhat — 92 passing:
-  PriceOracle     — 12 tests: access control, staleness, price submission
-  CollateralVault — 18 tests: deposit, withdraw, health factor math, LTV enforcement
-  LendingPool     — 21 tests: borrow, repay, liquidate, interest accrual
+Hardhat — 102 passing:
+  PriceOracle     — 14 tests: access control, staleness, price submission, circuit breaker
+  CollateralVault — 21 tests: deposit, withdraw, health factor math, LTV enforcement,
+                              donation resistance, supply cap
+  LendingPool     — 23 tests: borrow, repay, liquidate, interest accrual, borrow cap
   TreasuryRouter  — 15 tests: 100% treasury routing, no-op burn, passthrough, admin
   Integration     — 10 tests: full deposit → borrow → price crash → liquidate
   SolvencyProof   — 14 tests: gateway setup, valid/invalid proof, permissionless,
                               wrong input count, stale timestamp
+  XCMPrecompile   —  4 tests: precompile exists, weighMessage, treasury set, dispatch count
+                              (require testnet; skipped on local hardhat)
 
 Forge fuzz — 6 tests × 512 runs:
   testFuzz_HealthFactorNoOverflow     — formula safe in realistic input range
@@ -443,7 +449,8 @@ dotlend/
 │   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
 │   ├── MockSolvencyVerifier.sol # configurable test double
 │   ├── MockvDOT.sol             # ERC-20 vDOT mock
-│   └── MockUSDH.sol           # ERC-20 USDH mock
+│   ├── MockUSDH.sol             # ERC-20 USDH mock
+│   └── XCMTreasuryDispatch.sol  # XCM Track 2 — cross-chain treasury dispatch via precompile
 ├── circuits/
 │   └── solvency/
 │       ├── src/main.nr          # Noir ZK circuit
@@ -490,7 +497,7 @@ dotlend/
 
 ## Tests
 
-**92 Hardhat unit tests** — all run locally on Hardhat without testnet access.
+**102 Hardhat unit tests** — all run locally on Hardhat without testnet access.
 
 ```bash
 npx hardhat test
@@ -525,7 +532,11 @@ The Forge fuzz suite discovered a real arithmetic boundary in the health factor 
 - `SolvencyGateway.setSolvencyVerifier` — owner only, one-time set (immutable after)
 - `SolvencyGateway.publishSolvencyProof` — permissionless (anyone can submit a valid proof)
 
-**Oracle manipulation resistance:** Stale price guard (3600s) prevents frozen-price attacks. Oracle address is a separate authorized key, not the deployer.
+**Oracle manipulation resistance:** Stale price guard (3600s) prevents frozen-price attacks. Oracle address is a separate authorized key, not the deployer. Price deviation circuit breaker (`maxDeviationBps = 2000`, i.e. 20%) rejects any single update that moves the price more than 20% in either direction — prevents oracle key compromise from instantly liquidating all positions.
+
+**Donation attack resistance:** `CollateralVault` tracks its own accounting via `internalCash` rather than `balanceOf(address(this))`. Tokens sent directly to the contract without calling `deposit()` are not counted as collateral — they can be swept to the owner via `sweepDonations()`. This closes the share-inflation attack vector used in ERC-4626 vaults.
+
+**Supply and borrow caps:** `CollateralVault.supplyCap` and `LendingPool.borrowCap` allow the owner to cap total exposure per market (0 = disabled). Critical for early mainnet risk management.
 
 **PolkaVM forbidden opcodes:** Audited — zero instances of `SELFDESTRUCT`, `CREATE2`, `EXTCODECOPY`, `assembly {}`, or `block.prevrandao`. OpenZeppelin v4.x used throughout (v5.x banned).
 
@@ -683,7 +694,7 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 
 | Phase | Timeline | Milestone |
 |-------|----------|-----------|
-| **1 — Testnet** | March 2026 | 12 contracts on Polkadot Hub TestNet, 92 tests, 2 collateral markets ✓ |
+| **1 — Testnet** | March 2026 | 13 contracts on Polkadot Hub TestNet, 102 tests, 2 collateral markets ✓ |
 | **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
 | **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace USDH with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
 | **4 — Treasury Flywheel** | Q3 2026 | Treasury buys DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers |
