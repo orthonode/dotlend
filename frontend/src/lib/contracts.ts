@@ -1,8 +1,9 @@
 export const COMMON_ADDRESSES = {
-  priceOracle:     "0xc12D24cD6DF4521C9A453a325751bB1f38326a91" as `0x${string}`,
-  usdh:            "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca" as `0x${string}`,
-  treasuryRouter:  "0x68099740bb099970c62F231fE5d8A08ae58de9AA" as `0x${string}`,
-  solvencyGateway: "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa" as `0x${string}`,
+  priceOracle:     "0xb422522F5eB930e417652deb747956545A969F63" as `0x${string}`,
+  usdh:            "0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683" as `0x${string}`,
+  treasuryRouter:  "0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281" as `0x${string}`,
+  solvencyGateway: "0x199E3E7c1f1382bc389b495B927B0535B390Acd0" as `0x${string}`,
+  xcmTreasuryDispatch: "0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d" as `0x${string}`,
 };
 
 export type MarketAddresses = {
@@ -14,25 +15,25 @@ export type MarketAddresses = {
 
 export const MARKETS: Record<"vdot" | "wpas", MarketAddresses> = {
   vdot: {
-    collateral: "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
-    collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
-    lendingPool: "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
-    treasuryRouter: "0x68099740bb099970c62F231fE5d8A08ae58de9AA",
+    collateral: "0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544",
+    collateralVault: "0x73b41E4815114859FB0c0CD4F504Ed27CBd37219",
+    lendingPool: "0xf909F5096700439E621B83F826Ee6Ff02047381B",
+    treasuryRouter: "0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281",
   },
   wpas: {
-    collateral: "0x2bab91eCF2d6E9af19182dBFC4141D03154B2eE6",
-    collateralVault: "0x4131788B3A068Acf9758C740826A368bf9FBaE4D",
-    lendingPool: "0xC557C3869B6B7572a81dB50C61A369682C035EAD",
-    treasuryRouter: "0x4Ff597473986387F8c1683ebAf5E123Fc60A25ba",
+    collateral: "0x83754cfC4501dc098d5bf37605E77e3bF83a1556",
+    collateralVault: "0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B",
+    lendingPool: "0x86a97A53304c20122850cD6b80ccCA2d50A90683",
+    treasuryRouter: "0x6007cDBEc7D6D114adc68191465c392Bd29d42cf",
   }
 };
 
 // Kept for backward compat inside specific files temporarily if needed, but we will migrate out of this
 export const ADDRESSES = {
   ...COMMON_ADDRESSES,
-  vdot: "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F" as `0x${string}`,
-  collateralVault: "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8" as `0x${string}`,
-  lendingPool: "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419" as `0x${string}`,
+  vdot: "0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544" as `0x${string}`,
+  collateralVault: "0x73b41E4815114859FB0c0CD4F504Ed27CBd37219" as `0x${string}`,
+  lendingPool: "0xf909F5096700439E621B83F826Ee6Ff02047381B" as `0x${string}`,
 };
 
 export const EXPLORER = "https://blockscout-testnet.polkadot.io";

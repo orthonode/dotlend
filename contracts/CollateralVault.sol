@@ -38,9 +38,17 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     /// @notice USDH debt balance per user (in 1e18, set by LendingPool)
     mapping(address => uint256) public debtBalance;
 
+    /// @notice Internal cash tracker — resistant to donation attacks
+    uint256 public internalCash;
+
+    /// @notice Supply cap — 0 means disabled
+    uint256 public supplyCap;
+
     event Deposited(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event LendingPoolSet(address indexed pool);
+    event DonationSwept(uint256 amount);
+    event SupplyCapUpdated(uint256 cap);
 
     modifier onlyLendingPool() {
         require(msg.sender == lendingPool, "Vault: only lending pool");
@@ -66,7 +74,9 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     /// @param amount Amount of vDOT in 1e18
     function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Vault: zero amount");
+        if (supplyCap > 0) require(internalCash + amount <= supplyCap, "Supply cap reached");
         vdot.safeTransferFrom(msg.sender, address(this), amount);
+        internalCash += amount;
         collateralBalance[msg.sender] += amount;
         emit Deposited(msg.sender, amount);
     }
@@ -94,6 +104,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
         }
 
         collateralBalance[msg.sender] = newCollateral;
+        internalCash -= amount;
         vdot.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
     }
@@ -134,6 +145,23 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     function seizeCollateral(address user, uint256 amount, address recipient) external onlyLendingPool {
         require(collateralBalance[user] >= amount, "Vault: insufficient collateral to seize");
         collateralBalance[user] -= amount;
+        internalCash -= amount;
         vdot.safeTransfer(recipient, amount);
+    }
+
+    /// @notice Recover tokens sent directly to this contract (donation attacks)
+    function sweepDonations() external onlyOwner {
+        uint256 actual = vdot.balanceOf(address(this));
+        uint256 surplus = actual > internalCash ? actual - internalCash : 0;
+        if (surplus > 0) {
+            vdot.safeTransfer(owner(), surplus);
+            emit DonationSwept(surplus);
+        }
+    }
+
+    /// @notice Set supply cap — 0 disables the cap
+    function setSupplyCap(uint256 cap) external onlyOwner {
+        supplyCap = cap;
+        emit SupplyCapUpdated(cap);
     }
 }

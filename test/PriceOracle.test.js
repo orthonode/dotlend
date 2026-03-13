@@ -98,4 +98,22 @@ describe("PriceOracle", function () {
       expect(await oracle.getPrice(TOKEN)).to.equal(price);
     });
   });
+
+  describe("circuit breaker (K3 — price deviation)", function () {
+    it("submitPrice accepts first price with no deviation check", async function () {
+      const { oracle, oracleAddr } = await loadFixture(deployFixture);
+      // prices[TOKEN] == 0, so no deviation check
+      await oracle.connect(oracleAddr).submitPrice(TOKEN, ethers.parseEther("8.5"));
+      expect(await oracle.prices(TOKEN)).to.equal(ethers.parseEther("8.5"));
+    });
+
+    it("submitPrice reverts when price deviates more than 20%", async function () {
+      const { oracle, oracleAddr } = await loadFixture(deployFixture);
+      await oracle.connect(oracleAddr).submitPrice(TOKEN, ethers.parseEther("10"));
+      // $10 → $7 is a 30% drop — exceeds 20% maxDeviationBps
+      await expect(
+        oracle.connect(oracleAddr).submitPrice(TOKEN, ethers.parseEther("7"))
+      ).to.be.revertedWith("Price deviation too large");
+    });
+  });
 });

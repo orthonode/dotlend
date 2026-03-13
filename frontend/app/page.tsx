@@ -1,21 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { LendingDashboard } from "@/src/components/LendingDashboard";
 import { DepositCollateral } from "@/src/components/DepositCollateral";
 import { BorrowUSDH } from "@/src/components/BorrowUSDH";
 import { RepayAndWithdraw } from "@/src/components/RepayAndWithdraw";
-import { LiquidationMonitor } from "@/src/components/LiquidationMonitor";
-import { ProtocolStats } from "@/src/components/ProtocolStats";
-import { Markets } from "@/src/components/Markets";
 import { MARKETS } from "@/src/lib/contracts";
 
-type Tab = "dashboard" | "markets" | "analytics";
-
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
-
   return (
     <div className="space-y-8">
       {/* Testnet notice */}
@@ -44,51 +36,15 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero & Navigation Tabs */}
-      <div>
-        <LendingDashboard />
+      <LendingDashboard />
 
-        <div className="flex gap-4 border-b border-[#222] mt-8 mb-6">
-          {(["dashboard", "markets", "analytics"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-bold capitalize transition-colors border-b-2 ${
-                activeTab === tab
-                  ? "border-[#E6007A] text-white"
-                  : "border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-700"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+      {/* Dashboard forms */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DepositCollateral />
+          <BorrowUSDH />
         </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="min-h-[400px]">
-        {activeTab === "dashboard" && (
-          <div className="space-y-6 slide-enter">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DepositCollateral />
-              <BorrowUSDH />
-            </div>
-            <RepayAndWithdraw />
-          </div>
-        )}
-
-        {activeTab === "markets" && (
-          <div className="slide-enter">
-            <Markets />
-          </div>
-        )}
-
-        {activeTab === "analytics" && (
-          <div className="space-y-6 slide-enter">
-            <ProtocolStats />
-            <LiquidationMonitor />
-          </div>
-        )}
+        <RepayAndWithdraw />
       </div>
 
       {/* Footer */}

@@ -38,7 +38,7 @@ function HealthBar({ hf, hasDebt }: { hf: bigint; hasDebt: boolean }) {
       <div className="mt-3">
         <div className="flex justify-between text-xs mb-1">
           <span className="text-gray-400">Health Factor</span>
-          <span className="font-bold text-green-400">MAX</span>
+          <span className="font-bold text-green-400">MAX — Safe</span>
         </div>
         <div className="h-2 bg-[#222] rounded-full overflow-hidden">
           <div className="h-full rounded-full bg-green-500 w-full transition-all duration-500" />
@@ -49,19 +49,25 @@ function HealthBar({ hf, hasDebt }: { hf: bigint; hasDebt: boolean }) {
   }
 
   const value = Number(formatEther(hf));
-  const capped = Math.min(value, 3);
-  const pct = (capped / 3) * 100;
+  const pct = Math.min(value / 2, 1) * 100;
   const color = value >= 1.5 ? "#22c55e" : value >= 1.2 ? "#eab308" : "#ef4444";
+  const label = value >= 1.5 ? "Safe" : value >= 1.2 ? "At Risk" : "Danger";
+  const labelClass = value >= 1.5 ? "text-green-400" : value >= 1.2 ? "text-yellow-400" : "text-red-500";
 
   return (
     <div className="mt-3">
       <div className="flex justify-between text-xs mb-1">
         <span className="text-gray-400">Health Factor</span>
-        <FlashValue value={value.toFixed(3)} className="font-bold" />
+        <span className="flex items-center gap-2">
+          <FlashValue value={value.toFixed(2)} className="font-bold" />
+          <span className={`font-bold ${labelClass}`}>{label}</span>
+        </span>
       </div>
       <div className="h-2 bg-[#222] rounded-full overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${pct}%`, background: color }} />
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${value < 1.2 ? "animate-pulse" : ""}`}
+          style={{ width: `${pct}%`, background: color }}
+        />
       </div>
       {value < 1.2 && (
         <div className="text-xs text-red-400 mt-1">⚠ Approaching liquidation threshold (1.0)</div>
@@ -153,11 +159,20 @@ export function LendingDashboard() {
     ? Math.min(Number(formatEther(debt)) / Number(formatEther(collUSD)) * 100, 100)
     : 0;
 
-  const collateralDisplay = `${Number(formatEther(collateral)).toFixed(4)} ${assetSymbol}`;
-  const collUSDDisplay    = `$${Number(formatEther(collUSD)).toFixed(2)}`;
-  const debtDisplay       = `${Number(formatEther(debt)).toFixed(6)} USDH`;
+  const collNum    = Number(formatEther(collateral));
+  const collUSDNum = Number(formatEther(collUSD));
+  const debtNum    = Number(formatEther(debt));
+
+  const collateralDisplay = `${collNum.toFixed(2)} ${assetSymbol} ($${collUSDNum.toFixed(2)})`;
+  const debtDisplay       = `${debtNum.toFixed(2)} USDH`;
   const ltvDisplay        = ltv > 0 ? `${ltv.toFixed(1)}%` : "--";
   const priceDisplay      = vdotPrice > 0n ? `$${Number(formatEther(vdotPrice)).toFixed(2)}` : "--";
+
+  const liqPrice = (hasDebt && collateral > 0n)
+    ? Number(formatEther(debt * 100n * BigInt(1e18) / (collateral * 80n))).toFixed(2)
+    : null;
+
+  const maxBorrow = Math.max(0, collUSDNum * 0.70 - debtNum);
 
   return (
     <div className="space-y-6">
@@ -195,7 +210,6 @@ export function LendingDashboard() {
             <div>
               <div className="text-xs text-gray-500">Collateral</div>
               <div className="text-lg font-bold"><FlashValue value={collateralDisplay} /></div>
-              <FlashValue value={collUSDDisplay} className="text-xs text-gray-500" />
             </div>
             <div>
               <div className="text-xs text-gray-500">Debt</div>
@@ -205,12 +219,25 @@ export function LendingDashboard() {
               </div>
             </div>
           </div>
+          {liqPrice && (
+            <div className="text-xs text-gray-500 font-mono space-y-0.5">
+              <div>Liquidation price: <span className="text-red-400">${liqPrice}</span> · Current: <span className="text-white">{priceDisplay}</span></div>
+            </div>
+          )}
+          {collateral > 0n && (
+            <div className="text-xs text-gray-500 font-mono">
+              {maxBorrow > 0
+                ? <span>Available: <span className="text-green-400">${maxBorrow.toFixed(2)} USDH</span></span>
+                : <span className="text-yellow-400">Borrow limit reached</span>
+              }
+            </div>
+          )}
           {collateral > 0n && <HealthBar hf={hf} hasDebt={hasDebt} />}
           {hasDebt && <AccruedInterestBadge debt={debt} />}
         </div>
       ) : (
         <div className="bg-[#111] border border-[#222] rounded-xl p-8 text-center text-gray-500">
-          Connect wallet to see your position
+          Connect your wallet to view your position
         </div>
       )}
     </div>

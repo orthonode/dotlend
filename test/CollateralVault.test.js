@@ -243,4 +243,33 @@ describe("CollateralVault", function () {
         .to.be.revertedWith("Vault: only lending pool");
     });
   });
+
+  describe("internalCash (K1 — donation attack resistance)", function () {
+    it("internalCash increases on deposit and decreases on withdraw", async function () {
+      const { vault, user } = await loadFixture(depositFixture);
+      // depositFixture deposited 10 vDOT
+      expect(await vault.internalCash()).to.equal(ethers.parseEther("10"));
+      await vault.connect(user).withdraw(ethers.parseEther("5"));
+      expect(await vault.internalCash()).to.equal(ethers.parseEther("5"));
+    });
+
+    it("sweepDonations transfers surplus tokens to owner", async function () {
+      const { vault, vdot, owner, user } = await loadFixture(depositFixture);
+      // Donate 5 vDOT directly to vault (bypassing deposit)
+      await vdot.mint(owner.address, ethers.parseEther("5"));
+      await vdot.connect(owner).transfer(vault.target, ethers.parseEther("5"));
+      // internalCash = 10 (from deposit), actual balance = 15, surplus = 5
+      const ownerBalBefore = await vdot.balanceOf(owner.address);
+      await vault.sweepDonations();
+      const ownerBalAfter = await vdot.balanceOf(owner.address);
+      expect(ownerBalAfter - ownerBalBefore).to.equal(ethers.parseEther("5"));
+    });
+
+    it("deposit reverts when supply cap exceeded", async function () {
+      const { vault, user } = await loadFixture(deployFixture);
+      await vault.setSupplyCap(ethers.parseEther("5"));
+      await expect(vault.connect(user).deposit(ethers.parseEther("10")))
+        .to.be.revertedWith("Supply cap reached");
+    });
+  });
 });

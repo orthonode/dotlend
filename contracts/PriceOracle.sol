@@ -21,8 +21,12 @@ contract PriceOracle is Ownable {
     /// @notice Address authorized to post prices
     address public authorizedOracle;
 
+    /// @notice Maximum allowed price deviation in basis points — default 20%
+    uint256 public maxDeviationBps = 2000;
+
     event PriceUpdated(address indexed token, uint256 price, uint256 timestamp);
     event AuthorizedOracleSet(address indexed oracle);
+    event MaxDeviationUpdated(uint256 bps);
 
     modifier onlyOracle() {
         require(msg.sender == authorizedOracle, "PriceOracle: unauthorized");
@@ -35,6 +39,10 @@ contract PriceOracle is Ownable {
     function submitPrice(address token, uint256 price) external onlyOracle {
         require(token != address(0), "PriceOracle: zero address");
         require(price > 0, "PriceOracle: zero price");
+        if (prices[token] > 0) {
+            uint256 diff = price > prices[token] ? price - prices[token] : prices[token] - price;
+            require(diff * 10000 / prices[token] <= maxDeviationBps, "Price deviation too large");
+        }
         prices[token] = price;
         lastUpdated[token] = block.timestamp;
         emit PriceUpdated(token, price, block.timestamp);
@@ -58,5 +66,12 @@ contract PriceOracle is Ownable {
         require(oracle != address(0), "PriceOracle: zero address");
         authorizedOracle = oracle;
         emit AuthorizedOracleSet(oracle);
+    }
+
+    /// @notice Set max allowed price deviation — 10000 = 100% (disables check)
+    function setMaxDeviationBps(uint256 bps) external onlyOwner {
+        require(bps <= 10000, "Max 100%");
+        maxDeviationBps = bps;
+        emit MaxDeviationUpdated(bps);
     }
 }

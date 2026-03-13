@@ -42,11 +42,18 @@ contract LendingPool is Ownable, ReentrancyGuard {
     IPriceOracle public immutable oracle;
     address public immutable vdot;
 
+    /// @notice Borrow cap — 0 means disabled
+    uint256 public borrowCap;
+
+    /// @notice Total protocol debt (principal, not including accrued interest)
+    uint256 public totalDebt;
+
     /// @notice Timestamp of last interest accrual per user
     mapping(address => uint256) public lastAccrualTime;
 
     event Borrowed(address indexed user, uint256 usdhAmount);
     event Repaid(address indexed user, uint256 usdhAmount);
+    event BorrowCapUpdated(uint256 cap);
     event Liquidated(
         address indexed borrower,
         address indexed liquidator,
@@ -103,8 +110,10 @@ contract LendingPool is Ownable, ReentrancyGuard {
         uint256 newDebt = currentDebt + usdhAmount;
 
         require(newDebt * 100 <= collateralUSD * 70, "Pool: exceeds LTV");
+        if (borrowCap > 0) require(totalDebt + usdhAmount <= borrowCap, "Borrow cap reached");
 
         vault.setDebt(msg.sender, newDebt);
+        totalDebt += usdhAmount;
         if (lastAccrualTime[msg.sender] == 0) {
             lastAccrualTime[msg.sender] = block.timestamp;
         }
@@ -127,6 +136,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         usdh.burn(repayAmount);
 
         vault.setDebt(msg.sender, debt - repayAmount);
+        totalDebt = totalDebt >= repayAmount ? totalDebt - repayAmount : 0;
         lastAccrualTime[msg.sender] = block.timestamp;
 
         emit Repaid(msg.sender, repayAmount);
@@ -155,9 +165,16 @@ contract LendingPool is Ownable, ReentrancyGuard {
         }
 
         vault.setDebt(borrower, 0);
+        totalDebt = totalDebt >= debt ? totalDebt - debt : 0;
         // Vault sends vDOT directly to liquidator — no IERC20 needed in this contract
         vault.seizeCollateral(borrower, collateralToSeize, msg.sender);
 
         emit Liquidated(borrower, msg.sender, debt, collateralToSeize);
+    }
+
+    /// @notice Set borrow cap — 0 disables the cap
+    function setBorrowCap(uint256 cap) external onlyOwner {
+        borrowCap = cap;
+        emit BorrowCapUpdated(cap);
     }
 }

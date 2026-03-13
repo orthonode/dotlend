@@ -9,10 +9,20 @@ import { useRefetch } from "@/src/lib/refetch-context";
 import { useTx } from "@/src/lib/tx-context";
 import { useMarket } from "@/src/lib/market-context";
 
+const mapError = (e: unknown) => {
+  const m = String(e).toLowerCase();
+  if (m.includes("allowance")) return "Approve the token first";
+  if (m.includes("ltv") || m.includes("exceeds")) return "Exceeds 70% LTV — reduce amount";
+  if (m.includes("stale") || m.includes("price")) return "Oracle updating — retry in 30s";
+  if (m.includes("health")) return "Would risk liquidation";
+  return "Failed — check Blockscout for details";
+};
+
 export function DepositCollateral() {
   const { address } = useAccount();
   const [amount, setAmount] = useState("");
   const [step, setStep] = useState<"idle" | "approve" | "deposit">("idle");
+  const [successHash, setSuccessHash] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { triggerRefetch } = useRefetch();
   const { setStatus, setOptimistic, clearOptimistic } = useTx();
@@ -41,13 +51,15 @@ export function DepositCollateral() {
   useEffect(() => { if (isPending)     setStatus("confirming"); }, [isPending, setStatus]);
   useEffect(() => { if (isConfirming)  setStatus("confirming"); }, [isConfirming, setStatus]);
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && txHash) {
       setStatus("success");
       clearOptimistic();
       queryClient.invalidateQueries();
       triggerRefetch();
+      setSuccessHash(txHash);
+      setTimeout(() => setSuccessHash(null), 6000);
     }
-  }, [isSuccess, setStatus, clearOptimistic, queryClient, triggerRefetch]);
+  }, [isSuccess, txHash, setStatus, clearOptimistic, queryClient, triggerRefetch]);
   useEffect(() => {
     if (writeError || receiptError) {
       setStatus("error");
@@ -148,11 +160,16 @@ export function DepositCollateral() {
         </button>
       )}
 
-      {isSuccess && txHash && (
-        <a href={`${EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-          className="block text-center text-xs text-[#E6007A] hover:underline">
-          {step === "approve" ? "Approved" : "Deposited"} — View on Blockscout →
+      {successHash && (
+        <a href={`${EXPLORER}/tx/${successHash}`} target="_blank" rel="noopener noreferrer"
+          className="block text-center text-xs text-green-400 hover:underline transition-opacity duration-500">
+          ✓ Confirmed — View on Blockscout →
         </a>
+      )}
+      {(writeError || receiptError) && (
+        <div className="text-xs text-red-400 text-center">
+          {mapError(writeError || receiptError)}
+        </div>
       )}
     </div>
   );

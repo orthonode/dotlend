@@ -184,6 +184,7 @@ describe("LendingPool", function () {
 
     it("reverts if position is healthy", async function () {
       const { pool, oracle, vdot, user, liquidator } = await loadFixture(liquidatableFixture);
+      await oracle.setMaxDeviationBps(10000); // disable cap: $8 → $10 is 25%, would revert otherwise
       await oracle.submitPrice(vdot.target, ethers.parseEther("10"));
       await expect(pool.connect(liquidator).liquidate(user.address))
         .to.be.revertedWith("Pool: position healthy");
@@ -210,6 +211,16 @@ describe("LendingPool", function () {
       const colBefore = await vault.collateralBalance(user.address);
       await pool.connect(liquidator).liquidate(user.address);
       expect(await vault.collateralBalance(user.address)).to.be.lt(colBefore);
+    });
+  });
+
+  describe("borrowCap (K2 — borrow cap)", function () {
+    it("borrow reverts when borrow cap exceeded", async function () {
+      const { pool, user } = await loadFixture(deployFixture);
+      await pool.setBorrowCap(ethers.parseEther("10"));
+      // user has $100 collateral, 70% LTV = $70 max, but cap is $10
+      await expect(pool.connect(user).borrow(ethers.parseEther("11")))
+        .to.be.revertedWith("Borrow cap reached");
     });
   });
 });
