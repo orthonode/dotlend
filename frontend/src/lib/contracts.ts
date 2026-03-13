@@ -52,6 +52,8 @@ export const VAULT_ABI = [
     inputs: [{ name: "amount", type: "uint256" }], outputs: [] },
   { name: "Deposited", type: "event",
     inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256", indexed: false }] },
+  { name: "Withdrawn", type: "event",
+    inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256", indexed: false }] },
 ] as const;
 
 export const POOL_ABI = [
@@ -61,6 +63,8 @@ export const POOL_ABI = [
     inputs: [{ name: "usdhAmount", type: "uint256" }], outputs: [] },
   { name: "liquidate", type: "function", stateMutability: "nonpayable",
     inputs: [{ name: "borrower", type: "address" }], outputs: [] },
+  { name: "Borrowed", type: "event",
+    inputs: [{ name: "user", type: "address", indexed: true }, { name: "usdhAmount", type: "uint256", indexed: false }] },
 ] as const;
 
 export const GATEWAY_ABI = [

@@ -97,7 +97,7 @@ export default function Home() {
         <div className="flex justify-center flex-wrap gap-4 mt-3">
           <a href={`https://blockscout-testnet.polkadot.io/address/${MARKETS.vdot.lendingPool}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">vDOT LendingPool</a>
           <a href={`https://blockscout-testnet.polkadot.io/address/${MARKETS.wpas.lendingPool}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">WPAS LendingPool</a>
-          <a href="https://youtu.be/Oj9luiA8mJM" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">Demo Video</a>
+          <a href="https://youtu.be/nCcKqU8otWM" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">Demo Video</a>
           <a href="https://github.com/orthonode/dotlend" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A]">GitHub</a>
         </div>
       </div>
