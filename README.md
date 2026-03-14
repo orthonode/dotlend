@@ -69,16 +69,16 @@ All 13 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 
 | Contract | Address | Blockscout |
 |----------|---------|------------|
-| PriceOracle | `0xb422522F5eB930e417652deb747956545A969F63` | [view](https://blockscout-testnet.polkadot.io/address/0xb422522F5eB930e417652deb747956545A969F63) |
+| PriceOracle | `0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173` | [view](https://blockscout-testnet.polkadot.io/address/0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173) |
 | MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` | [view](https://blockscout-testnet.polkadot.io/address/0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544) |
 | MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` | [view](https://blockscout-testnet.polkadot.io/address/0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683) |
-| TreasuryRouter (vDOT) | `0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281` | [view](https://blockscout-testnet.polkadot.io/address/0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281) |
-| CollateralVault (vDOT) | `0x73b41E4815114859FB0c0CD4F504Ed27CBd37219` | [view](https://blockscout-testnet.polkadot.io/address/0x73b41E4815114859FB0c0CD4F504Ed27CBd37219) |
-| LendingPool (vDOT) | `0xf909F5096700439E621B83F826Ee6Ff02047381B` | [view](https://blockscout-testnet.polkadot.io/address/0xf909F5096700439E621B83F826Ee6Ff02047381B) |
-| WPAS | `0x83754cfC4501dc098d5bf37605E77e3bF83a1556` | [view](https://blockscout-testnet.polkadot.io/address/0x83754cfC4501dc098d5bf37605E77e3bF83a1556) |
-| TreasuryRouter (WPAS) | `0x6007cDBEc7D6D114adc68191465c392Bd29d42cf` | [view](https://blockscout-testnet.polkadot.io/address/0x6007cDBEc7D6D114adc68191465c392Bd29d42cf) |
-| CollateralVault (WPAS) | `0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B` | [view](https://blockscout-testnet.polkadot.io/address/0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B) |
-| LendingPool (WPAS) | `0x86a97A53304c20122850cD6b80ccCA2d50A90683` | [view](https://blockscout-testnet.polkadot.io/address/0x86a97A53304c20122850cD6b80ccCA2d50A90683) |
+| TreasuryRouter (vDOT) | `0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80` | [view](https://blockscout-testnet.polkadot.io/address/0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80) |
+| CollateralVault (vDOT) | `0x7E700a00290f4B12467361030b274769A10A490B` | [view](https://blockscout-testnet.polkadot.io/address/0x7E700a00290f4B12467361030b274769A10A490B) |
+| LendingPool (vDOT) | `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668` | [view](https://blockscout-testnet.polkadot.io/address/0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668) |
+| WPAS | `0xc09348291775B55Da40433ba44240c262D87Eb90` | [view](https://blockscout-testnet.polkadot.io/address/0xc09348291775B55Da40433ba44240c262D87Eb90) |
+| TreasuryRouter (WPAS) | `0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a` | [view](https://blockscout-testnet.polkadot.io/address/0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a) |
+| CollateralVault (WPAS) | `0x575B8578F000fC554394C63cec8F07Abd0C66C34` | [view](https://blockscout-testnet.polkadot.io/address/0x575B8578F000fC554394C63cec8F07Abd0C66C34) |
+| LendingPool (WPAS) | `0xF68bDd12a8904fd6bB0CbED5623722517FDd3408` | [view](https://blockscout-testnet.polkadot.io/address/0xF68bDd12a8904fd6bB0CbED5623722517FDd3408) |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` | [view](https://blockscout-testnet.polkadot.io/address/0xED2676C995BAA392093Ac0b907EA216c2B8C52cc) |
 | SolvencyGateway | `0x199E3E7c1f1382bc389b495B927B0535B390Acd0` | [view](https://blockscout-testnet.polkadot.io/address/0x199E3E7c1f1382bc389b495B927B0535B390Acd0) |
 | XCMTreasuryDispatch | `0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d` | [view](https://blockscout-testnet.polkadot.io/address/0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d) |
@@ -111,7 +111,7 @@ All 13 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 ### ZK solvency architecture — automated every 30 minutes
 
 The Railway cron job submits a `SolvencyProven` event to `SolvencyGateway` every 30 minutes.
-Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948769818C71075E38bbAA6198908Ba6CFAa) under the contract's Events tab.
+Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x199E3E7c1f1382bc389b495B927B0535B390Acd0) under the contract's Events tab.
 
 ---
 
@@ -622,11 +622,11 @@ Your wallet now has 1000 vDOT and 1000 USDH. Gas (WND) is deducted from the sign
 
 #### Option B — Blockscout (no code, no setup)
 
-1. Go to [MockvDOT on Blockscout](https://blockscout-testnet.polkadot.io/address/0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F)
+1. Go to [MockvDOT on Blockscout](https://blockscout-testnet.polkadot.io/address/0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544)
 2. Click **Write Contract** → connect MetaMask → call `mint(to, amount)`
    - `to`: your MetaMask address
    - `amount`: `1000000000000000000000` (1000 tokens in wei)
-3. Repeat for [MockUSDH](https://blockscout-testnet.polkadot.io/address/0xA94f7464F3a2cA966CB31881A1614A9CF97859ca)
+3. Repeat for [MockUSDH](https://blockscout-testnet.polkadot.io/address/0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683)
 
 ### Step 3 — Import tokens into MetaMask
 
@@ -634,8 +634,8 @@ In MetaMask → Import tokens → add each address:
 
 | Token | Contract Address |
 |-------|-----------------|
-| MockvDOT | `0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F` |
-| MockUSDH | `0xA94f7464F3a2cA966CB31881A1614A9CF97859ca` |
+| MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` |
+| MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` |
 
 ### Step 4 — Use the frontend
 

@@ -21,12 +21,12 @@ const fs = require("fs");
 require("dotenv").config();
 
 const ADDRESSES = {
-  priceOracle:      "0xc12D24cD6DF4521C9A453a325751bB1f38326a91",
-  vdot:             "0xa21443dfC33d44a4BaE8aA6fA6cA2A2d90F7F22F",
-  usdh:             "0xA94f7464F3a2cA966CB31881A1614A9CF97859ca",
-  collateralVault:  "0x57c1d7f0a596FD53923d7AB6c6F2ed0ea73d51A8",
-  lendingPool:      "0xda1eBb8A45ea027b6d2d80AcD6b299ceE31B0419",
-  solvencyGateway:  "0x3e7D948769818C71075E38bbAA6198908Ba6CFAa",
+  priceOracle:      "0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173",
+  vdot:             "0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544",
+  usdh:             "0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683",
+  collateralVault:  "0x7E700a00290f4B12467361030b274769A10A490B",
+  lendingPool:      "0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668",
+  solvencyGateway:  "0x199E3E7c1f1382bc389b495B927B0535B390Acd0",
 };
 
 const EXPLORER = "https://blockscout-testnet.polkadot.io";

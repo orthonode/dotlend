@@ -16,7 +16,7 @@
 const { ethers } = require("hardhat");
 
 // Existing deployed (unchanged) contracts
-const PRICE_ORACLE_ADDRESS = "0xc12D24cD6DF4521C9A453a325751bB1f38326a91";
+const PRICE_ORACLE_ADDRESS = "0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173";
 
 // Initial DOT/PAS price in USD (update if stale at deploy time)
 // The oracle will keep this current on each 30-min tick afterward.
