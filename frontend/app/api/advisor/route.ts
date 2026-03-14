@@ -1,32 +1,60 @@
-import Anthropic from "@anthropic-ai/sdk";
-
 export async function POST(req: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return Response.json({ error: "ANTHROPIC_API_KEY not configured" }, { status: 503 });
+    return Response.json({ error: "GEMINI_API_KEY not configured" }, { status: 503 });
   }
 
   try {
     const { messages, systemPrompt } = await req.json();
 
-    const anthropic = new Anthropic({ apiKey });
+    const geminiMessages = messages.map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: geminiMessages,
+          generationConfig: { maxOutputTokens: 400 },
+        }),
+      }
+    );
+
+    if (!res.ok || !res.body) {
+      const err = await res.text();
+      return Response.json({ error: err }, { status: res.status });
+    }
+
     const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const response = await anthropic.messages.stream({
-            model: "claude-sonnet-4-20250514",
-            max_tokens: 400,
-            system: systemPrompt,
-            messages,
-          });
-          for await (const chunk of response) {
-            if (
-              chunk.type === "content_block_delta" &&
-              chunk.delta.type === "text_delta"
-            ) {
-              controller.enqueue(encoder.encode(chunk.delta.text));
+          const reader = res.body!.getReader();
+          let buffer = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const json = line.slice(6).trim();
+              if (!json || json === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(json);
+                const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) controller.enqueue(encoder.encode(text));
+              } catch {
+                // skip malformed chunks
+              }
             }
           }
         } catch (e) {
