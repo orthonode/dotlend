@@ -1,3 +1,10 @@
+const PROTOCOL_CONTEXT = `DotLend is the first EVM-native money market on Polkadot Hub (Chain ID 420420417).
+It is an Aave/Compound-style lending market — NOT a synthetic stablecoin issuer.
+Testnet uses MockUSDH (mint/burn). Mainnet will use Hollar (real stablecoin, lending reserve model — principal returns to reserve, only stability fee accrues to treasury).
+Key parameters: LTV 70% | Liquidation threshold 80% | Stability fee 0.5%/yr | Liquidation bonus 5% | Oracle stale after 1 hour.
+ZK solvency proofs use a Noir UltraHonk circuit. Testnet uses MockSolvencyVerifier (BN254 precompile pending on PolkaVM).
+Always be concise, accurate, and never invent on-chain numbers.`;
+
 export async function POST(req: Request) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -6,6 +13,7 @@ export async function POST(req: Request) {
 
   try {
     const { messages, systemPrompt } = await req.json();
+    const fullSystemPrompt = `${PROTOCOL_CONTEXT}\n\n${systemPrompt ?? ""}`.trim();
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -18,7 +26,7 @@ export async function POST(req: Request) {
         max_tokens: 400,
         stream: true,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: fullSystemPrompt },
           ...messages,
         ],
       }),

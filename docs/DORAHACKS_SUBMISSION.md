@@ -57,7 +57,7 @@ ZK solvency architecture implemented in Noir/UltraHonk. On-chain verification is
 
 ### Traction
 
-Thirteen contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 102 Hardhat tests pass with 0 failures, covering every state transition including a complete price-crash liquidation cycle. Two collateral markets live (vDOT + native DOT via WPAS). Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts live prices from DeFiLlama every 30 minutes. ZK solvency architecture runs automatically on Railway.
+Thirteen contracts deployed and verified on Polkadot Hub TestNet (Chain ID 420420417). 102 Hardhat tests pass with 0 failures, covering every state transition including a complete price-crash liquidation cycle. Two collateral markets live (vDOT + native DOT via WPAS). Live frontend at nexucore.xyz connects directly to on-chain state — no backend, no subgraph. Oracle posts live prices from DeFiLlama every 30 minutes. ZK solvency architecture runs automatically on Railway. The /advisor page ships an AI risk dashboard: streaming Groq chat with live position context, A–F borrower risk grade (HF + LTV), price drop simulator (−10–50%), liquidation alert banner, mock AML screening, and a transparency card — all client-side from existing wagmi reads, zero new contract calls.
 
 ---
 
@@ -104,7 +104,7 @@ Every contract was built with PolkaVM constraints as hard requirements. No `SELF
 | Contracts | Solidity 0.8.20, OpenZeppelin v4.9.6, Hardhat |
 | Compiler | resolc 0.5.0 via @parity/hardhat-polkadot |
 | ZK Layer | Noir 1.0.0-beta.19, UltraHonk, nargo |
-| Frontend | Next.js 14, React, TypeScript, viem v2, wagmi v2, TailwindCSS |
+| Frontend | Next.js 16, React, TypeScript, viem v2, wagmi v2, TailwindCSS |
 | Prover | Node.js cron on Railway (every 30 minutes) |
 | Oracle (testnet) | Python 3, web3.py, DeFiLlama + Bybit + MEXC + Gate.io fallback |
 | Oracle (mainnet) | Hyperbridge ISMP (PriceOracle implements IIsmpModule) |

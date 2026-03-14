@@ -315,14 +315,14 @@ Built with Next.js 16 (Turbopack), wagmi v2, viem v2, TailwindCSS. Connects to P
 |-----------|----------|
 | `NavBar` | Route-based navigation with usePathname active state; mobile hamburger dropdown |
 | `SolvencyStatus` | Live SOLVENT badge — reads `SolvencyProven` events, shows collateral/debt/C/D ratio |
-| `LendingDashboard` | User position: collateral, USDH debt, health factor bar with color/label, liq price, max borrow |
+| `LendingDashboard` | User position: collateral, USDH debt, health factor bar with color/label, liq price, max borrow; dismissible liquidation risk banner when HF < 1.3 |
 | `DepositCollateral` | approve + deposit flow; 6s auto-hide success toast; inline mapError display |
 | `BorrowUSDH` | Borrow with real-time health factor preview; red warning when HF < 1.2 |
 | `RepayAndWithdraw` | Tabbed repay/withdraw with debt balance display |
 | `LiquidationMonitor` | Scans all borrowers' health factors; liquidate button for eligible positions |
-| `AiAdvisor` | Streaming AI chat (Groq Llama 3.3 70B); position panel with live on-chain data; quick chips |
+| `AiAdvisor` | Streaming AI chat (Groq Llama 3.3 70B); live position panel; **A–F risk grade** badge (HF + LTV compound); **price drop simulator** (−10/20/30/40/50%); **liquidation alert banner** (HF < 1.3); **mock AML screening** (3 flagged addresses); **transparency card** (test count, audit status, ZK caveat); rich system prompt with address, LTV%, risk grade, liq price |
 
-All reads are direct on-chain calls via wagmi hooks. AI route (`/api/advisor`) is server-side only — API key never exposed to client.
+All reads are direct on-chain calls via wagmi hooks. AI route (`/api/advisor`) is server-side only — API key never exposed to client. Route prepends a protocol context block to every system prompt regardless of client payload.
 
 ---
 

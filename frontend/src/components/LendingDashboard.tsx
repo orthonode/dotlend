@@ -133,6 +133,7 @@ export function LendingDashboard() {
   const { collateralDelta, debtDelta } = useTx();
   const { marketId, setMarketId, addresses, assetSymbol } = useMarket();
   const [now, setNow] = useState(Math.floor(Date.now() / 1000));
+  const [liqDismissed, setLiqDismissed] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
@@ -187,6 +188,10 @@ export function LendingDashboard() {
 
   const maxBorrow = Math.max(0, collUSDNum * 0.70 - debtNum);
 
+  const hfNum        = hasDebt ? Number(formatEther(hf)) : 999;
+  const dropToLiq    = hasDebt ? ((hfNum - 1) / hfNum * 100).toFixed(0) : "0";
+  const showLiqBanner = hasDebt && hfNum < 1.3 && !liqDismissed;
+
   const priceAge = lastUpdatedNum > 0 ? formatAge(ageSec) : "";
   const priceSub = isStale
     ? "Oracle stale — last known price"
@@ -194,6 +199,21 @@ export function LendingDashboard() {
 
   return (
     <div className="space-y-6">
+      {showLiqBanner && (
+        <div className="flex items-start justify-between gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+          <div className="text-sm text-red-400">
+            <span className="font-bold">Liquidation Risk</span> — Your health factor is{" "}
+            <span className="font-mono font-bold">{hfNum.toFixed(2)}</span>. A {dropToLiq}% price drop will trigger liquidation.
+          </div>
+          <button
+            onClick={() => setLiqDismissed(true)}
+            className="text-gray-500 hover:text-white text-xs shrink-0 mt-0.5"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <Hero />
 
       {/* Market Selector */}

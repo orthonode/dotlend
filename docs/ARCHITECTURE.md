@@ -693,7 +693,7 @@ vDOT/USD venue in the Polkadot ecosystem ($330M TVL in USDH).
 
 | Layer | Technology | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 14.2.5 |
+| Framework | Next.js (App Router) | 16.1.6 |
 | Wallet | wagmi | v2 |
 | EVM client | viem | v2 |
 | Data fetching | @tanstack/react-query | latest |
@@ -742,12 +742,22 @@ app/
         │     useWriteContract(LendingPool, "repay")
         │     useWriteContract(CollateralVault, "withdraw")
         │
-        └── LiquidationMonitor.tsx
-              Scan Borrowed events → active borrower addresses
-              getHealthFactor for each → display table
-              HF < 1.0 → "Liquidate" button active
-              useWriteContract(MockUSDH,    "approve")
-              useWriteContract(LendingPool, "liquidate")
+        ├── LiquidationMonitor.tsx
+        │     Scan Borrowed events → active borrower addresses
+        │     getHealthFactor for each → display table
+        │     HF < 1.0 → "Liquidate" button active
+        │     useWriteContract(MockUSDH,    "approve")
+        │     useWriteContract(LendingPool, "liquidate")
+        │
+        └── AiAdvisor.tsx  (/advisor page)
+              useReadContracts(collateralBalance, debtBalance, prices)
+              A–F risk grade badge — compound HF + LTV thresholds
+              Price drop simulator — 10/20/30/40/50% scenarios
+              Liquidation alert banner — dismissible, HF < 1.3
+              Mock AML screening — 3 hardcoded flagged addresses
+              Transparency card — test count, audit status, ZK caveat
+              Streaming chat via /api/advisor (Groq Llama 3.3 70B)
+              Route prepends PROTOCOL_CONTEXT block server-side
 ```
 
 ### 6.3 Data Flow Diagram
