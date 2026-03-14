@@ -325,7 +325,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
             log.warning(f"{prefix}Deviation {deviation_bps} bps > limit {max_dev} bps — temporarily widening circuit breaker")
             needs_bypass = True
 
-    nonce = w3.eth.get_transaction_count(account.address)
+    nonce = w3.eth.get_transaction_count(account.address, "pending")
     max_fee, priority_fee = get_eip1559_fees(w3)
 
     if needs_bypass:
@@ -336,7 +336,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
         })
         signed = w3.eth.account.sign_transaction(tx_widen, private_key)
         tx_hash = send_signed(w3, signed)
-        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
         log.info(f"{prefix}Circuit breaker widened to 100%")
         nonce += 1
 
@@ -347,7 +347,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
     })
     signed = w3.eth.account.sign_transaction(tx, private_key)
     tx_hash = send_signed(w3, signed)
-    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
     status = "OK" if receipt["status"] == 1 else "FAIL"
     log.info(f"{prefix}Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {status}")
     log.info(f"{prefix}Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
@@ -361,7 +361,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
         })
         signed = w3.eth.account.sign_transaction(tx_restore, private_key)
         tx_hash = send_signed(w3, signed)
-        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
         log.info(f"{prefix}Circuit breaker restored to {max_dev} bps")
 
     return receipt
@@ -422,7 +422,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
     public_inputs = [total_collateral, total_debt, timestamp]
 
     try:
-        nonce = w3.eth.get_transaction_count(account.address)
+        nonce = w3.eth.get_transaction_count(account.address, "pending")
         max_fee, priority_fee = get_eip1559_fees(w3)
 
         tx = gateway_contract.functions.publishSolvencyProof(
@@ -437,7 +437,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
 
         signed = w3.eth.account.sign_transaction(tx, private_key)
         tx_hash = send_signed(w3, signed)  # ← version-agnostic
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
 
         status = "OK" if receipt["status"] == 1 else "FAIL"
         log.info(f"[solvency] Proof submitted | Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | {status}")
