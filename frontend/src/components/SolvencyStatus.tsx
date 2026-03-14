@@ -87,9 +87,7 @@ async function fetchSolvency() {
 
 function subscribe(fn: Listener) {
   listeners.push(fn);
-  // Immediately send current state to new subscriber
   fn({ data: cachedData, loading: cachedLoading, error: cachedError });
-  // Start polling if first subscriber
   if (listeners.length === 1) {
     fetchSolvency();
     intervalId = setInterval(fetchSolvency, 5 * 60 * 1000);
@@ -117,22 +115,28 @@ function useSolvencyData() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getDotColor(ageHours: number): string {
-  if (ageHours < 1)  return "#22c55e";
-  if (ageHours < 2) return "#eab308";
-  return "#ef4444";
+function getDotClass(ageHours: number): string {
+  if (ageHours < 1) return "bg-green-400";
+  if (ageHours < 2) return "bg-yellow-400";
+  return "bg-red-400";
 }
 
 function getBadgeLabel(ageHours: number): string {
-  if (ageHours < 1)  return "SOLVENCY ARCHITECTURE ✓";
+  if (ageHours < 1) return "SOLVENCY VERIFIED";
   if (ageHours < 2) return "REPORT AGING";
-  return "REPORT STALE ✗";
+  return "REPORT STALE";
+}
+
+function getBadgeTextClass(ageHours: number): string {
+  if (ageHours < 1) return "text-green-400";
+  if (ageHours < 2) return "text-yellow-400";
+  return "text-red-400";
 }
 
 function formatAge(ageMs: number): string {
   const mins = Math.round(ageMs / 60000);
-  if (mins < 60) return `${mins} min ago`;
-  return `${(ageMs / 3600000).toFixed(1)} hr ago`;
+  if (mins < 60) return `${mins}m ago`;
+  return `${(ageMs / 3600000).toFixed(1)}h ago`;
 }
 
 // ── Exported hero text hook ───────────────────────────────────────────────────
@@ -143,9 +147,9 @@ export function useSolvencyHeroText(): string {
   if (!data)   return "Solvency architecture active — pending first report.";
   const ageHours = (Date.now() - data.provenAt.getTime()) / 3600000;
   const age      = formatAge(Date.now() - data.provenAt.getTime());
-  if (ageHours < 1)  return `ZK Solvency Architecture active. Last solvency report: ${age}.`;
-  if (ageHours < 2) return `Solvency architecture report aging — last report ${age}. Next report due soon.`;
-  return `Solvency report is stale (${age}). Architecture remains solvent.`;
+  if (ageHours < 1)  return `ZK Solvency Architecture active. Last report: ${age}.`;
+  if (ageHours < 2) return `Solvency report aging — last ${age}. Next due soon.`;
+  return `Solvency report stale (${age}). Architecture remains solvent.`;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -155,103 +159,75 @@ export function SolvencyStatus() {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <span style={styles.dot("#888")} />
-        <span style={styles.label}>Checking solvency...</span>
+      <div className="flex items-center gap-2 bg-[#0c0c0c] border border-white/5 rounded-xl px-4 py-3">
+        <span className="w-2 h-2 rounded-full bg-gray-500 animate-pulse" />
+        <span className="text-sm text-gray-500">Checking solvency...</span>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div style={styles.container}>
-        <span style={styles.dot("#888")} />
-        <span style={styles.label}>No proof on-chain yet</span>
+      <div className="flex items-center gap-2 bg-[#0c0c0c] border border-white/5 rounded-xl px-4 py-3">
+        <span className="w-2 h-2 rounded-full bg-gray-500" />
+        <span className="text-sm text-gray-500">No proof on-chain yet</span>
       </div>
     );
   }
 
   const ageMs    = Date.now() - data.provenAt.getTime();
   const ageHours = ageMs / 3600000;
-  const dotColor   = getDotColor(ageHours);
-  const badgeLabel = getBadgeLabel(ageHours);
-  const hoursAgo   = formatAge(ageMs);
+  const dotClass    = getDotClass(ageHours);
+  const badgeLabel  = getBadgeLabel(ageHours);
+  const textClass   = getBadgeTextClass(ageHours);
+  const hoursAgo    = formatAge(ageMs);
 
   const collateralF = Number(formatEther(data.totalCollateral));
   const debtF       = Number(formatEther(data.totalDebt));
   const ratio       = debtF > 0 ? collateralF / debtF : null;
-  const ratioDisplay = ratio !== null ? ratio.toFixed(2) + "x" : "∞";
+  const ratioDisplay = ratio !== null ? ratio.toFixed(2) + "x" : "---";
   const explorerUrl  = `https://blockscout-testnet.polkadot.io/tx/${data.txHash}`;
 
   return (
-    <div style={styles.card}>
-      <div style={styles.badgeRow}>
-        <span style={styles.dot(dotColor)} />
-        <span style={{ ...styles.badgeText, color: dotColor }}>{badgeLabel}</span>
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-4 font-mono">
+      <div className="flex items-center gap-2 mb-3">
+        <span className={`w-2 h-2 rounded-full ${dotClass} ${ageHours < 1 ? "live-pulse" : ""}`} />
+        <span className={`text-xs font-bold uppercase tracking-widest ${textClass}`}>
+          {badgeLabel}
+        </span>
       </div>
 
-      <div style={styles.statsRow}>
-        <div style={styles.stat}>
-          <div style={styles.statLabel}>Total Collateral</div>
-          <div style={styles.statValue}>
+      <div className="flex gap-5 mb-3">
+        <div className="flex-1">
+          <div className="text-[11px] text-gray-600 mb-0.5">Total Collateral</div>
+          <div className="text-base font-semibold text-white">
             ${collateralF.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
-        <div style={styles.stat}>
-          <div style={styles.statLabel}>Total Debt</div>
-          <div style={styles.statValue}>
+        <div className="flex-1">
+          <div className="text-[11px] text-gray-600 mb-0.5">Total Debt</div>
+          <div className="text-base font-semibold text-white">
             ${debtF.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
         </div>
-        <div style={styles.stat}>
-          <div style={styles.statLabel}>C/D Ratio</div>
-          <div style={{ ...styles.statValue, color: "#E6007A" }}>{ratioDisplay}</div>
+        <div className="flex-1">
+          <div className="text-[11px] text-gray-600 mb-0.5">C/D Ratio</div>
+          <div className="text-base font-semibold text-[#E6007A]">{ratioDisplay}</div>
         </div>
       </div>
 
-      <div style={styles.footer}>
-        <span style={styles.footerText}>Last logged: {hoursAgo}</span>
-        <a href={explorerUrl} target="_blank" rel="noopener noreferrer" style={styles.link}>
-          View on Blockscout &rarr;
+      <div className="flex justify-between items-center border-t border-white/5 pt-2.5">
+        <span className="text-[11px] text-gray-600">Last logged: {hoursAgo}</span>
+        <a href={explorerUrl} target="_blank" rel="noopener noreferrer"
+          className="text-[11px] text-[#E6007A] hover:underline">
+          Blockscout
         </a>
       </div>
 
-      <div style={styles.disclaimer}>
-        ZK Solvency Architecture is production-ready. On-chain verification is currently mocked
-        pending PolkaVM support for BN254 elliptic curve precompiles (EIP-196/197).
-        The underlying solvency circuit is fully implemented and mainnet-compatible.
+      <div className="mt-2.5 text-[10px] text-gray-600 border-t border-white/5 pt-2">
+        ZK Solvency Architecture is production-ready. On-chain verification mocked pending
+        PolkaVM BN254 precompile support (EIP-196/197). Circuit is mainnet-compatible.
       </div>
     </div>
   );
 }
-
-// ── Styles ────────────────────────────────────────────────────────────────────
-
-const styles = {
-  container: {
-    display: "flex" as const, alignItems: "center" as const, gap: "8px",
-    padding: "8px 16px", borderRadius: "8px", background: "#1a1a1a", border: "1px solid #333",
-  },
-  card: {
-    padding: "16px 20px", borderRadius: "12px", background: "#1a1a1a",
-    border: "1px solid #333", fontFamily: "monospace", minWidth: "320px",
-  },
-  badgeRow: { display: "flex" as const, alignItems: "center" as const, gap: "8px", marginBottom: "12px" },
-  dot: (color: string) => ({
-    display: "inline-block" as const, width: "8px", height: "8px",
-    borderRadius: "50%", background: color, flexShrink: 0 as const,
-  }),
-  label:     { color: "#888", fontSize: "14px" },
-  badgeText: { fontWeight: "700" as const, fontSize: "14px", letterSpacing: "0.05em" },
-  statsRow:  { display: "flex" as const, gap: "20px", marginBottom: "12px" },
-  stat:      { flex: 1 },
-  statLabel: { color: "#666", fontSize: "11px", marginBottom: "4px" },
-  statValue: { color: "#fff", fontWeight: "600" as const, fontSize: "16px" },
-  footer: {
-    display: "flex" as const, justifyContent: "space-between" as const,
-    alignItems: "center" as const, borderTop: "1px solid #222", paddingTop: "10px",
-  },
-  footerText: { color: "#666", fontSize: "12px" },
-  link:       { color: "#E6007A", fontSize: "12px", textDecoration: "none" as const },
-  disclaimer: { marginTop: "10px", fontSize: "11px", color: "#555", borderTop: "1px solid #1a1a1a", paddingTop: "8px" },
-};

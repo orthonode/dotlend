@@ -124,7 +124,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x3e7D948
 | Stability Fee | 0.5% / year (5 bps) | Minimal cost of capital — vDOT staking yield (~15%) far exceeds it |
 | Liquidation Bonus | 5% | Competitive incentive for liquidators; covered by collateral buffer |
 | Oracle Stale Threshold | 1 hour | Prevents stale price exploitation |
-| Treasury Fee | 100% of stability fees | MakerDAO-style — no stablecoin burn; treasury funds DOT buybacks |
+| Treasury Fee | 100% of stability fees | Split: 50% DOT buybacks, 20% user incentives, 18% system maintenance, 12% team operations |
 
 ---
 
@@ -163,9 +163,9 @@ DotLend is the only active lending protocol on Polkadot Hub EVM. The right produ
        │                                    │                                      │
        │                            transferFrom() / burn()                        │
        │                                    ▼                                      │
-       │                              TreasuryRouter  (100% to treasury)           │
+       │                              TreasuryRouter  (fee split)                  │
        │                                    │                                      │
-       │                          transfer()│  (no USDH burn)                    │
+       │                    50% DOT buyback │ 20% incentives │ 18% maint │ 12% team│
        │                               Treasury Wallet                             │
        │                                                                           │
        └──liquidate(borrower)─────────► LendingPool                                │
@@ -238,7 +238,7 @@ Constraints:
 Railway Cron (every 30m)
         │
         ▼
-CoinGecko API → fresh DOT/USD price
+DeFiLlama API → fresh DOT/USD price
         │
         ▼
 oracle.submitPrice(vdot, price)  ← prevents stale price in witness
@@ -286,7 +286,7 @@ npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
 `oracle/oracle.py` — Python script deployed on Railway. The **container runs 24/7**; the script sleeps 30 minutes between price posts. Railway's `restartPolicyType: ALWAYS` auto-restarts the container on any crash.
 
 Loop:
-1. Fetch DOT/USD from CoinGecko (with Binance, KuCoin, OKX fallbacks)
+1. Fetch DOT/USD from DeFiLlama (with Bybit, MEXC, Gate.io fallbacks)
 2. Call `PriceOracle.submitPrice(vdot, price_in_wei)` on-chain — vDOT price
 3. If `WPAS_ADDRESS` is set in `.env`: also call `submitPrice(wpas, dot_price_in_wei)` — native PAS collateral price
 4. Submit solvency report to `SolvencyGateway` every 30 minutes
@@ -361,7 +361,7 @@ cd circuits/solvency && nargo compile
 ### Test
 
 ```bash
-# Hardhat unit tests (92 tests)
+# Hardhat unit tests (102 tests)
 npx hardhat test
 
 # Forge property-based fuzz tests (6 tests, 512 runs each)
@@ -375,7 +375,7 @@ Hardhat — 102 passing:
   CollateralVault — 21 tests: deposit, withdraw, health factor math, LTV enforcement,
                               donation resistance, supply cap
   LendingPool     — 23 tests: borrow, repay, liquidate, interest accrual, borrow cap
-  TreasuryRouter  — 15 tests: 100% treasury routing, no-op burn, passthrough, admin
+  TreasuryRouter  — 15 tests: fee split routing, no-op burn, passthrough, admin
   Integration     — 10 tests: full deposit → borrow → price crash → liquidate
   SolvencyProof   — 14 tests: gateway setup, valid/invalid proof, permissionless,
                               wrong input count, stale timestamp
@@ -443,7 +443,7 @@ dotlend/
 │   ├── PriceOracle.sol          # authorized price feed, staleness guard
 │   ├── CollateralVault.sol      # vDOT deposit, health factor, liquidation seizure
 │   ├── LendingPool.sol          # borrow / repay / liquidate / interest
-│   ├── TreasuryRouter.sol       # 100% fee routing to treasury (MakerDAO model)
+│   ├── TreasuryRouter.sol       # fee split: 50% DOT buyback, 20% incentives, 18% maint, 12% team
 │   ├── WPAS.sol                 # Wrapped PAS — WETH9-style native DOT collateral
 │   ├── SolvencyGateway.sol      # ZK proof submission, SolvencyProven event
 │   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
@@ -562,7 +562,7 @@ The most interesting OZ interaction in DotLend is the one that **didn't work** a
 
 When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a **strict 24KB initcode size limit** — significantly smaller than Ethereum's 24.576KB limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
 
-The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and routes 100% to the treasury. When `LendingPool` calls `usdh.burn()`, the router returns a no-op.
+The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and splits it: 50% DOT buybacks, 20% user incentives, 18% system maintenance, 12% team operations. When `LendingPool` calls `usdh.burn()`, the router returns a no-op.
 
 This pattern exists *specifically because* OpenZeppelin's composition model (Ownable + ReentrancyGuard + ERC20 interactions) consumed enough bytecode that the fee logic had to be externalized. It's a real constraint that produced a cleaner architecture — the router pattern is now more testable, more upgradeable, and more auditable than inline fee logic would have been.
 
@@ -697,15 +697,15 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 | **1 — Testnet** | March 2026 | 13 contracts on Polkadot Hub TestNet, 102 tests, 2 collateral markets ✓ |
 | **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
 | **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace USDH with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
-| **4 — Treasury Flywheel** | Q3 2026 | Treasury buys DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers |
-| **5 — Governance Token** | Q4 2026 | DOTLEND token launch; treasury fee split: 70% reserve, 20% DOT buyback, 10% liquidity mining |
+| **4 — Treasury Flywheel** | Q3 2026 | Fee split live: 50% DOT buybacks, 20% user incentives, 18% maintenance, 12% team |
+| **5 — Governance Token** | Q4 2026 | DOTLEND token launch; governance over fee parameters and risk settings |
 | **6 — Scale** | Q4 2026 | Velocity Labs DeFi Builders Cohort; target $10M TVL |
 
 **Snowbridge multi-asset vision (Phase 3):**
 Snowbridge has $75M+ TVL and zero on-chain downtime. wETH, wBTC, and USDC are already bridgeable to Polkadot Hub. DotLend becomes a full two-sided market: deposit vDOT/wETH/wBTC, borrow USDC. Identical to Aave — but on Polkadot Hub, where nobody has built this yet.
 
-**Treasury flywheel (Phase 4, MakerDAO model):**
-Stability fees accumulate in treasury (100%, no stablecoin burn) → Treasury governance buys DOT on Hydration DEX via XCM → Bought DOT gets staked → becomes vDOT → vDOT distributed to DOTLEND governance token holders → More TVL → more fees → more DOT bought → token price rises. Every dollar borrowed on DotLend eventually becomes DOT demand.
+**Treasury flywheel (Phase 4):**
+Stability fees are split on-chain by TreasuryRouter: 50% buys DOT on Hydration DEX via XCM → staked → vDOT → distributed to DOTLEND stakers. 20% funds user incentives (liquidity mining, deposit rewards). 18% covers system maintenance (audits, infrastructure, oracle hosting). 12% sustains team operations (founder salary, hiring, legal). Every dollar borrowed on DotLend creates direct DOT demand while keeping the team funded and the protocol maintained.
 
 **Hyperbridge ISMP oracle (mainnet):**
 Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOracle.onAccept()` → CollateralVault + LendingPool. No Chainlink. No bridge. 100% Polkadot-native.

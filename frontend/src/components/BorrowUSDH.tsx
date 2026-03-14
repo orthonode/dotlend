@@ -91,7 +91,7 @@ export function BorrowUSDH() {
 
   if (!address) {
     return (
-      <div className="bg-[#111] border border-[#222] rounded-xl p-6 text-center text-gray-500">
+      <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 text-center text-gray-500 text-sm">
         Connect wallet to borrow
       </div>
     );
@@ -100,22 +100,22 @@ export function BorrowUSDH() {
   const busy = isPending || isConfirming;
 
   return (
-    <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
-      <div className="text-sm font-bold text-white">Borrow USDH</div>
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4 hover:border-white/10 transition-colors">
+      <div className="text-sm font-semibold text-white">Borrow USDH</div>
 
       <div className="grid grid-cols-2 gap-3 text-xs">
-        <div className="bg-[#0a0a0a] rounded-lg p-3">
-          <div className="text-gray-500">Collateral Value</div>
+        <div className="bg-[#080808] border border-white/5 rounded-lg p-3">
+          <div className="text-gray-500 text-[11px]">Collateral Value</div>
           <div className="font-bold text-white">${collUSDNum.toFixed(2)}</div>
         </div>
-        <div className="bg-[#0a0a0a] rounded-lg p-3">
-          <div className="text-gray-500">Max Borrow (70% LTV)</div>
-          <div className="font-bold text-[#E6007A]">${maxBorrow.toFixed(2)} USDH</div>
+        <div className="bg-[#080808] border border-white/5 rounded-lg p-3">
+          <div className="text-gray-500 text-[11px]">Max Borrow (70%)</div>
+          <div className="font-bold text-[#E6007A]">${maxBorrow.toFixed(2)}</div>
         </div>
       </div>
 
       <div>
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <div className="flex justify-between text-[11px] text-gray-500 mb-1.5">
           <span>Borrow Amount</span>
           <button onClick={() => setAmount(maxBorrow.toFixed(6))} className="text-[#E6007A] hover:underline">
             MAX ${maxBorrow.toFixed(2)}
@@ -128,68 +128,63 @@ export function BorrowUSDH() {
           placeholder="0.00"
           max={maxBorrow}
           disabled={busy}
-          className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+          className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50 transition-colors"
         />
       </div>
 
-      {/* Stability fee — always shown when there's input */}
       {borrowNum > 0 && (
-        <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3 space-y-2 text-xs font-mono">
+        <div className="bg-[#080808] border border-white/5 rounded-lg p-3 space-y-2 text-xs font-mono">
           <div className="flex justify-between">
             <span className="text-gray-500">New LTV</span>
-            <span style={{ color: ltvColor }} className="font-bold">{(newLTV * 100).toFixed(1)}%</span>
+            <span style={{ color: ltvColor }} className="font-semibold">{(newLTV * 100).toFixed(1)}%</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">New Health Factor</span>
-            <span style={{ color: newHF < 1.2 ? "#ef4444" : newHF < 1.5 ? "#eab308" : "#22c55e" }} className="font-bold">
+            <span className="text-gray-500">Health Factor</span>
+            <span style={{ color: newHF < 1.2 ? "#ef4444" : newHF < 1.5 ? "#eab308" : "#22c55e" }} className="font-semibold">
               {isFinite(newHF) ? newHF.toFixed(3) : "MAX"}
             </span>
           </div>
-          <div className="border-t border-[#222] pt-2 space-y-1">
+          <div className="border-t border-white/5 pt-2 space-y-1">
             <div className="flex justify-between">
-              <span className="text-gray-500">Stability fee</span>
-              <span className="text-white">0.5% / year (5 bps)</span>
+              <span className="text-gray-500">Fee</span>
+              <span className="text-white">0.5%/yr</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Cost on this borrow / day</span>
-              <span className="text-white">~${perDay.toFixed(4)} USDH</span>
-            </div>
-            <div className="text-gray-600 pt-1">
-              Interest accrues every second on-chain from the moment you borrow. Applied automatically on repay via <span className="text-gray-400">accrueInterest()</span>.
+              <span className="text-gray-500">Daily cost</span>
+              <span className="text-white">~${perDay.toFixed(4)}</span>
             </div>
           </div>
           {newHF < 1.2 && isFinite(newHF) && (
-            <div className="text-red-400 font-bold border-t border-[#222] pt-2">
-              ⚠ WARNING: dangerously close to liquidation threshold (HF 1.0)
+            <div className="text-red-400 font-semibold border-t border-white/5 pt-2">
+              Near liquidation threshold (HF 1.0)
             </div>
           )}
         </div>
       )}
 
-      {/* Stability fee reminder even before input */}
       {borrowNum === 0 && (
-        <div className="text-xs text-gray-600 font-mono px-1">
-          Stability fee: 0.5%/yr. Accrues every second from first borrow. Repay any time — contract charges only exact debt.
+        <div className="text-[11px] text-gray-600 px-1">
+          0.5%/yr stability fee. Accrues per second. Contract charges exact debt on repay.
         </div>
       )}
 
       <button
         onClick={handleBorrow}
         disabled={busy || !amount || borrowNum <= 0 || borrowNum > maxBorrow}
-        className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
+        className="w-full py-3 rounded-lg font-semibold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition shadow-lg shadow-[#E6007A]/10 hover:shadow-[#E6007A]/20"
       >
         {busy ? (
           <span className="flex items-center justify-center gap-2">
             <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
+            {isPending ? "Waiting for wallet…" : "Confirming…"}
           </span>
         ) : "Borrow USDH"}
       </button>
 
       {successHash && (
         <a href={`${EXPLORER}/tx/${successHash}`} target="_blank" rel="noopener noreferrer"
-          className="block text-center text-xs text-green-400 hover:underline transition-opacity duration-500">
-          ✓ Confirmed — View on Blockscout →
+          className="block text-center text-xs text-green-400 hover:underline">
+          Confirmed — View on Blockscout
         </a>
       )}
       {(writeError || receiptError) && (

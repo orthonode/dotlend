@@ -86,12 +86,12 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
 ║   └──────────────────────────────────────────────────────────────────────────┘           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
           ▲                                          ▲
-          │ submitPrice every 30 min                 │ publishSolvencyProof every 6h
+          │ submitPrice every 30 min                 │ publishSolvencyProof every 30m
           │                                          │
    ┌──────┴──────────────┐              ┌────────────┴────────────────────────────────┐
    │   oracle.py         │              │   Railway Cron Job                           │
    │   Python process    │              │   generate-solvency-proof.js                 │
-   │   CoinGecko API     │              │   Noir ZK prover (UltraHonk)                 │
+   │   DeFiLlama API     │              │   Noir ZK prover (UltraHonk)                 │
    │   DOT/USD → wei     │              │   Fallback: dummy proof bytes                │
    └─────────────────────┘              └─────────────────────────────────────────────┘
           ▲
@@ -572,7 +572,7 @@ vDOT/USD venue in the Polkadot ecosystem ($330M TVL in USDH).
                                            ▼
                          ┌─────────────────────────────────┐
                          │  Step 1: Fetch Fresh Price        │
-                         │  CoinGecko API → DOT/USD          │
+                         │  DeFiLlama API → DOT/USD          │
                          │  oracle.submitPrice(vDOT, price)  │
                          └───────────────┬─────────────────┘
                                          │
@@ -848,7 +848,7 @@ const logs = await publicClient.getLogs({
   │  oracle.py                  │   │  Railway Cron Job                            │
   │  Local Python process       │   │  railway.json: { "cron": "0 */6 * * *" }    │
   │  30-min interval            │   │  generate-solvency-proof.js                  │
-  │  CoinGecko → submitPrice    │   │  Node.js + @noir-lang/noir_js               │
+  │  DeFiLlama → submitPrice    │   │  Node.js + @noir-lang/noir_js               │
   └─────────────────────────────┘   └─────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────────────────────┐

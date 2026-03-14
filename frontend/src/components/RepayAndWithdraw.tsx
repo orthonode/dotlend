@@ -14,7 +14,7 @@ import { useMarket } from "@/src/lib/market-context";
 function ProtocolFAQ() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-[#1a1a1a] rounded-lg text-xs font-mono">
+    <div className="border border-white/5 rounded-lg text-xs font-mono">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex justify-between items-center px-3 py-2 text-gray-400 hover:text-white transition"
@@ -23,7 +23,7 @@ function ProtocolFAQ() {
         <span>{open ? "▲" : "▼"}</span>
       </button>
       {open && (
-        <div className="px-3 pb-3 space-y-2 text-gray-500 border-t border-[#1a1a1a] pt-2">
+        <div className="px-3 pb-3 space-y-2 text-gray-500 border-t border-white/5 pt-2">
           <div>
             <span className="text-gray-300">Stability fee</span> — 0.5%/year (5 bps), accrues
             every second on-chain. Applied automatically when you call repay().
@@ -49,7 +49,7 @@ function ProtocolFAQ() {
             drops below 1.0 (LTV exceeds 80%), anyone can liquidate your position and receive
             a 5% bonus on the seized collateral.
           </div>
-          <div className="text-gray-600 pt-1 border-t border-[#1a1a1a]">
+          <div className="text-gray-600 pt-1 border-t border-white/5">
             All logic is on-chain and open source:{" "}
             <a
               href="https://github.com/orthonode/dotlend/blob/main/contracts/LendingPool.sol"
@@ -151,7 +151,7 @@ export function RepayAndWithdraw() {
 
   if (!address) {
     return (
-      <div className="bg-[#111] border border-[#222] rounded-xl p-6 text-center text-gray-500">
+      <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 text-center text-gray-500 text-sm">
         Connect wallet to repay or withdraw
       </div>
     );
@@ -165,14 +165,14 @@ export function RepayAndWithdraw() {
   const bufferedDebt = debt + debt / 100n;
 
   return (
-    <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
-      <div className="flex gap-2">
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4 hover:border-white/10 transition-colors">
+      <div className="flex gap-1.5 bg-[#080808] p-1 rounded-lg">
         {(["repay", "withdraw"] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition ${
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-semibold transition-all ${
               activeTab === tab
-                ? "bg-[#E6007A] text-white"
-                : "border border-[#333] text-gray-400 hover:border-[#E6007A]"
+                ? "bg-[#E6007A] text-white shadow-lg shadow-[#E6007A]/20"
+                : "text-gray-400 hover:text-white"
             }`}>
             {tab === "repay" ? "Repay USDH" : `Withdraw ${assetSymbol}`}
           </button>
@@ -183,11 +183,11 @@ export function RepayAndWithdraw() {
         <div className="space-y-3">
           {/* Balances */}
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-[#0a0a0a] rounded-lg p-2">
+            <div className="bg-[#080808] rounded-lg p-2">
               <div className="text-gray-500">Outstanding Debt</div>
               <div className="font-bold text-[#E6007A] font-mono">{Number(formatEther(debt)).toFixed(6)} USDH</div>
             </div>
-            <div className="bg-[#0a0a0a] rounded-lg p-2">
+            <div className="bg-[#080808] rounded-lg p-2">
               <div className="text-gray-500">USDH Balance</div>
               <div className="font-bold font-mono">{Number(formatEther(usdhBal)).toFixed(6)}</div>
             </div>
@@ -195,7 +195,7 @@ export function RepayAndWithdraw() {
 
           {/* Interest accrual rate */}
           {debt > 0n && (
-            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 text-xs font-mono text-gray-500">
+            <div className="bg-[#080808] border border-white/5 rounded-lg px-3 py-2 text-xs font-mono text-gray-500">
               Interest accruing at{" "}
               <span className="text-gray-300">~${perSecond.toFixed(8)}/sec</span>
               {" "}(0.5%/yr). Applied on-chain when you call repay().
@@ -216,7 +216,7 @@ export function RepayAndWithdraw() {
             <input
               type="number" value={repayAmount} onChange={e => setRepayAmount(e.target.value)}
               placeholder="0.00" disabled={busy}
-              className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+              className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
             />
           </div>
 
@@ -229,7 +229,7 @@ export function RepayAndWithdraw() {
 
           {needsApproval ? (
             <button onClick={handleApprove} disabled={busy}
-              className="w-full py-3 rounded-lg font-bold text-sm bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition">
+              className="w-full py-3 rounded-lg font-semibold text-sm bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition">
               {busy
                 ? <span className="flex items-center justify-center gap-2">
                     <span className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -239,7 +239,7 @@ export function RepayAndWithdraw() {
             </button>
           ) : (
             <button onClick={handleRepay} disabled={busy || !repayAmount}
-              className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition">
+              className="w-full py-3 rounded-lg font-semibold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition">
               {busy
                 ? <span className="flex items-center justify-center gap-2">
                     <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -255,7 +255,7 @@ export function RepayAndWithdraw() {
 
       {activeTab === "withdraw" && (
         <div className="space-y-3">
-          <div className="bg-[#0a0a0a] rounded-lg p-3 text-xs font-mono">
+          <div className="bg-[#080808] rounded-lg p-3 text-xs font-mono">
             <div className="text-gray-500">Available Collateral</div>
             <div className="font-bold text-white">{Number(formatEther(collateral)).toFixed(4)} {assetSymbol}</div>
             {debt > 0n && (
@@ -278,14 +278,14 @@ export function RepayAndWithdraw() {
             <input
               type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
               placeholder="0.00" disabled={busy || debt > 0n}
-              className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+              className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
             />
           </div>
 
           <button
             onClick={handleWithdraw}
             disabled={busy || !withdrawAmount || debt > 0n}
-            className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
+            className="w-full py-3 rounded-lg font-semibold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
           >
             {busy
               ? <span className="flex items-center justify-center gap-2">

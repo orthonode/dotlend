@@ -128,7 +128,7 @@ Rules: never invent numbers. under 120 words.`;
       {/* Chat panel — 65% */}
       <div className="flex flex-col" style={{ flex: "0 0 65%" }}>
         {/* Message history */}
-        <div className="flex-1 bg-[#111] border border-[#222] rounded-xl p-4 overflow-y-auto space-y-3 mb-3">
+        <div className="flex-1 bg-[#0c0c0c] border border-white/5 rounded-xl p-4 overflow-y-auto space-y-3 mb-3">
           {messages.length === 0 && (
             <div className="text-gray-500 text-sm text-center mt-8">
               Ask about your position, protocol mechanics, or risk scenarios.
@@ -140,7 +140,7 @@ Rules: never invent numbers. under 120 words.`;
                 className={`max-w-[80%] rounded-xl px-4 py-2 text-sm ${
                   m.role === "user"
                     ? "bg-[#E6007A] text-white"
-                    : "bg-[#1a1a1a] text-gray-200 border border-[#333]"
+                    : "bg-white/5 text-gray-200 border border-white/10"
                 }`}
               >
                 {m.content || (streaming && m.role === "assistant" ? (
@@ -163,7 +163,7 @@ Rules: never invent numbers. under 120 words.`;
               <button
                 key={chip}
                 onClick={() => send(chip)}
-                className="text-xs px-3 py-1.5 rounded-lg border border-[#333] text-gray-400 hover:border-[#E6007A] hover:text-[#E6007A] transition"
+                className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:border-[#E6007A] hover:text-[#E6007A] transition"
               >
                 {chip}
               </button>
@@ -180,7 +180,7 @@ Rules: never invent numbers. under 120 words.`;
             onKeyDown={e => e.key === "Enter" && send(input)}
             placeholder="Ask about your position..."
             disabled={streaming}
-            className="flex-1 bg-[#111] border border-[#333] rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#E6007A] disabled:opacity-50"
+            className="flex-1 bg-[#0c0c0c] border border-white/10 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#E6007A] disabled:opacity-50"
           />
           <button
             onClick={() => send(input)}
@@ -193,7 +193,7 @@ Rules: never invent numbers. under 120 words.`;
       </div>
 
       {/* Position panel — 35% */}
-      <div className="flex-1 bg-[#111] border border-[#222] rounded-xl p-4 space-y-3 text-sm overflow-y-auto">
+      <div className="flex-1 bg-[#0c0c0c] border border-white/5 rounded-xl p-4 space-y-3 text-sm overflow-y-auto">
         <div className="text-xs text-gray-500 uppercase tracking-widest">Your Position</div>
 
         {!address ? (
@@ -231,7 +231,7 @@ Rules: never invent numbers. under 120 words.`;
               </div>
             </div>
 
-            <div className="border-t border-[#222] pt-2 text-[10px] text-gray-600 space-y-1 font-mono">
+            <div className="border-t border-white/5 pt-2 text-[10px] text-gray-600 space-y-1 font-mono">
               <div>LTV 70% | Liq 80% | Fee 0.5%/yr</div>
               <div>vDOT ~15% staking APY | Oracle 30min</div>
             </div>

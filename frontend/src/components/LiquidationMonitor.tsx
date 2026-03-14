@@ -112,9 +112,9 @@ export function LiquidationMonitor() {
   const healthy      = positions.filter(p => Number(formatEther(p.hf)) >= 1.0);
 
   return (
-    <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="text-sm font-bold text-white">Liquidation Monitor</div>
+        <div className="text-sm font-semibold text-white">Liquidation Monitor</div>
         <div className="text-xs text-gray-500">5% bonus to liquidator</div>
       </div>
 
@@ -134,7 +134,7 @@ export function LiquidationMonitor() {
         <>
           {/* Summary bar */}
           <div className="flex gap-3 text-xs font-mono">
-            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 flex-1 text-center">
+            <div className="bg-[#080808] border border-white/5 rounded-lg px-3 py-2 flex-1 text-center">
               <div className="text-gray-500">Monitored</div>
               <div className="text-white font-bold">{positions.length}</div>
             </div>
@@ -148,7 +148,7 @@ export function LiquidationMonitor() {
                 {liquidatable.length}
               </div>
             </div>
-            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-3 py-2 flex-1 text-center">
+            <div className="bg-[#080808] border border-white/5 rounded-lg px-3 py-2 flex-1 text-center">
               <div className="text-gray-500">Safe</div>
               <div className="text-green-400 font-bold">{healthy.length}</div>
             </div>
@@ -170,7 +170,7 @@ export function LiquidationMonitor() {
                 <div
                   key={pos.user}
                   className={`border rounded-lg p-4 ${
-                    isLiquidatable ? "border-red-500/50 bg-red-950/20" : "border-[#222]"
+                    isLiquidatable ? "border-red-500/50 bg-red-950/20" : "border-white/10"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -231,17 +231,17 @@ export function LiquidationMonitor() {
       )}
 
       {/* How liquidation works */}
-      <div className="border border-[#1a1a1a] rounded-lg text-xs font-mono">
+      <div className="border border-white/5 rounded-lg text-xs font-mono">
         <details>
           <summary className="px-3 py-2 text-gray-400 hover:text-white cursor-pointer uppercase tracking-widest">
             How liquidation works
           </summary>
-          <div className="px-3 pb-3 pt-2 border-t border-[#1a1a1a] space-y-2 text-gray-500">
+          <div className="px-3 pb-3 pt-2 border-t border-white/5 space-y-2 text-gray-500">
             <div><span className="text-gray-300">Trigger</span> — health factor drops below 1.0 (LTV exceeds 80%). Anyone can call <span className="text-gray-400">liquidate(borrower)</span>.</div>
             <div><span className="text-gray-300">What happens</span> — the liquidator repays the borrower's full USDH debt and receives their {assetSymbol} collateral plus a 5% bonus.</div>
             <div><span className="text-gray-300">Why 80% threshold</span> — collateral is priced at the oracle's last on-chain value. Price feeds update every 30 minutes via the Python oracle; the 80% liquidation threshold gives a buffer against price drops between updates.</div>
             <div><span className="text-gray-300">This monitor</span> — scans all <span className="text-gray-400">Deposited</span> events from block 0, re-reads every 15 seconds. Health factors are computed client-side using the same formula as <span className="text-gray-400">CollateralVault.sol</span>.</div>
-            <div className="pt-1 border-t border-[#1a1a1a] text-gray-600">
+            <div className="pt-1 border-t border-white/5 text-gray-600">
               Source:{" "}
               <a href="https://github.com/orthonode/dotlend/blob/main/contracts/LendingPool.sol"
                 target="_blank" rel="noopener noreferrer" className="text-[#E6007A] hover:underline">

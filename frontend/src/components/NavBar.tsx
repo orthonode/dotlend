@@ -21,17 +21,17 @@ export function NavBar() {
   return (
     <div className="flex-1 flex items-center justify-between">
       {/* Desktop nav links */}
-      <nav className="hidden md:flex items-center gap-6 ml-6">
+      <nav className="hidden md:flex items-center gap-1 ml-4">
         {NAV.map(({ label, href }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`text-sm transition-colors ${
+              className={`text-sm px-3 py-1.5 rounded-lg transition-all ${
                 active
-                  ? "font-bold text-white border-b-2 border-[#E6007A] pb-0.5"
-                  : "text-gray-400 hover:text-white"
+                  ? "font-semibold text-white bg-white/5"
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
               }`}
             >
               {label}
@@ -40,11 +40,11 @@ export function NavBar() {
         })}
       </nav>
 
-      {/* Right side: desktop actions + mobile hamburger */}
-      <div className="flex items-center gap-3 ml-auto">
+      {/* Right side */}
+      <div className="flex items-center gap-2.5 ml-auto">
         <Link
           href="/mint"
-          className="hidden md:block text-xs px-3 py-1.5 rounded-lg border border-yellow-600/50 text-yellow-400 hover:bg-yellow-600/10 transition"
+          className="hidden md:block text-xs px-3 py-1.5 rounded-lg border border-yellow-500/30 text-yellow-400/80 hover:bg-yellow-500/5 hover:text-yellow-400 transition"
         >
           Get tokens
         </Link>
@@ -54,26 +54,28 @@ export function NavBar() {
         <div className="md:hidden relative">
           <button
             onClick={() => setOpen(o => !o)}
-            className="text-gray-400 hover:text-white p-1 text-lg"
+            className="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition text-lg"
             aria-label="Toggle menu"
           >
-            ☰
+            {open ? "✕" : "☰"}
           </button>
           {open && (
-            <div className="absolute top-full right-0 mt-2 bg-[#0a0a0a] border border-[#222] rounded-lg shadow-lg p-4 flex flex-col gap-3 min-w-[160px] z-50">
+            <div className="absolute top-full right-0 mt-2 bg-[#0c0c0c] border border-white/10 rounded-xl shadow-2xl p-4 flex flex-col gap-2.5 min-w-[180px] z-50 backdrop-blur-xl">
               {NAV.map(({ label, href }) => (
                 <Link
                   key={href}
                   href={href}
-                  className={`text-sm ${
-                    pathname === href ? "font-bold text-[#E6007A]" : "text-gray-400"
+                  className={`text-sm px-3 py-2 rounded-lg transition ${
+                    pathname === href
+                      ? "font-semibold text-white bg-white/5"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   {label}
                 </Link>
               ))}
-              <hr className="border-[#222]" />
-              <Link href="/mint" className="text-xs text-yellow-400">
+              <hr className="border-white/5" />
+              <Link href="/mint" className="text-xs text-yellow-400 px-3 py-1.5">
                 Get tokens
               </Link>
             </div>

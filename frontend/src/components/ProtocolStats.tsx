@@ -59,7 +59,7 @@ function Stat({
   accent?: boolean;
 }) {
   return (
-    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-4 space-y-1">
+    <div className="bg-[#080808] border border-white/5 rounded-xl p-4 space-y-1">
       <div className="text-[10px] text-gray-600 uppercase tracking-widest">
         {label}
       </div>
@@ -191,11 +191,11 @@ export function ProtocolStats() {
   const stabilityFeeRate = "0.5%/yr on all debt";
 
   return (
-    <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-5">
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-5">
       {/* Header */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <div className="text-sm font-bold text-white">Protocol Stats</div>
+          <div className="text-sm font-semibold text-white">Protocol Stats</div>
           <a
             href={`${EXPLORER}/address/${addresses.lendingPool}`}
             target="_blank"
@@ -241,7 +241,7 @@ export function ProtocolStats() {
       </div>
 
       {/* Revenue model explainer */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 text-xs font-mono space-y-3">
+      <div className="bg-[#080808] border border-white/5 rounded-lg p-4 text-xs font-mono space-y-3">
         <div className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">
           Revenue Model — MakerDAO-Style
         </div>
@@ -259,7 +259,7 @@ export function ProtocolStats() {
             <span className="text-white">DOT/vDOT buybacks</span>
           </div>
         </div>
-        <div className="border-t border-[#1a1a1a] pt-3 space-y-1 text-gray-600">
+        <div className="border-t border-white/5 pt-3 space-y-1 text-gray-600">
           <div>
             Treasury governance directs accumulated fees to{" "}
             <span className="text-[#E6007A]">buy DOT/vDOT on open market</span>{" "}

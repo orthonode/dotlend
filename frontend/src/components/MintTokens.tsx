@@ -72,7 +72,7 @@ export function MintTokens() {
   return (
     <div className="space-y-6">
       {/* Explainer */}
-      <div className="bg-[#111] border border-[#222] rounded-xl p-6">
+      <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6">
         <div className="text-sm font-bold text-white mb-2">How minting works</div>
         <div className="text-xs text-gray-400 space-y-2">
           <p>
@@ -88,7 +88,7 @@ export function MintTokens() {
           </p>
         </div>
         {/* Faucet link */}
-        <div className="mt-4 border-t border-[#222] pt-4">
+        <div className="mt-4 border-t border-white/5 pt-4">
           <div className="text-xs text-gray-500 mb-2">Need testnet DOT for gas?</div>
           <a
             href="https://faucet.polkadot.io"
@@ -112,7 +112,7 @@ export function MintTokens() {
       {address ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Collateral (vDOT or WPAS) */}
-          <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
+          <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4">
             {marketId === "vdot" ? (
               <>
                 <div>
@@ -158,7 +158,7 @@ export function MintTokens() {
                       onChange={(e) => setWrapAmount(e.target.value)}
                       placeholder="0.00"
                       disabled={busy}
-                      className="flex-1 bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+                      className="flex-1 bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
                     />
                   </div>
                   <div className="text-xs text-gray-500 font-mono mt-0.5 break-all">{addresses.collateral}</div>
@@ -180,7 +180,7 @@ export function MintTokens() {
           </div>
 
           {/* USDH */}
-          <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
+          <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4">
             <div>
               <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">USDH</div>
               <div className="text-2xl font-bold text-white">
@@ -203,7 +203,7 @@ export function MintTokens() {
           </div>
         </div>
       ) : (
-        <div className="bg-[#111] border border-[#222] rounded-xl p-8 text-center text-gray-500">
+        <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-8 text-center text-gray-500">
           Connect wallet to mint tokens
         </div>
       )}
@@ -228,7 +228,7 @@ export function MintTokens() {
       )}
 
       {/* Alternative: script / Blockscout */}
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-5 space-y-3">
+      <div className="bg-[#080808] border border-white/5 rounded-xl p-5 space-y-3">
         <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
           Prefer not to connect a wallet?
         </div>

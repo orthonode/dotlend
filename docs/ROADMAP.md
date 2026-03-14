@@ -43,7 +43,7 @@
 
 - [x] All 5 contracts deployed to **Polkadot Hub TestNet** (Chain ID 420420417)
 - [x] PriceOracle seeded with vDOT = $8.50
-- [x] oracle/oracle.py — posts vDOT price every 30 min (CoinGecko + env override)
+- [x] oracle/oracle.py — posts vDOT price every 30 min (DeFiLlama + env override)
 - [x] scripts/simulate-crisis.js — price crash $8.50→$6.00, HF 1.214→0.857, liquidation ✓
 - [x] scripts/interact.js — deposit→borrow→repay→withdraw flow verified
 
@@ -60,7 +60,7 @@
 - [x] LendingPool.sol — publishSolvencyProof() + SolvencyProven event
 - [x] scripts/generate-solvency-proof.js — off-chain prover (noir_js + backend_barretenberg)
 - [x] test/SolvencyProof.test.js — 14 tests passing
-- [x] railway.json — Railway cron (every 6hr, auto-submit proof)
+- [x] railway.json — Railway cron (every 30min, auto-submit proof)
 - [x] frontend/src/components/SolvencyStatus.tsx — live SOLVENT badge widget
 - [x] 76 total tests green (62 + 14)
 

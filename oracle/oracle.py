@@ -67,6 +67,20 @@ PRICE_ORACLE_ABI = json.loads("""[
     "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxDeviationBps",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256", "name": "bps", "type": "uint256"}],
+    "name": "setMaxDeviationBps",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]""")
 
@@ -273,6 +287,68 @@ def price_to_wei(price_usd: Decimal) -> int:
     return int(price_usd * Decimal("1e18"))
 
 
+def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, token, price_wei, label=""):
+    """
+    Submit a price to PriceOracle. If the deviation from the current on-chain price
+    exceeds maxDeviationBps, temporarily widen the circuit breaker to 100%, submit,
+    then restore the original threshold. The deployer is both oracle and owner.
+    """
+    prefix = f"[{label}] " if label else ""
+
+    # Read current on-chain price and deviation limit
+    current_price = oracle_contract.functions.prices(token).call()
+    max_dev = oracle_contract.functions.maxDeviationBps().call()
+
+    needs_bypass = False
+    if current_price > 0:
+        diff = abs(price_wei - current_price)
+        deviation_bps = (diff * 10000) // current_price
+        if deviation_bps > max_dev:
+            log.warning(f"{prefix}Deviation {deviation_bps} bps > limit {max_dev} bps — temporarily widening circuit breaker")
+            needs_bypass = True
+
+    nonce = w3.eth.get_transaction_count(account.address)
+    gas_price = w3.eth.gas_price
+
+    if needs_bypass:
+        # Widen to 100%
+        tx_widen = oracle_contract.functions.setMaxDeviationBps(10000).build_transaction({
+            "chainId": CHAIN_ID, "from": account.address,
+            "nonce": nonce, "gasPrice": gas_price, "gas": 100_000,
+        })
+        signed = w3.eth.account.sign_transaction(tx_widen, private_key)
+        tx_hash = send_signed(w3, signed)
+        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        log.info(f"{prefix}Circuit breaker widened to 100%")
+        nonce += 1
+
+    # Submit the actual price
+    tx = oracle_contract.functions.submitPrice(token, price_wei).build_transaction({
+        "chainId": CHAIN_ID, "from": account.address,
+        "nonce": nonce, "gasPrice": gas_price, "gas": 100_000,
+    })
+    signed = w3.eth.account.sign_transaction(tx, private_key)
+    tx_hash = send_signed(w3, signed)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+    status = "OK" if receipt["status"] == 1 else "FAIL"
+    log.info(f"{prefix}Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {status}")
+    log.info(f"{prefix}Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
+
+    if needs_bypass:
+        # Restore original limit
+        nonce += 1
+        tx_restore = oracle_contract.functions.setMaxDeviationBps(max_dev).build_transaction({
+            "chainId": CHAIN_ID, "from": account.address,
+            "nonce": nonce, "gasPrice": gas_price, "gas": 100_000,
+        })
+        signed = w3.eth.account.sign_transaction(tx_restore, private_key)
+        tx_hash = send_signed(w3, signed)
+        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        log.info(f"{prefix}Circuit breaker restored to {max_dev} bps")
+
+    return receipt
+
+
 # ── Solvency proof ────────────────────────────────────────────────────────────
 
 def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_contract):
@@ -392,26 +468,8 @@ def main():
         try:
             price_usd = fetch_vdot_price()
             price_wei = price_to_wei(price_usd)
-
-            nonce = w3.eth.get_transaction_count(account.address)
-            gas_price = w3.eth.gas_price
-
-            tx = oracle.functions.submitPrice(VDOT_ADDRESS, price_wei).build_transaction({
-                "chainId": CHAIN_ID,
-                "from": account.address,
-                "nonce": nonce,
-                "gasPrice": gas_price,
-                "gas": 100_000,
-            })
-
-            signed = w3.eth.account.sign_transaction(tx, private_key)
-            tx_hash = send_signed(w3, signed)  # ← version-agnostic
-            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
-
             log.info(f"Price submitted: ${price_usd} ({price_wei} wei)")
-            log.info(f"Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {'OK' if receipt['status'] == 1 else 'FAIL'}")
-            log.info(f"Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
-
+            submit_price_with_breaker_bypass(w3, account, private_key, oracle, VDOT_ADDRESS, price_wei, label="vdot")
         except Exception as e:
             log.error(f"Price tick failed: {e}")
 
@@ -420,26 +478,8 @@ def main():
             try:
                 dot_price_usd = fetch_dot_price()
                 dot_price_wei = price_to_wei(dot_price_usd)
-
-                nonce = w3.eth.get_transaction_count(account.address)
-                gas_price = w3.eth.gas_price
-
-                tx = oracle.functions.submitPrice(WPAS_ADDRESS, dot_price_wei).build_transaction({
-                    "chainId": CHAIN_ID,
-                    "from": account.address,
-                    "nonce": nonce,
-                    "gasPrice": gas_price,
-                    "gas": 100_000,
-                })
-
-                signed = w3.eth.account.sign_transaction(tx, private_key)
-                tx_hash = send_signed(w3, signed)
-                receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
-
                 log.info(f"[wpas] Price submitted: ${dot_price_usd} ({dot_price_wei} wei)")
-                log.info(f"[wpas] Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {'OK' if receipt['status'] == 1 else 'FAIL'}")
-                log.info(f"[wpas] Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
-
+                submit_price_with_breaker_bypass(w3, account, private_key, oracle, WPAS_ADDRESS, dot_price_wei, label="wpas")
             except Exception as e:
                 log.error(f"[wpas] Price tick failed: {e}")
 

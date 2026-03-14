@@ -50,7 +50,7 @@ Contract deployment to Westend Asset Hub is in Phase 3 (requires WND on Asset Hu
 
 ### Deliverables
 - [x] All 5 contracts deployed to Polkadot Hub TestNet (Chain ID 420420417) → 5 Blockscout links
-- [x] `oracle/oracle.py` — posts vDOT price every 30 min, CoinGecko + env override
+- [x] `oracle/oracle.py` — posts vDOT price every 30 min, DeFiLlama + env override
 - [x] `oracle/requirements.txt`
 - [x] `scripts/simulate-crisis.js` — full crisis simulation PASSED on-chain ✓
 - [x] `scripts/interact.js` — deposit → borrow → repay → withdraw flow verified

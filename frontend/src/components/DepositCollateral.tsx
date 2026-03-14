@@ -96,7 +96,7 @@ export function DepositCollateral() {
 
   if (!address) {
     return (
-      <div className="bg-[#111] border border-[#222] rounded-xl p-6 text-center text-gray-500">
+      <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 text-center text-gray-500 text-sm">
         Connect wallet to deposit
       </div>
     );
@@ -105,11 +105,11 @@ export function DepositCollateral() {
   const busy = isPending || isConfirming;
 
   return (
-    <div className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4">
-      <div className="text-sm font-bold text-white">Deposit {assetSymbol} Collateral</div>
+    <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4 hover:border-white/10 transition-colors">
+      <div className="text-sm font-semibold text-white">Deposit {assetSymbol}</div>
 
       <div>
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <div className="flex justify-between text-[11px] text-gray-500 mb-1.5">
           <span>Amount</span>
           <span>Balance: {assetBalance !== undefined ? Number(formatEther(assetBalance)).toFixed(4) : "--"} {assetSymbol}</span>
         </div>
@@ -120,12 +120,12 @@ export function DepositCollateral() {
             onChange={e => setAmount(e.target.value)}
             placeholder="0.00"
             disabled={busy}
-            className="flex-1 bg-[#0a0a0a] border border-[#333] rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
+            className="flex-1 bg-[#080808] border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50 transition-colors"
           />
           <button
             onClick={() => assetBalance && setAmount(formatEther(assetBalance))}
             disabled={busy}
-            className="px-3 py-2 text-xs border border-[#333] rounded-lg text-gray-400 hover:border-[#E6007A] hover:text-[#E6007A] transition disabled:opacity-50"
+            className="px-3 py-2.5 text-xs font-medium border border-white/10 rounded-lg text-gray-400 hover:border-[#E6007A] hover:text-[#E6007A] transition disabled:opacity-50"
           >
             MAX
           </button>
@@ -136,7 +136,7 @@ export function DepositCollateral() {
         <button
           onClick={handleApprove}
           disabled={busy || !amount}
-          className="w-full py-3 rounded-lg font-bold text-sm bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition"
+          className="w-full py-3 rounded-lg font-semibold text-sm bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition"
         >
           {busy ? (
             <span className="flex items-center justify-center gap-2">
@@ -149,12 +149,12 @@ export function DepositCollateral() {
         <button
           onClick={handleDeposit}
           disabled={busy || !amount || parsedAmount === 0n}
-          className="w-full py-3 rounded-lg font-bold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition"
+          className="w-full py-3 rounded-lg font-semibold text-sm bg-[#E6007A] text-white hover:bg-[#c4006a] disabled:opacity-50 transition shadow-lg shadow-[#E6007A]/10 hover:shadow-[#E6007A]/20"
         >
           {busy ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {isPending ? "Waiting for wallet…" : "Confirming on-chain…"}
+              {isPending ? "Waiting for wallet…" : "Confirming…"}
             </span>
           ) : `Deposit ${assetSymbol}`}
         </button>
@@ -162,8 +162,8 @@ export function DepositCollateral() {
 
       {successHash && (
         <a href={`${EXPLORER}/tx/${successHash}`} target="_blank" rel="noopener noreferrer"
-          className="block text-center text-xs text-green-400 hover:underline transition-opacity duration-500">
-          ✓ Confirmed — View on Blockscout →
+          className="block text-center text-xs text-green-400 hover:underline">
+          Confirmed — View on Blockscout
         </a>
       )}
       {(writeError || receiptError) && (

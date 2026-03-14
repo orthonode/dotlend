@@ -108,7 +108,7 @@ DotLend is composed of seven contracts organized into two layers:
 │   └──────────────────────┘                                   │
 │                                                              │
 │   Off-chain: Railway cron → generate-solvency-proof.js       │
-│              Noir 1.0.0-beta.19 | UltraHonk | every 6h      │
+│              Noir 1.0.0-beta.19 | UltraHonk | every 30m      │
 └──────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────────┐
@@ -317,7 +317,22 @@ The function is public and can be called by anyone — useful for liquidators wh
 
 ### 5.4 Interest Destination
 
-Interest increases the debt balance stored in `CollateralVault`. When the borrower eventually repays, the full accrued debt (principal + stability fee) is transferred to `LendingPool` and burned. There is no protocol fee reserve in the current design — fees are destroyed, reducing USDH supply and acting as a mild deflationary mechanism.
+Interest increases the debt balance stored in `CollateralVault`. When the borrower eventually repays, the full accrued debt (principal + stability fee) is transferred to `LendingPool`, which routes it through `TreasuryRouter`. The router intercepts the repayment and directs it to the protocol treasury rather than burning it.
+
+**Fee Split (TreasuryRouter):**
+
+```
+User repays (principal + accrued stability fee)
+         ↓
+TreasuryRouter intercepts repayment
+         ↓
+50%  → DOT Buybacks (Hydration DEX via XCM → stake → vDOT → ecosystem flywheel)
+20%  → User Incentives (liquidity mining, early depositor rewards)
+18%  → System Development & Maintenance (audits, infrastructure, oracle costs)
+12%  → Team Operations (founder salary, hiring, legal)
+```
+
+This split is designed to be sustainable. A protocol where the team takes nothing is not a protocol that survives long enough to reach mainnet. The 12% team allocation is modest, transparent, and ensures continuity. The 50% DOT buyback creates direct demand for DOT — every dollar borrowed on DotLend eventually becomes DOT ecosystem value.
 
 ---
 
@@ -553,7 +568,7 @@ A Railway cron job runs `scripts/generate-solvency-proof.js` every 30 minutes:
 
 ```
 Step 1: Refresh oracle price
-        → CoinGecko API → current DOT/USD price
+        → DeFiLlama API → current DOT/USD price
         → Post to PriceOracle.submitPrice() if needed
 
 Step 2: Discover active users
@@ -633,10 +648,10 @@ A React component (`frontend/src/components/SolvencyStatus.tsx`) reads the lates
 
 ### 8.1 Testnet Oracle
 
-For testnet, price data flows from CoinGecko to the protocol:
+For testnet, price data flows from DeFiLlama to the protocol:
 
 ```
-CoinGecko API
+DeFiLlama API
       │
       │  HTTP GET /simple/price?ids=polkadot&vs_currencies=usd
       │
@@ -746,7 +761,7 @@ Both `SafeERC20` and `ReentrancyGuard` from OZ v4.x compile cleanly with `resolc
 
 ### 9.6 Compilation Verification
 
-All 12 contracts (across 2 collateral markets) compile to `hh-resolc-artifact-1` format using `resolc 0.5.0` via `@parity/hardhat-polkadot`. All artifacts carry the `0x50564d00` PolkaVM bytecode prefix, confirming successful compilation to PolkaVM target.
+All 13 contracts (across 2 collateral markets) compile to `hh-resolc-artifact-1` format using `resolc 0.5.0` via `@parity/hardhat-polkadot`. All artifacts carry the `0x50564d00` PolkaVM bytecode prefix, confirming successful compilation to PolkaVM target.
 
 ```bash
 npx hardhat compile --network westendAssetHub
@@ -923,7 +938,7 @@ Replace the fixed stability fee with a dynamic interest rate curve:
 
 - Deploy a DOT-based governance token (or use DOT directly via OpenGov)
 - Interest rate parameters, LTV ratios, and risk parameters governed on-chain
-- Treasury accumulates stability fees rather than burning them
+- Treasury fee split enforced on-chain: 50% DOT buyback, 20% user incentives, 18% maintenance, 12% team
 
 ### 12.7 Phase 7: Multi-Collateral Expansion
 

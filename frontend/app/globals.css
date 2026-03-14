@@ -1,22 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --polkadot: #E6007A;
+  --polkadot-dark: #c4006a;
 }
 
 body {
-  background: #0a0a0a;
+  background: #050505;
   color: #ffffff;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* Value flash on price update */
 @keyframes valueFlash {
   0%   { color: #E6007A; }
   100% { color: inherit; }
 }
-
 .flash {
   animation: valueFlash 0.6s ease-out forwards;
 }
+
+/* Pulse dot for live indicators */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.live-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Gradient border effect */
+.gradient-border {
+  position: relative;
+  border-radius: 12px;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(230, 0, 122, 0.3), transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #333; }

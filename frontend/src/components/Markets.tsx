@@ -128,9 +128,9 @@ export function Markets() {
       </div>
 
       {/* Full market table */}
-      <div className="bg-[#111] border border-[#222] rounded-xl overflow-hidden">
+      <div className="bg-[#0c0c0c] border border-white/5 rounded-xl overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-[#222]">
+        <div className="p-6 border-b border-white/5">
           <h2 className="text-xl font-bold text-white mb-2">DotLend Markets</h2>
           <p className="text-sm text-gray-400">
             The native liquidity layer for Polkadot Hub. Two markets live on testnet.
@@ -139,7 +139,7 @@ export function Markets() {
         </div>
 
         {/* Filters */}
-        <div className="px-6 py-4 flex gap-2 text-xs border-b border-[#222] bg-[#0a0a0a]">
+        <div className="px-6 py-4 flex gap-2 text-xs border-b border-white/5 bg-[#080808]">
           {(["all", "live", "mainnet"] as const).map(f => (
             <button
               key={f}
@@ -147,7 +147,7 @@ export function Markets() {
               className={`px-3 py-1.5 rounded-lg font-bold transition border ${
                 filter === f
                   ? "bg-[#E6007A] text-white border-[#E6007A]"
-                  : "border-[#333] text-gray-400 hover:border-[#E6007A]"
+                  : "border-white/10 text-gray-400 hover:border-[#E6007A]"
               }`}
             >
               {f === "all" ? "All Markets" : f === "live" ? "✅ Live on Testnet" : "🔜 Coming to Mainnet"}
@@ -158,7 +158,7 @@ export function Markets() {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="text-xs text-gray-500 uppercase tracking-widest bg-[#0a0a0a] border-b border-[#222]">
+            <thead className="text-xs text-gray-500 uppercase tracking-widest bg-[#080808] border-b border-white/5">
               <tr>
                 <th className="px-6 py-4 font-normal">Asset</th>
                 <th className="px-6 py-4 font-normal">Role</th>
@@ -168,9 +168,9 @@ export function Markets() {
                 <th className="px-6 py-4 font-normal text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#222]">
+            <tbody className="divide-y divide-white/5">
               {filtered.map(asset => (
-                <tr key={asset.symbol} className="hover:bg-[#1a1a1a] transition">
+                <tr key={asset.symbol} className="hover:bg-white/[0.02] transition">
                   <td className="px-6 py-4">
                     <div className="font-bold text-white mb-0.5 font-mono">{asset.symbol}</div>
                     <div className="text-xs text-gray-500">{asset.name}</div>
@@ -218,7 +218,7 @@ export function Markets() {
         </div>
 
         {/* Footer note */}
-        <div className="px-6 py-4 border-t border-[#222] bg-[#0a0a0a]">
+        <div className="px-6 py-4 border-t border-white/5 bg-[#080808]">
           <p className="text-[10px] text-gray-600 font-mono">
             Mainnet assets bridged via{" "}
             <a href="https://snowbridge.network" target="_blank" rel="noopener noreferrer" className="text-[#E6007A] hover:underline">
