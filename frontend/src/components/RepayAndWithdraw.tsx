@@ -29,15 +29,13 @@ function ProtocolFAQ() {
             every second on-chain. Applied automatically when you call repay().
           </div>
           <div>
-            <span className="text-gray-300">Full debt button</span> — adds a 1% buffer on top
-            of your current debt reading. This covers interest that accrues between when the
-            UI reads your balance and when your transaction confirms (~2–10 seconds).
+            <span className="text-gray-300">Full debt button</span> — fetches your exact
+            on-chain debt at the moment you click Submit, so the amount is always current.
+            Interest accrues per second; this eliminates both over- and under-payment.
           </div>
           <div>
-            <span className="text-gray-300">You never overpay</span> — the contract caps repayment
-            at your exact on-chain debt:{" "}
-            <span className="text-gray-400">repayAmount = min(sent, actualDebt)</span>.
-            Any excess USDH stays in your wallet untouched.
+            <span className="text-gray-300">Partial repay</span> — type any amount less than
+            your debt to make a partial repayment. The remainder stays as debt.
           </div>
           <div>
             <span className="text-gray-300">Why withdrawal is blocked</span> — the contract
@@ -80,6 +78,7 @@ const mapError = (e: unknown) => {
 export function RepayAndWithdraw() {
   const { address } = useAccount();
   const [repayAmount, setRepayAmount] = useState("");
+  const [repayAll, setRepayAll] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [activeTab, setActiveTab] = useState<"repay" | "withdraw">("repay");
   const [successHash, setSuccessHash] = useState<string | null>(null);
@@ -123,6 +122,7 @@ export function RepayAndWithdraw() {
       queryClient.invalidateQueries();
       triggerRefetch();
       setRepayAmount("");
+      setRepayAll(false);
       setWithdrawAmount("");
       setSuccessHash(txHash);
       setTimeout(() => setSuccessHash(null), 6000);
@@ -147,17 +147,28 @@ export function RepayAndWithdraw() {
   }
 
   async function handleRepay() {
-    setOptimistic(0n, -parsedRepay);
-    setStatus("signing", `Repaying ${Number(repayAmount).toFixed(2)} USDH…`);
+    // If "Full debt" was clicked, fetch the exact current debt from chain
+    // at submit time so we repay precisely — no buffer, no stale data.
+    let amount = parsedRepay;
+    if (repayAll) {
+      const freshDebt = await publicClient!.readContract({
+        address: addresses.collateralVault, abi: VAULT_ABI,
+        functionName: "debtBalance", args: [address!],
+      }) as bigint;
+      if (freshDebt === 0n) return;
+      amount = freshDebt;
+    }
+    setOptimistic(0n, -amount);
+    setStatus("signing", `Repaying ${Number(formatEther(amount)).toFixed(6)} USDH…`);
     let gas = 200_000n;
     try {
       const est = await publicClient!.estimateContractGas({
         address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay",
-        args: [parsedRepay], account: address,
+        args: [amount], account: address,
       });
       gas = est * 120n / 100n;
     } catch (e) { console.error("Gas estimation failed (repay):", e); }
-    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay], gas });
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [amount], gas });
   }
 
   async function handleWithdraw() {
@@ -185,9 +196,8 @@ export function RepayAndWithdraw() {
   const busy = isPending || isConfirming;
 
   // Estimate interest accruing per second for display
-  const debtNum     = Number(formatEther(debt));
-  const perSecond   = debtNum * 0.005 / (365 * 24 * 3600);
-  const bufferedDebt = debt + debt / 100n;
+  const debtNum   = Number(formatEther(debt));
+  const perSecond = debtNum * 0.005 / (365 * 24 * 3600);
 
   return (
     <div className="bg-[#0c0c0c] border border-white/5 rounded-xl p-6 space-y-4 hover:border-white/10 transition-colors">
@@ -232,16 +242,16 @@ export function RepayAndWithdraw() {
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Repay Amount</span>
               <button
-                onClick={() => setRepayAmount(formatEther(bufferedDebt))}
+                onClick={() => { setRepayAmount(formatEther(debt)); setRepayAll(true); }}
                 className="text-[#E6007A] hover:underline"
               >
-                Full debt (+1% buffer)
+                Full debt (live amount on submit)
               </button>
             </div>
             <input
               id="repay-amount" name="repay-amount"
               aria-label="Repay amount" autoComplete="off"
-              type="number" value={repayAmount} onChange={e => setRepayAmount(e.target.value)}
+              type="number" value={repayAmount} onChange={e => { setRepayAmount(e.target.value); setRepayAll(false); }}
               placeholder="0.00" disabled={busy}
               className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
             />
@@ -249,9 +259,11 @@ export function RepayAndWithdraw() {
 
           {/* Transparent repay explanation */}
           <div className="text-xs text-gray-600 font-mono space-y-1">
-            <div>• Buffer covers interest accrued during tx confirmation (~2–10s)</div>
-            <div>• Contract charges only exact debt: <span className="text-gray-400">min(sent, actualDebt)</span></div>
-            <div>• Excess USDH stays in your wallet — you are never overcharged</div>
+            {repayAll
+              ? <div className="text-yellow-600">⚡ Full debt mode — exact on-chain balance fetched at submit time</div>
+              : <div>• Enter a partial amount or use <span className="text-gray-400">Full debt</span> for exact repayment</div>
+            }
+            <div>• Interest accrues per second — full debt button re-reads chain on submit</div>
           </div>
 
           {needsApproval ? (
