@@ -153,6 +153,8 @@ export function MintTokens() {
                   </div>
                   <div className="flex gap-2 mb-2">
                     <input
+                      id="wrap-amount"
+                      name="wrap-amount"
                       type="number"
                       value={wrapAmount}
                       onChange={(e) => setWrapAmount(e.target.value)}

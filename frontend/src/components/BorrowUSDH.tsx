@@ -122,6 +122,8 @@ export function BorrowUSDH() {
           </button>
         </div>
         <input
+          id="borrow-amount"
+          name="borrow-amount"
           type="number"
           value={amount}
           onChange={e => setAmount(e.target.value)}

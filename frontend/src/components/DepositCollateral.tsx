@@ -115,6 +115,8 @@ export function DepositCollateral() {
         </div>
         <div className="flex gap-2">
           <input
+            id="deposit-amount"
+            name="deposit-amount"
             type="number"
             value={amount}
             onChange={e => setAmount(e.target.value)}

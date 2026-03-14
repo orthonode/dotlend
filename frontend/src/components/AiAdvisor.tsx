@@ -179,6 +179,8 @@ Rules: never invent numbers. under 120 words.`;
         {/* Input */}
         <div className="flex gap-2">
           <input
+            id="advisor-input"
+            name="advisor-input"
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
