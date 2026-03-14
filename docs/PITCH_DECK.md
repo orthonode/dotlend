@@ -323,6 +323,7 @@ That's $200K/year in revenue at a 0.5% stability fee. Enough to fund a small tea
 - ZK solvency pipeline (Noir + mock verifier, full pipeline ready)
 - Oracle posting live prices from DeFiLlama every 30 minutes
 - Full crisis simulation: price crash → liquidation → confirmed on-chain
+- AI risk advisor: A–F borrower risk grade, price drop simulator, liquidation alert banner, mock AML screening, transparency card — all from live on-chain data, zero new contract calls
 
 **Q2 2026:** W3F grant application. PAL security audit. Velocity Labs DeFi Builders Cohort.
 
@@ -371,7 +372,7 @@ That's $200K/year in revenue at a 0.5% stability fee. Enough to fund a small tea
 
 ---
 
-DotLend is a complete, working protocol for a primitive that Polkadot Hub is missing. The contracts are deployed. The tests pass. The frontend works. The oracle is live. The ZK pipeline is built.
+DotLend is a complete, working protocol for a primitive that Polkadot Hub is missing. The contracts are deployed. The tests pass. The frontend works. The oracle is live. The ZK pipeline is built. The AI advisor gives every borrower a live risk grade, a price drop simulator, and instant AML screening — directly from on-chain state.
 
 vDOT earns yield. Stablecoins need collateral utility. Polkadot Hub needs a lending market.
 

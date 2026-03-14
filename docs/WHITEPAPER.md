@@ -642,6 +642,19 @@ The `SolvencyGateway` is unaware of which verifier it is using — it calls `ISo
 
 A React component (`frontend/src/components/SolvencyStatus.tsx`) reads the latest `SolvencyProven` event from the gateway contract and displays a live "SOLVENT" badge on the protocol dashboard. The badge shows total collateral, total debt, and the timestamp of the last proof — giving end users direct visibility into protocol solvency without requiring they read raw event logs.
 
+### 7.9 AI Risk Advisor
+
+The `/advisor` page ships a streaming AI risk dashboard built on the existing wagmi reads — zero new contract calls. Components:
+
+- **Borrower Risk Grade (A–F):** Computed client-side from live HF and LTV. A = HF > 3 and LTV < 30%; F = HF < 1.2 or LTV > 70%. Badge is always visible on connect.
+- **Price Drop Simulator:** Selectable −10/20/30/40/50% scenario. Computes `newHF = (collUSD × (1 − drop) × 0.8) / debt` and shows SAFE / WARNING / LIQUIDATION status.
+- **Liquidation Alert Banner:** Dismissible red banner on both `/advisor` and the main dashboard when HF < 1.3. Calculates exact price drop to liquidation as `(HF − 1) / HF × 100%`.
+- **Mock AML Screening:** Wallet address checked against three hardcoded flagged addresses on connect. Labeled "(mock)". On mainnet this integrates Chainalysis.
+- **Transparency Card:** Static card disclosing 102 passing tests, no formal audit, admin keys held by deployer, and the MockSolvencyVerifier caveat — honest testnet disclosure.
+- **Streaming Chat:** Groq Llama 3.3 70B via `/api/advisor`. The server-side route prepends a `PROTOCOL_CONTEXT` block to every system prompt, grounding the model in correct DotLend architecture (lending market, not synthetic stablecoin issuer) regardless of client payload. The client enriches the prompt with live address, collateral, debt, HF, LTV%, risk grade, and liquidation price.
+
+On mainnet, risk grades will incorporate dynamic collateral ratios per wallet risk profile, Chainalysis AML screening will replace the mock check, and the ZK solvency proof will be verifiable on-chain once BN254 precompile support lands on PolkaVM.
+
 ---
 
 ## 8. Oracle Architecture

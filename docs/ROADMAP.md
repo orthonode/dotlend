@@ -74,6 +74,7 @@
 - [x] README.md — full with all deployed addresses, architecture, security
 - [x] docs/WHITEPAPER.md — mechanism, math, ZK circuit, interest model
 - [x] docs/ARCHITECTURE.md — full ASCII diagrams, all user flows, deployment topology
+- [x] AI advisor upgrade — A–F risk grade, price drop simulator, liquidation banner, mock AML screening, transparency card, enhanced system prompt (6 tasks, 3 files, 0 new contract calls)
 - [ ] Demo video (3 min, YouTube unlisted)
 - [ ] DoraHacks submission (before Mar 20 23:59)
 - [ ] Send to Bifrost for review
