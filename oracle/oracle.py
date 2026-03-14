@@ -132,6 +132,16 @@ logging.basicConfig(
 )
 log = logging.getLogger("dotlend-oracle")
 
+# ── gas price helper ──────────────────────────────────────────────────────────
+# Polkadot Hub TestNet sometimes returns gas_price=1 which is below network minimum.
+# Floor at 1 gwei and add 20% bump to avoid "Priority is too low" errors.
+MIN_GAS_PRICE = 1_000_000_000  # 1 gwei
+
+def get_gas_price(w3):
+    raw = w3.eth.gas_price
+    bumped = int(raw * 1.2)
+    return max(bumped, MIN_GAS_PRICE)
+
 # ── web3 version-agnostic transaction sender ──────────────────────────────────
 
 def send_signed(w3, signed):
@@ -308,7 +318,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
             needs_bypass = True
 
     nonce = w3.eth.get_transaction_count(account.address)
-    gas_price = w3.eth.gas_price
+    gas_price = get_gas_price(w3)
 
     if needs_bypass:
         # Widen to 100%
@@ -405,7 +415,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
 
     try:
         nonce = w3.eth.get_transaction_count(account.address)
-        gas_price = w3.eth.gas_price
+        gas_price = get_gas_price(w3)
 
         tx = gateway_contract.functions.publishSolvencyProof(
             proof_bytes, public_inputs
