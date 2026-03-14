@@ -1,29 +1,28 @@
 export async function POST(req: Request) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return Response.json({ error: "GEMINI_API_KEY not configured" }, { status: 503 });
+    return Response.json({ error: "GROQ_API_KEY not configured" }, { status: 503 });
   }
 
   try {
     const { messages, systemPrompt } = await req.json();
 
-    const geminiMessages = messages.map((m: { role: string; content: string }) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: geminiMessages,
-          generationConfig: { maxOutputTokens: 400 },
-        }),
-      }
-    );
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 400,
+        stream: true,
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages,
+        ],
+      }),
+    });
 
     if (!res.ok || !res.body) {
       const err = await res.text();
@@ -50,7 +49,7 @@ export async function POST(req: Request) {
               if (!json || json === "[DONE]") continue;
               try {
                 const parsed = JSON.parse(json);
-                const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text;
+                const text = parsed?.choices?.[0]?.delta?.content;
                 if (text) controller.enqueue(encoder.encode(text));
               } catch {
                 // skip malformed chunks
