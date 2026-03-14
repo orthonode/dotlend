@@ -1,5 +1,5 @@
 import { createConfig, http } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { injected, walletConnect } from "wagmi/connectors";
 
 export const polkadotHubTestnet = {
   id: 420420417,
@@ -15,7 +15,18 @@ export const polkadotHubTestnet = {
 
 export const config = createConfig({
   chains: [polkadotHubTestnet],
-  connectors: [injected()],
+  connectors: [
+    injected(),
+    walletConnect({
+      projectId: "327cde52817024c462716ebabea9cb1e",
+      metadata: {
+        name: "DotLend",
+        description: "Non-custodial money market on Polkadot Hub",
+        url: "https://nexucore.xyz",
+        icons: ["https://nexucore.xyz/favicon.ico"],
+      },
+    }),
+  ],
   transports: {
     [polkadotHubTestnet.id]: http(),
   },
