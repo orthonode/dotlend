@@ -166,7 +166,6 @@ DotLend is the only active lending protocol on Polkadot Hub EVM. The right produ
        │                              TreasuryRouter  (fee split)                  │
        │                                    │                                      │
        │                               treasury wallet                             │
-       │                               Treasury Wallet                             │
        │                                                                           │
        └──liquidate(borrower)─────────► LendingPool                                │
                                             │                                      │
