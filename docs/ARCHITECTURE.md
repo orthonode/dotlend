@@ -764,7 +764,7 @@ app/
 
 ```
                     Polkadot Hub TestNet RPC
-                 https://westend-asset-hub-eth-rpc.polkadot.io
+                 https://eth-rpc-testnet.polkadot.io
                               │
                ┌──────────────┼──────────────────────────────────┐
                │              │                                   │
@@ -841,7 +841,7 @@ const logs = await publicClient.getLogs({
                                       │
   ┌─────────────────────────────────────────────────────────────────────────────┐
   │         Polkadot Hub TestNet  (Chain ID 420420417)                            │
-  │         RPC: https://westend-asset-hub-eth-rpc.polkadot.io                   │
+  │         RPC: https://eth-rpc-testnet.polkadot.io                   │
   │         Explorer: https://blockscout-testnet.polkadot.io                     │
   │                                                                               │
   │  PriceOracle          0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173            │
@@ -1012,9 +1012,9 @@ The Noir-generated `UltraHonk` verifier contract uses `assembly {}` blocks for B
 | LendingPool (WPAS) | `0xF68bDd12a8904fd6bB0CbED5623722517FDd3408` |
 | TreasuryRouter (WPAS) | `0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a` |
 
-**Network:** Westend Asset Hub (Polkadot Hub TestNet)
+**Network:** Polkadot Hub TestNet (Chain ID 420420417)
 **Chain ID:** 420420417
-**RPC:** `https://westend-asset-hub-eth-rpc.polkadot.io`
+**RPC:** `https://eth-rpc-testnet.polkadot.io`
 **Explorer:** `https://blockscout-testnet.polkadot.io`
 **Compiler:** `resolc` via `@parity/hardhat-polkadot`
 

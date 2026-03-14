@@ -18,8 +18,8 @@ const ADDRESSES = {
   priceOracle:     "0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173",
   vdot:            "0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544",
   usdh:          "0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683",
-  collateralVault: "0x7E700a00290f4B12467361030b274769A10A490B",
-  lendingPool:     "0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668",
+  collateralVault: "0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2",
+  lendingPool:     "0x34B22768B16262aD5b7fC23DD797D80791e4e7e6",
 };
 
 const EXPLORER = "https://blockscout-testnet.polkadot.io";
