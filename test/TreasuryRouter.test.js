@@ -1,12 +1,11 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("TreasuryRouter", function () {
   async function deployFixture() {
     const [owner, user, treasury, liquidator] = await ethers.getSigners();
 
-    // Deploy mock tokens
     const MockvDOT = await ethers.getContractFactory("MockvDOT");
     const vdot = await MockvDOT.deploy();
     await vdot.waitForDeployment();
@@ -15,19 +14,16 @@ describe("TreasuryRouter", function () {
     const usdh = await MockUSDH.deploy();
     await usdh.waitForDeployment();
 
-    // Deploy oracle
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
     const oracle = await PriceOracle.deploy();
     await oracle.waitForDeployment();
     await oracle.setAuthorizedOracle(owner.address);
     await oracle.submitPrice(vdot.target, ethers.parseEther("10")); // $10/vDOT
 
-    // Deploy TreasuryRouter
     const TreasuryRouter = await ethers.getContractFactory("TreasuryRouter");
     const router = await TreasuryRouter.deploy(usdh.target, treasury.address);
     await router.waitForDeployment();
 
-    // Deploy vault & pool (pool uses router as its usdh)
     const CollateralVault = await ethers.getContractFactory("CollateralVault");
     const vault = await CollateralVault.deploy(vdot.target, oracle.target);
     await vault.waitForDeployment();
@@ -36,16 +32,9 @@ describe("TreasuryRouter", function () {
     const pool = await LendingPool.deploy(vault.target, router.target, oracle.target, vdot.target);
     await pool.waitForDeployment();
 
-    // Wire
     await vault.setLendingPool(pool.target);
     await router.setLendingPool(pool.target);
 
-    // Grant router mint/burn rights on USDH
-    // MockUSDH likely has open mint — grant router the ability to call usdh
-    // For the router to call usdh.burn() and usdh.transfer(), it needs balance
-    // The router calls usdh.transferFrom(user, router, amount) then usdh.transfer(treasury, amount)
-
-    // Setup: user deposits 10 vDOT ($100 collateral)
     await vdot.mint(user.address, ethers.parseEther("100"));
     await vdot.connect(user).approve(vault.target, ethers.parseEther("100"));
     await vault.connect(user).deposit(ethers.parseEther("10"));
@@ -55,9 +44,9 @@ describe("TreasuryRouter", function () {
 
   async function borrowedFixture() {
     const ctx = await deployFixture();
-    // Borrow 50 USDH
+    // Borrow 50 USDH — router.mint() intercepts and records principalDebt[user] = 50
     await ctx.pool.connect(ctx.user).borrow(ethers.parseEther("50"));
-    // User needs to approve the ROUTER (not pool) for repayment, since router pulls from user
+    // User approves router (not pool) for repayment
     await ctx.usdh.connect(ctx.user).approve(ctx.router.target, ethers.parseEther("100"));
     return ctx;
   }
@@ -68,14 +57,12 @@ describe("TreasuryRouter", function () {
       expect(await router.usdh()).to.equal(usdh.target);
       expect(await router.treasury()).to.equal(treasury.address);
     });
-
     it("reverts on zero usdh address", async function () {
       const TreasuryRouter = await ethers.getContractFactory("TreasuryRouter");
       const [, , treasury] = await ethers.getSigners();
       await expect(TreasuryRouter.deploy(ethers.ZeroAddress, treasury.address))
         .to.be.revertedWith("TR: zero usdh");
     });
-
     it("reverts on zero treasury address", async function () {
       const TreasuryRouter = await ethers.getContractFactory("TreasuryRouter");
       const MockUSDH = await ethers.getContractFactory("MockUSDH");
@@ -90,7 +77,6 @@ describe("TreasuryRouter", function () {
       const { router, pool } = await loadFixture(deployFixture);
       expect(await router.lendingPool()).to.equal(pool.target);
     });
-
     it("reverts on zero address", async function () {
       const { router } = await loadFixture(deployFixture);
       await expect(router.setLendingPool(ethers.ZeroAddress))
@@ -104,14 +90,12 @@ describe("TreasuryRouter", function () {
       await router.setTreasury(liquidator.address);
       expect(await router.treasury()).to.equal(liquidator.address);
     });
-
     it("emits TreasuryUpdated event", async function () {
       const { router, liquidator } = await loadFixture(deployFixture);
       await expect(router.setTreasury(liquidator.address))
         .to.emit(router, "TreasuryUpdated")
         .withArgs(liquidator.address);
     });
-
     it("reverts on zero address", async function () {
       const { router } = await loadFixture(deployFixture);
       await expect(router.setTreasury(ethers.ZeroAddress))
@@ -119,57 +103,84 @@ describe("TreasuryRouter", function () {
     });
   });
 
-  describe("fee collection — 100% to treasury", function () {
-    it("sends 100% of repayment to treasury", async function () {
+  describe("fee collection — principal burned, interest to treasury", function () {
+    it("burns principal on repayment — no treasury balance change for principal-only repay", async function () {
       const { pool, usdh, router, user, treasury } = await loadFixture(borrowedFixture);
-
       const treasuryBefore = await usdh.balanceOf(treasury.address);
+      const supplyBefore = await usdh.totalSupply();
       const repayAmount = ethers.parseEther("50");
 
       await pool.connect(user).repay(repayAmount);
 
       const treasuryAfter = await usdh.balanceOf(treasury.address);
-      // Treasury should receive the full repay amount
-      expect(treasuryAfter - treasuryBefore).to.equal(repayAmount);
+      const supplyAfter = await usdh.totalSupply();
+
+      // Principal (50 USDH) is burned — supply decreases
+      expect(supplyBefore - supplyAfter).to.equal(repayAmount);
+      // Treasury gets nothing for principal-only repay (no accrued interest yet)
+      expect(treasuryAfter - treasuryBefore).to.equal(0n);
     });
 
-    it("burns zero USDH on repayment", async function () {
-      const { pool, usdh, user } = await loadFixture(borrowedFixture);
+    it("routes accrued interest to treasury, burns principal", async function () {
+      const { pool, usdh, router, user, treasury } = await loadFixture(borrowedFixture);
 
-      const totalSupplyBefore = await usdh.totalSupply();
-      const repayAmount = ethers.parseEther("50");
+      // Advance 1 year to accrue interest
+      await time.increase(365 * 24 * 3600);
 
-      await pool.connect(user).repay(repayAmount);
+      // Give user extra USDH to cover interest before snapshot
+      const MockUSDH = await ethers.getContractFactory("MockUSDH");
+      await usdh.mint(user.address, ethers.parseEther("1")); // buffer for interest
+      await usdh.connect(user).approve(router.target, ethers.parseEther("60"));
 
-      const totalSupplyAfter = await usdh.totalSupply();
-      // Supply should decrease by repayAmount (the router doesn't burn, but
-      // the USDH was transferred from user's balance to treasury — supply unchanged)
-      // Actually, minting happened for borrow, repay transfers to treasury, no burn occurs
-      // So total supply should stay the same (50 minted, 50 transferred to treasury, 0 burned)
-      expect(totalSupplyAfter).to.equal(totalSupplyBefore);
+      // Capture supply AFTER extra mint so burn delta is accurate
+      const supplyBefore = await usdh.totalSupply();
+      const treasuryBefore = await usdh.balanceOf(treasury.address);
+
+      // Repay exactly the accrued debt (principal + interest)
+      // Use a large approval and let contract cap to actual debt
+      await pool.connect(user).repay(ethers.parseEther("51")); // capped to actual debt
+
+      const supplyAfter = await usdh.totalSupply();
+      const treasuryAfter = await usdh.balanceOf(treasury.address);
+
+      const burned = supplyBefore - supplyAfter;
+      const feeToTreasury = treasuryAfter - treasuryBefore;
+
+      // Total repaid = burned (principal) + fee (interest)
+      const totalRepaid = burned + feeToTreasury;
+
+      // Total repaid must be >= 50 USDH (principal)
+      expect(totalRepaid).to.be.gte(ethers.parseEther("50"));
+      // Treasury received the interest portion (> 0)
+      expect(feeToTreasury).to.be.gt(0n);
+      // Principal burned must be close to 50 (within 0.1 USDH)
+      expect(burned).to.be.gte(ethers.parseEther("49.9"));
     });
 
-    it("increments totalFeesCollected by full amount", async function () {
+    it("principalDebt tracked correctly after borrow", async function () {
+      const { router, user } = await loadFixture(borrowedFixture);
+      // After borrowing 50, router should track 50 as principal
+      expect(await router.principalDebt(user.address)).to.equal(ethers.parseEther("50"));
+    });
+
+    it("principalDebt decreases after repay", async function () {
       const { pool, router, user } = await loadFixture(borrowedFixture);
-
-      const feesBefore = await router.totalFeesCollected();
-      const repayAmount = ethers.parseEther("50");
-
-      await pool.connect(user).repay(repayAmount);
-
-      const feesAfter = await router.totalFeesCollected();
-      expect(feesAfter - feesBefore).to.equal(repayAmount);
+      await pool.connect(user).repay(ethers.parseEther("50"));
+      expect(await router.principalDebt(user.address)).to.equal(0n);
     });
 
-    it("emits ProtocolFeeCollected event", async function () {
+    it("emits PrincipalBurned event on repay", async function () {
       const { pool, router, user } = await loadFixture(borrowedFixture);
+      await expect(pool.connect(user).repay(ethers.parseEther("50")))
+        .to.emit(router, "PrincipalBurned")
+        .withArgs(user.address, ethers.parseEther("50"));
+    });
 
-      const repayAmount = ethers.parseEther("50");
-
-      // The event is emitted by the router, not the pool
-      await expect(pool.connect(user).repay(repayAmount))
-        .to.emit(router, "ProtocolFeeCollected")
-        .withArgs(repayAmount);
+    it("totalBurned increments by principal portion", async function () {
+      const { pool, router, user } = await loadFixture(borrowedFixture);
+      const burnedBefore = await router.totalBurned();
+      await pool.connect(user).repay(ethers.parseEther("50"));
+      expect(await router.totalBurned() - burnedBefore).to.equal(ethers.parseEther("50"));
     });
   });
 
@@ -186,23 +197,22 @@ describe("TreasuryRouter", function () {
   describe("passthrough", function () {
     it("forwards non-pool transferFrom transparently", async function () {
       const { router, usdh, user, liquidator } = await loadFixture(borrowedFixture);
-
-      // Approve router to spend user USDH
       await usdh.connect(user).approve(router.target, ethers.parseEther("10"));
-
-      // transferFrom to a non-pool address should pass through
       const balBefore = await usdh.balanceOf(liquidator.address);
       await router.transferFrom(user.address, liquidator.address, ethers.parseEther("5"));
       const balAfter = await usdh.balanceOf(liquidator.address);
       expect(balAfter - balBefore).to.equal(ethers.parseEther("5"));
     });
 
-    it("forwards mint() to real USDH", async function () {
+    it("forwards mint() to real USDH and tracks principal", async function () {
       const { router, usdh, user } = await loadFixture(deployFixture);
       const balBefore = await usdh.balanceOf(user.address);
+      const principalBefore = await router.principalDebt(user.address);
       await router.mint(user.address, ethers.parseEther("100"));
       const balAfter = await usdh.balanceOf(user.address);
+      const principalAfter = await router.principalDebt(user.address);
       expect(balAfter - balBefore).to.equal(ethers.parseEther("100"));
+      expect(principalAfter - principalBefore).to.equal(ethers.parseEther("100"));
     });
   });
 });
