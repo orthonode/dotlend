@@ -10,7 +10,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 - Lead with the live demo: **nexucore.xyz**
 - Position as **"Aave of Polkadot"** — the first native money market on Polkadot Hub
 - Emphasize multi-asset vision: Snowbridge makes wETH/wBTC/USDC collateral markets possible
-- Highlight DOT buyback flywheel: 50% of stability fees → DOT buybacks, 20% user incentives, 18% maintenance, 12% team
+- Highlight DOT buyback flywheel: mainnet governance target — 50% of stability fees → DOT buybacks, 20% user incentives, 18% maintenance, 12% team (testnet: fee accrues to deployer wallet; full split activates on mainnet with Hollar)
 - Keep the tone direct, specific, and technically focused.
 
 ---
@@ -21,7 +21,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Explore SLPx integration for one-transaction minting and collateralization.
 
 **Draft Message:**
-> Hey Victor — I'm Arhant, building DotLend, the first money market on Polkadot Hub. vDOT is our primary collateral asset — 13 contracts deployed, 102 tests passing, live at nexucore.xyz. Our V2 vision: transparent on-chain fee split — 50% buys DOT on Hydration, 20% to user incentives, 18% maintenance, 12% team. Every dollar borrowed on DotLend becomes ecosystem value. I'd love to discuss SLPx integration for one-click mint + collateralize. Is that something the Bifrost team would be open to?
+> Hey Victor — I'm Arhant, building DotLend, the first money market on Polkadot Hub. vDOT is our primary collateral asset — 13 contracts deployed, 102 tests passing, live at nexucore.xyz. Mainnet vision: stability fees fund a DOT buyback flywheel — 50% buys DOT on Hydration via XCM, staked back as vDOT to governance holders. Every dollar borrowed on DotLend becomes ecosystem value. I'd love to discuss SLPx integration for one-click mint + collateralize. Is that something the Bifrost team would be open to?
 
 ---
 
@@ -40,7 +40,7 @@ This document outlines the strategy for connecting with key ecosystem contributo
 **Goal:** Inquire about W3F grants for critical DeFi infrastructure.
 
 **Draft Message:**
-> Hi — I'm building DotLend, a native money market for Polkadot Hub. Two collateral markets (vDOT, native DOT), transparent fee split (50% DOT buybacks, 20% user incentives, 18% maintenance, 12% team), and ZK solvency architecture. V2 leverages Snowbridge to add wETH/wBTC/USDC markets. 102 tests, 13 deployed contracts, live at nexucore.xyz. Is this type of core DeFi infrastructure aligned with current grant priorities?
+> Hi — I'm building DotLend, a native money market for Polkadot Hub. Two collateral markets (vDOT, native DOT), ZK solvency architecture, and a mainnet treasury model where stability fees fund DOT buybacks on Hydration (50/20/18/12% governance target). V2 leverages Snowbridge to add wETH/wBTC/USDC markets. 102 tests, 13 deployed contracts, live at nexucore.xyz. Is this type of core DeFi infrastructure aligned with current grant priorities?
 
 ---
 

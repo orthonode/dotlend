@@ -178,18 +178,26 @@ This isn't "Aave but on another chain." This is infrastructure that can only exi
 
 I've seen too many DeFi projects claim "100% to the community" while the team secretly runs on VC money or exit-scams after the token launch. I wanted a model that's honest from day one.
 
-**Stability fee: 0.5% per year on all borrowed USDH.** Every repayment passes through `TreasuryRouter`, which splits it on-chain:
+**Stability fee: 0.5% per year on all borrowed USDH.** Every repayment passes through `TreasuryRouter`, which separates principal from accrued fee.
+
+**Testnet (current):** Principal is burned via MockUSDH. The 0.5%/yr stability fee accrues to the deployer wallet. MockUSDH has mint/burn rights — this model is a testnet simplification only.
+
+**Mainnet governance target** (once Hollar integration is live — Hollar cannot be burned):
 
 ```
 User repays (principal + accrued stability fee)
          ↓
 TreasuryRouter intercepts repayment
          ↓
-50%  → DOT Buybacks (Hydration DEX via XCM → stake → vDOT → ecosystem flywheel)
-20%  → User Incentives (liquidity mining rewards, early depositor bonuses)
-18%  → System Maintenance (audits, infrastructure, oracle hosting, RPC costs)
-12%  → Team Operations (founder compensation, future hires, legal)
+Principal   → returns to lending reserve (Aave/Compound model)
+Stability fee splits:
+  50%  → DOT Buybacks (Hydration DEX via XCM → stake → vDOT → ecosystem flywheel)
+  20%  → User Incentives (liquidity mining rewards, early depositor bonuses)
+  18%  → System Maintenance (audits, infrastructure, oracle hosting, RPC costs)
+  12%  → Team Operations (founder compensation, future hires, legal)
 ```
+
+The TreasuryRouter architecture already supports this split. The percentages are a mainnet governance target, not current on-chain behavior.
 
 ---
 
@@ -319,7 +327,7 @@ That's $200K/year in revenue at a 0.5% stability fee. Enough to fund a small tea
 - 13 contracts deployed on Polkadot Hub TestNet (2 collateral markets)
 - 102 Hardhat tests, 0 failures
 - Live frontend at nexucore.xyz
-- TreasuryRouter with on-chain fee split
+- TreasuryRouter deployed (principal burn on testnet; mainnet governance split: 50/20/18/12%)
 - ZK solvency pipeline (Noir + mock verifier, full pipeline ready)
 - Oracle posting live prices from DeFiLlama every 30 minutes
 - Full crisis simulation: price crash → liquidation → confirmed on-chain

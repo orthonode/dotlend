@@ -142,7 +142,7 @@ https://github.com/orthonode/dotlend
 ## Demo
 
 - **Live frontend:** https://nexucore.xyz
-- **Demo video:** https://youtu.be/Oj9luiA8mJM
+- **Demo video:** https://youtu.be/Oj9luiA8mJM  *(placeholder — update before final submission)*
 - **Pitch Deck (PDF):** [DotLend_Native_Polkadot_Lending.pdf](./assets/DotLend_Native_Polkadot_Lending.pdf)
 
 ---
