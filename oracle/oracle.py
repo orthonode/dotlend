@@ -132,15 +132,23 @@ logging.basicConfig(
 )
 log = logging.getLogger("dotlend-oracle")
 
-# ── gas price helper ──────────────────────────────────────────────────────────
-# Polkadot Hub TestNet sometimes returns gas_price=1 which is below network minimum.
-# Floor at 1 gwei and add 20% bump to avoid "Priority is too low" errors.
-MIN_GAS_PRICE = 1_000_000_000  # 1 gwei
+# ── EIP-1559 fee helper ───────────────────────────────────────────────────────
+# Polkadot Hub TestNet is EIP-1559. Legacy gasPrice txs fail with
+# "Priority is too low: (1 vs 1)". Use maxFeePerGas / maxPriorityFeePerGas.
+MIN_FEE = 1_000_000_000  # 1 gwei floor
 
-def get_gas_price(w3):
-    raw = w3.eth.gas_price
-    bumped = int(raw * 1.2)
-    return max(bumped, MIN_GAS_PRICE)
+def get_eip1559_fees(w3):
+    """Return (maxFeePerGas, maxPriorityFeePerGas) with a 1 gwei floor."""
+    try:
+        fee_history = w3.eth.fee_history(1, "latest", [50])
+        base_fee = fee_history["baseFeePerGas"][-1]
+        priority = fee_history["reward"][0][0] if fee_history.get("reward") else 0
+    except Exception:
+        base_fee = w3.eth.gas_price
+        priority = 0
+    priority = max(priority, MIN_FEE)
+    max_fee  = max(base_fee * 2 + priority, MIN_FEE)
+    return max_fee, priority
 
 # ── web3 version-agnostic transaction sender ──────────────────────────────────
 
@@ -318,13 +326,13 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
             needs_bypass = True
 
     nonce = w3.eth.get_transaction_count(account.address)
-    gas_price = get_gas_price(w3)
+    max_fee, priority_fee = get_eip1559_fees(w3)
 
     if needs_bypass:
         # Widen to 100%
         tx_widen = oracle_contract.functions.setMaxDeviationBps(10000).build_transaction({
             "chainId": CHAIN_ID, "from": account.address,
-            "nonce": nonce, "gasPrice": gas_price, "gas": 100_000,
+            "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
         })
         signed = w3.eth.account.sign_transaction(tx_widen, private_key)
         tx_hash = send_signed(w3, signed)
@@ -335,7 +343,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
     # Submit the actual price
     tx = oracle_contract.functions.submitPrice(token, price_wei).build_transaction({
         "chainId": CHAIN_ID, "from": account.address,
-        "nonce": nonce, "gasPrice": gas_price, "gas": 100_000,
+        "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
     })
     signed = w3.eth.account.sign_transaction(tx, private_key)
     tx_hash = send_signed(w3, signed)
@@ -349,7 +357,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
         nonce += 1
         tx_restore = oracle_contract.functions.setMaxDeviationBps(max_dev).build_transaction({
             "chainId": CHAIN_ID, "from": account.address,
-            "nonce": nonce, "gasPrice": gas_price, "gas": 100_000,
+            "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
         })
         signed = w3.eth.account.sign_transaction(tx_restore, private_key)
         tx_hash = send_signed(w3, signed)
@@ -415,7 +423,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
 
     try:
         nonce = w3.eth.get_transaction_count(account.address)
-        gas_price = get_gas_price(w3)
+        max_fee, priority_fee = get_eip1559_fees(w3)
 
         tx = gateway_contract.functions.publishSolvencyProof(
             proof_bytes, public_inputs
@@ -423,7 +431,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
             "chainId": CHAIN_ID,
             "from": account.address,
             "nonce": nonce,
-            "gasPrice": gas_price,
+            "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee,
             "gas": 200_000,
         })
 
