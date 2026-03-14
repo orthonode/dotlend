@@ -321,7 +321,7 @@ Built with Next.js 16 (Turbopack), wagmi v2, viem v2, TailwindCSS. Connects to P
 | `BorrowUSDH` | Borrow with real-time health factor preview; red warning when HF < 1.2 |
 | `RepayAndWithdraw` | Tabbed repay/withdraw with debt balance display |
 | `LiquidationMonitor` | Scans all borrowers' health factors; liquidate button for eligible positions |
-| `AiAdvisor` | Streaming AI chat (Claude Sonnet); position panel with live on-chain data; quick chips |
+| `AiAdvisor` | Streaming AI chat (Groq Llama 3.3 70B); position panel with live on-chain data; quick chips |
 
 All reads are direct on-chain calls via wagmi hooks. AI route (`/api/advisor`) is server-side only — API key never exposed to client.
 

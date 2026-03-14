@@ -65,11 +65,11 @@ Crisis simulation live on Polkadot Hub TestNet:
 - [Liquidation tx](https://blockscout-testnet.polkadot.io/tx/0xa09407bb1b8c41d265305de78ddb024144daeb0c47bfc62ff663bb7daf95c085)
 
 ### Network
-- **Chain:** Paseo PassetHub | Chain ID: 420420422
-- **RPC:** https://testnet-passet-hub-eth-rpc.polkadot.io
-- **Explorer:** https://blockscout-passet-hub.parity-testnet.parity.io
-- **Token:** PAS (deployer needs PAS on PassetHub)
-- **Hardhat network:** `--network paseoAssetHub`
+- **Chain:** Polkadot Hub TestNet | Chain ID: 420420417
+- **RPC:** https://eth-rpc-testnet.polkadot.io
+- **Explorer:** https://blockscout-testnet.polkadot.io
+- **Token:** WND (deployer needs WND on Polkadot Hub TestNet)
+- **Hardhat network:** `--network polkadotHub`
 
 ### Done Criteria
 5 Blockscout links for deployed contracts. Oracle posting prices on-chain. simulate-crisis.js runs without error.
