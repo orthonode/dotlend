@@ -170,7 +170,7 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
 
 ### 2.2 Contract Descriptions
 
-#### PriceOracle — `0xb422522F5eB930e417652deb747956545A969F63`
+#### PriceOracle — `0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173`
 
 The single source of truth for vDOT/USD price on-chain.
 
@@ -213,7 +213,7 @@ Standard OpenZeppelin v4 ERC-20. `mint()` is restricted to `LendingPool` only. `
 
 ---
 
-#### CollateralVault — `0x73b41E4815114859FB0c0CD4F504Ed27CBd37219`
+#### CollateralVault — `0x7E700a00290f4B12467361030b274769A10A490B`
 
 Holds all vDOT collateral. Computes health factors. Mediates between user deposits and lending pool debt accounting.
 
@@ -237,7 +237,7 @@ uint256 public constant LIQUIDATION_BONUS = 5;        // 5%
 
 ---
 
-#### LendingPool — `0xf909F5096700439E621B83F826Ee6Ff02047381B`
+#### LendingPool — `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668`
 
 Core protocol logic. Orchestrates borrow, repay, and liquidate. Applies lazy interest accrual per user on each interaction.
 
@@ -475,7 +475,7 @@ Python process run locally or on a server every 30 minutes. Pushes DOT/USD price
          │ on-chain tx
          ▼
 ┌──────────────────────────────────────────────────────────────────────────┐
-│   PriceOracle  (0xb422522F5eB930e417652deb747956545A969F63)              │
+│   PriceOracle  (0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173)              │
 │                                                                            │
 │   prices[vDOT]      = price_wei                                           │
 │   lastUpdated[vDOT] = block.timestamp                                     │
@@ -834,11 +834,11 @@ const logs = await publicClient.getLogs({
   │         RPC: https://westend-asset-hub-eth-rpc.polkadot.io                   │
   │         Explorer: https://blockscout-testnet.polkadot.io                     │
   │                                                                               │
-  │  PriceOracle          0xb422522F5eB930e417652deb747956545A969F63            │
+  │  PriceOracle          0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173            │
   │  MockvDOT             0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544            │
   │  MockUSDH           0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683            │
-  │  CollateralVault      0x73b41E4815114859FB0c0CD4F504Ed27CBd37219            │
-  │  LendingPool          0xf909F5096700439E621B83F826Ee6Ff02047381B            │
+  │  CollateralVault      0x7E700a00290f4B12467361030b274769A10A490B            │
+  │  LendingPool          0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668            │
   │  MockSolvencyVerifier 0xED2676C995BAA392093Ac0b907EA216c2B8C52cc            │
   │  SolvencyGateway      0x199E3E7c1f1382bc389b495B927B0535B390Acd0            │
   └─────────────┬───────────────────────────────────────────────────────────────┘
@@ -984,12 +984,12 @@ The Noir-generated `UltraHonk` verifier contract uses `assembly {}` blocks for B
 
 | Contract | Address |
 |---|---|
-| PriceOracle | `0xb422522F5eB930e417652deb747956545A969F63` |
+| PriceOracle | `0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173` |
 | MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` |
 | MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` |
-| CollateralVault (vDOT) | `0x73b41E4815114859FB0c0CD4F504Ed27CBd37219` |
-| LendingPool (vDOT) | `0xf909F5096700439E621B83F826Ee6Ff02047381B` |
-| TreasuryRouter (vDOT) | `0xF1E4172BEC741F69dE0a8Bf4EE88dFF679c6D281` |
+| CollateralVault (vDOT) | `0x7E700a00290f4B12467361030b274769A10A490B` |
+| LendingPool (vDOT) | `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668` |
+| TreasuryRouter (vDOT) | `0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80` |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
 | SolvencyGateway | `0x199E3E7c1f1382bc389b495B927B0535B390Acd0` |
 
@@ -997,10 +997,10 @@ The Noir-generated `UltraHonk` verifier contract uses `assembly {}` blocks for B
 
 | Contract | Address |
 |---|---|
-| WPAS (Collateral) | `0x83754cfC4501dc098d5bf37605E77e3bF83a1556` |
-| CollateralVault (WPAS) | `0x462415c604ae6c9bEe99a9357b6B40a0D529FC8B` |
-| LendingPool (WPAS) | `0x86a97A53304c20122850cD6b80ccCA2d50A90683` |
-| TreasuryRouter (WPAS) | `0x6007cDBEc7D6D114adc68191465c392Bd29d42cf` |
+| WPAS (Collateral) | `0xc09348291775B55Da40433ba44240c262D87Eb90` |
+| CollateralVault (WPAS) | `0x575B8578F000fC554394C63cec8F07Abd0C66C34` |
+| LendingPool (WPAS) | `0xF68bDd12a8904fd6bB0CbED5623722517FDd3408` |
+| TreasuryRouter (WPAS) | `0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a` |
 
 **Network:** Westend Asset Hub (Polkadot Hub TestNet)
 **Chain ID:** 420420417

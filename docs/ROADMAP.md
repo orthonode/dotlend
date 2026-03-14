@@ -68,15 +68,16 @@
 
 ---
 
-## Phase 5 — Mainnet Prep
-**Target: Q2 2026**
+## Phase 5 — Submission ✅ COMPLETE (docs)
+**Target: Mar 20, 2026 (DoraHacks deadline)**
 
-- [ ] README.md — full with all Subscan links
-- [ ] docs/WHITEPAPER.md
-- [ ] docs/ARCHITECTURE.md
+- [x] README.md — full with all deployed addresses, architecture, security
+- [x] docs/WHITEPAPER.md — mechanism, math, ZK circuit, interest model
+- [x] docs/ARCHITECTURE.md — full ASCII diagrams, all user flows, deployment topology
 - [ ] Demo video (3 min, YouTube unlisted)
+- [ ] DoraHacks submission (before Mar 20 23:59)
 - [ ] Send to Bifrost for review
-- [ ] Hyperbridge ISMP oracle integration
+- [ ] Hyperbridge ISMP oracle integration (post-hackathon)
 
 **Mainnet launch — non-negotiable.**
 
