@@ -26,12 +26,14 @@ contract SolvencyGateway is Ownable {
         uint256 totalDebt,
         uint256 timestamp
     );
+    event SolvencyVerifierSet(address indexed verifier);
 
     /// @notice Set the verifier — owner only, one-time
     function setSolvencyVerifier(address _verifier) external onlyOwner {
         require(address(solvencyVerifier) == address(0), "Gateway: verifier already set");
         require(_verifier != address(0), "Gateway: zero verifier");
         solvencyVerifier = ISolvencyVerifier(_verifier);
+        emit SolvencyVerifierSet(_verifier);
     }
 
     /// @notice Publish a ZK solvency proof — permissionless

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /// @title WPAS — Wrapped PAS (native Polkadot Asset token)
 /// @notice Identical in design to WETH9: deposit native PAS to mint WPAS 1:1,
@@ -10,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 ///         enabling native DOT/PAS to back USDH loans without modifying any
 ///         existing DotLend contracts.
 /// @dev No owner or admin — fully permissionless and non-upgradeable.
-contract WPAS is ERC20 {
+contract WPAS is ERC20, ReentrancyGuard {
     // ── Events ──────────────────────────────────────────────────────────────
 
     /// @notice Emitted when native PAS is wrapped into WPAS
@@ -34,7 +35,7 @@ contract WPAS is ERC20 {
 
     /// @notice Unwrap WPAS back to native PAS — burns WPAS, sends PAS 1:1
     /// @param wad Amount of WPAS to unwrap (in wei)
-    function withdraw(uint256 wad) external {
+    function withdraw(uint256 wad) external nonReentrant {
         require(balanceOf(msg.sender) >= wad, "WPAS: insufficient balance");
         _burn(msg.sender, wad);
         (bool success, ) = payable(msg.sender).call{value: wad}("");

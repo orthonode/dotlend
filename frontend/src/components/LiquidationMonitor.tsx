@@ -92,13 +92,16 @@ export function LiquidationMonitor() {
     return () => clearInterval(interval);
   }, [scanPositions, refetchCount]);
 
-  function handleLiquidate(borrower: `0x${string}`) {
-    writeContract({
-      address: addresses.lendingPool,
-      abi: POOL_ABI_FULL,
-      functionName: "liquidate",
-      args: [borrower],
-    });
+  async function handleLiquidate(borrower: `0x${string}`) {
+    let gas = 300_000n;
+    try {
+      const est = await client!.estimateContractGas({
+        address: addresses.lendingPool, abi: POOL_ABI_FULL, functionName: "liquidate",
+        args: [borrower], account: address,
+      });
+      gas = est * 120n / 100n;
+    } catch { /* use fallback */ }
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI_FULL, functionName: "liquidate", args: [borrower], gas });
   }
 
   function hfColor(hf: bigint) {

@@ -39,6 +39,7 @@ contract PriceOracle is Ownable {
     function submitPrice(address token, uint256 price) external onlyOracle {
         require(token != address(0), "PriceOracle: zero address");
         require(price > 0, "PriceOracle: zero price");
+        require(price <= 1e36, "PriceOracle: price too large");
         if (prices[token] > 0) {
             uint256 diff = price > prices[token] ? price - prices[token] : prices[token] - price;
             require(diff * 10000 / prices[token] <= maxDeviationBps, "Price deviation too large");

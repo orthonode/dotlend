@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther } from "viem";
 import { VAULT_ABI, POOL_ABI, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
@@ -57,6 +57,7 @@ export function BorrowUSDH() {
   // Per-day interest preview for the borrow amount
   const perDay = borrowNum * 0.005 / 365;
 
+  const publicClient = usePublicClient();
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
   const { isLoading: isConfirming, isSuccess, error: receiptError } = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -77,16 +78,19 @@ export function BorrowUSDH() {
     if (writeError || receiptError) { setStatus("error"); clearOptimistic(); }
   }, [writeError, receiptError, setStatus, clearOptimistic]);
 
-  function handleBorrow() {
+  async function handleBorrow() {
     const parsed = parseEther(amount);
     setOptimistic(0n, parsed);
     setStatus("signing", `Borrowing ${Number(amount).toFixed(2)} USDH…`);
-    writeContract({
-      address: addresses.lendingPool,
-      abi: POOL_ABI,
-      functionName: "borrow",
-      args: [parsed],
-    });
+    let gas = 200_000n;
+    try {
+      const est = await publicClient!.estimateContractGas({
+        address: addresses.lendingPool, abi: POOL_ABI, functionName: "borrow",
+        args: [parsed], account: address,
+      });
+      gas = est * 120n / 100n;
+    } catch { /* use fallback */ }
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "borrow", args: [parsed], gas });
   }
 
   if (!address) {

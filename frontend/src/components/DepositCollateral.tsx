@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther } from "viem";
 import { VAULT_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
@@ -44,6 +44,7 @@ export function DepositCollateral() {
     query: { enabled: !!address, refetchInterval: 15_000 },
   });
 
+  const publicClient = usePublicClient();
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
   const { isLoading: isConfirming, isSuccess, error: receiptError } = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -70,28 +71,34 @@ export function DepositCollateral() {
   const parsedAmount = amount ? parseEther(amount) : 0n;
   const needsApproval = allowance !== undefined && parsedAmount > 0n && parsedAmount > allowance;
 
-  function handleApprove() {
-    setStep("approve");
-    setStatus("signing", `Approving ${assetSymbol}…`);
-    writeContract({
-      address: addresses.collateral,
-      abi: ERC20_ABI,
-      functionName: "approve",
-      args: [addresses.collateralVault, parsedAmount],
-    });
+  async function estimateGas(params: Parameters<typeof publicClient.estimateContractGas>[0], fallback: bigint): Promise<bigint> {
+    try {
+      const est = await publicClient!.estimateContractGas(params);
+      return est * 120n / 100n; // +20% buffer
+    } catch {
+      return fallback;
+    }
   }
 
-  function handleDeposit() {
+  async function handleApprove() {
+    setStep("approve");
+    setStatus("signing", `Approving ${assetSymbol}…`);
+    const gas = await estimateGas({
+      address: addresses.collateral, abi: ERC20_ABI, functionName: "approve",
+      args: [addresses.collateralVault, parsedAmount], account: address,
+    }, 100_000n);
+    writeContract({ address: addresses.collateral, abi: ERC20_ABI, functionName: "approve", args: [addresses.collateralVault, parsedAmount], gas });
+  }
+
+  async function handleDeposit() {
     setStep("deposit");
-    // Optimistic: show collateral increasing immediately
     setOptimistic(parsedAmount, 0n);
     setStatus("signing", `Depositing ${Number(amount).toFixed(2)} ${assetSymbol}…`);
-    writeContract({
-      address: addresses.collateralVault,
-      abi: VAULT_ABI,
-      functionName: "deposit",
-      args: [parsedAmount],
-    });
+    const gas = await estimateGas({
+      address: addresses.collateralVault, abi: VAULT_ABI, functionName: "deposit",
+      args: [parsedAmount], account: address,
+    }, 200_000n);
+    writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "deposit", args: [parsedAmount], gas });
   }
 
   if (!address) {

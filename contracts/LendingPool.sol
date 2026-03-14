@@ -132,12 +132,13 @@ contract LendingPool is Ownable, ReentrancyGuard {
 
         uint256 repayAmount = usdhAmount > debt ? debt : usdhAmount;
 
-        usdh.transferFrom(msg.sender, address(this), repayAmount);
-        usdh.burn(repayAmount);
-
+        // CEI: effects before interactions
         vault.setDebt(msg.sender, debt - repayAmount);
         totalDebt = totalDebt >= repayAmount ? totalDebt - repayAmount : 0;
         lastAccrualTime[msg.sender] = block.timestamp;
+
+        usdh.transferFrom(msg.sender, address(this), repayAmount);
+        usdh.burn(repayAmount);
 
         emit Repaid(msg.sender, repayAmount);
     }
@@ -152,9 +153,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         uint256 debt = vault.debtBalance(borrower);
         require(debt > 0, "Pool: no debt");
 
-        usdh.transferFrom(msg.sender, address(this), debt);
-        usdh.burn(debt);
-
+        // Reads: calculate seizure amount before any state change
         uint256 vdotPrice = oracle.getPrice(vdot);
         uint256 debtInVdot = (debt * 1e18) / vdotPrice;
         uint256 collateralToSeize = debtInVdot + (debtInVdot * LIQUIDATION_BONUS) / BONUS_PRECISION;
@@ -164,9 +163,12 @@ contract LendingPool is Ownable, ReentrancyGuard {
             collateralToSeize = actualCollateral;
         }
 
+        // CEI: effects before interactions
         vault.setDebt(borrower, 0);
         totalDebt = totalDebt >= debt ? totalDebt - debt : 0;
-        // Vault sends vDOT directly to liquidator — no IERC20 needed in this contract
+
+        usdh.transferFrom(msg.sender, address(this), debt);
+        usdh.burn(debt);
         vault.seizeCollateral(borrower, collateralToSeize, msg.sender);
 
         emit Liquidated(borrower, msg.sender, debt, collateralToSeize);

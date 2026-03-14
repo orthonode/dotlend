@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt, useBalance } from "wagmi";
+import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt, useBalance, usePublicClient } from "wagmi";
 import { parseEther, formatEther } from "viem";
 import { ADDRESSES, MOCK_ABI, WPAS_ABI, EXPLORER } from "@/src/lib/contracts";
 import { useMarket } from "@/src/lib/market-context";
@@ -28,6 +28,7 @@ export function MintTokens() {
   const collateralBal = data?.[0]?.result ?? 0n;
   const usdhBal       = data?.[1]?.result ?? 0n;
 
+  const publicClient = usePublicClient();
   const { writeContract, data: txHash, isPending, error: writeError, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -45,25 +46,33 @@ export function MintTokens() {
     if (writeError) { setMinting(null); }
   }, [writeError]);
 
-  function handleMint(token: "vdot" | "usdh" | "wpas") {
+  async function handleMint(token: "vdot" | "usdh" | "wpas") {
     if (!address) return;
     setMinting(token);
     setLastTx(null);
 
     if (token === "wpas") {
-      writeContract({
-        address: addresses.collateral,
-        abi: WPAS_ABI,
-        functionName: "deposit",
-        value: parseEther(wrapAmount || "0"),
-      });
+      const value = parseEther(wrapAmount || "0");
+      let gas = 100_000n;
+      try {
+        const est = await publicClient!.estimateContractGas({
+          address: addresses.collateral, abi: WPAS_ABI, functionName: "deposit",
+          value, account: address,
+        });
+        gas = est * 120n / 100n;
+      } catch { /* use fallback */ }
+      writeContract({ address: addresses.collateral, abi: WPAS_ABI, functionName: "deposit", value, gas });
     } else {
-      writeContract({
-        address: token === "vdot" ? addresses.collateral : addresses.usdh,
-        abi: MOCK_ABI,
-        functionName: "mint",
-        args: [address, AMOUNT],
-      });
+      const tokenAddress = token === "vdot" ? addresses.collateral : addresses.usdh;
+      let gas = 100_000n;
+      try {
+        const est = await publicClient!.estimateContractGas({
+          address: tokenAddress, abi: MOCK_ABI, functionName: "mint",
+          args: [address, AMOUNT], account: address,
+        });
+        gas = est * 120n / 100n;
+      } catch { /* use fallback */ }
+      writeContract({ address: tokenAddress, abi: MOCK_ABI, functionName: "mint", args: [address, AMOUNT], gas });
     }
   }
 

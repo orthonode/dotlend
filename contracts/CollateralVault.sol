@@ -143,6 +143,7 @@ contract CollateralVault is Ownable, ReentrancyGuard {
     /// @param amount Amount of vDOT to seize
     /// @param recipient Address to receive the seized vDOT (liquidator)
     function seizeCollateral(address user, uint256 amount, address recipient) external onlyLendingPool {
+        require(recipient != address(0), "Vault: zero recipient");
         require(collateralBalance[user] >= amount, "Vault: insufficient collateral to seize");
         collateralBalance[user] -= amount;
         internalCash -= amount;

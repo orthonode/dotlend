@@ -44,6 +44,7 @@ contract TreasuryRouter is Ownable {
 
     event ProtocolFeeCollected(uint256 amount);
     event TreasuryUpdated(address indexed newTreasury);
+    event LendingPoolSet(address indexed pool);
 
     constructor(address _usdh, address _treasury) {
         require(_usdh   != address(0), "TR: zero usdh");
@@ -55,6 +56,7 @@ contract TreasuryRouter is Ownable {
     function setLendingPool(address _pool) external onlyOwner {
         require(_pool != address(0), "TR: zero pool");
         lendingPool = _pool;
+        emit LendingPoolSet(_pool);
     }
 
     function setTreasury(address _treasury) external onlyOwner {

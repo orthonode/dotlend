@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { parseEther, formatEther, maxUint256 } from "viem";
 import { VAULT_ABI, POOL_ABI, ERC20_ABI, EXPLORER } from "@/src/lib/contracts";
@@ -107,6 +107,7 @@ export function RepayAndWithdraw() {
   const parsedWithdraw = withdrawAmount ? parseEther(withdrawAmount) : 0n;
   const needsApproval  = parsedRepay > 0n && parsedRepay > allowance;
 
+  const publicClient = usePublicClient();
   const { writeContract, data: txHash, isPending, error: writeError } = useWriteContract();
   const { isLoading: isConfirming, isSuccess, error: receiptError } = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -132,21 +133,45 @@ export function RepayAndWithdraw() {
     if (writeError || receiptError) { setStatus("error"); clearOptimistic(); }
   }, [writeError, receiptError, setStatus, clearOptimistic]);
 
-  function handleApprove() {
+  async function handleApprove() {
     setStatus("signing", "Approving USDH…");
-    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256] });
+    let gas = 100_000n;
+    try {
+      const est = await publicClient!.estimateContractGas({
+        address: addresses.usdh, abi: ERC20_ABI, functionName: "approve",
+        args: [addresses.lendingPool, maxUint256], account: address,
+      });
+      gas = est * 120n / 100n;
+    } catch { /* use fallback */ }
+    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256], gas });
   }
 
-  function handleRepay() {
+  async function handleRepay() {
     setOptimistic(0n, -parsedRepay);
     setStatus("signing", `Repaying ${Number(repayAmount).toFixed(2)} USDH…`);
-    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay] });
+    let gas = 200_000n;
+    try {
+      const est = await publicClient!.estimateContractGas({
+        address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay",
+        args: [parsedRepay], account: address,
+      });
+      gas = est * 120n / 100n;
+    } catch { /* use fallback */ }
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [parsedRepay], gas });
   }
 
-  function handleWithdraw() {
+  async function handleWithdraw() {
     setOptimistic(-parsedWithdraw, 0n);
     setStatus("signing", `Withdrawing ${Number(withdrawAmount).toFixed(4)} ${assetSymbol}…`);
-    writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw] });
+    let gas = 200_000n;
+    try {
+      const est = await publicClient!.estimateContractGas({
+        address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw",
+        args: [parsedWithdraw], account: address,
+      });
+      gas = est * 120n / 100n;
+    } catch { /* use fallback */ }
+    writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw], gas });
   }
 
   if (!address) {
