@@ -13,43 +13,34 @@ interface IUSDH {
 /// @title TreasuryRouter — passed as _usdh to LendingPool constructor.
 ///
 /// Revenue model (MakerDAO-style):
-///   100% of repayment/liquidation flows go to the protocol treasury.
-///   USDH is a stablecoin — burning it destroys borrowing capacity for
-///   zero token-value benefit. Instead, treasury governance directs funds to:
-///     Phase 1 (testnet):  operations, hackathon prizes, liquidity
-///     Phase 2 (mainnet):  buy DOT/vDOT on open market → distribute to stakers
-///     Phase 3 (token):    buy DOTLEND governance token → burn
+///   Only accrued stability fee goes to treasury.
+///   Principal is burned — correct USDH peg mechanics.
 ///
-/// Intercept strategy:
-///   LendingPool.repay() calls in order:
-///     (A) usdh.transferFrom(user, address(this), amount)  — pull from user
-///     (B) usdh.burn(amount)                               — burn from pool
-///
-///   We intercept at (A): when transferFrom(user, lendingPool, amount) is called,
-///   the router pulls USDH from user directly into itself, sends 100% to
-///   treasury. When (B) usdh.burn(amount) is called, it's a no-op.
-///
-/// Deploy order:
-///   1. Deploy TreasuryRouter(usdhAddress, treasuryAddress)
-///   2. Deploy CollateralVault(collateral, oracle)
-///   3. Deploy LendingPool(vault, ROUTER_ADDRESS, oracle, collateral)
-///   4. vault.setLendingPool(pool)
-///   5. router.setLendingPool(pool)  ← so router knows pool address
+/// Principal tracking:
+///   mint(user, amount) is called on borrow — we record principal here.
+///   On repay, transferFrom intercepts and splits:
+///     principalPortion → burned
+///     feePortion (interest) → treasury
 contract TreasuryRouter is Ownable {
     IUSDH public immutable usdh;
     address public treasury;
     address public lendingPool;
 
-    uint256 public totalFeesCollected;
+    /// @notice Tracks original borrowed principal per user
+    mapping(address => uint256) public principalDebt;
 
-    event ProtocolFeeCollected(uint256 amount);
+    uint256 public totalFeesCollected;
+    uint256 public totalBurned;
+
+    event ProtocolFeeCollected(address indexed user, uint256 feeAmount);
+    event PrincipalBurned(address indexed user, uint256 burnAmount);
     event TreasuryUpdated(address indexed newTreasury);
     event LendingPoolSet(address indexed pool);
 
     constructor(address _usdh, address _treasury) {
-        require(_usdh   != address(0), "TR: zero usdh");
+        require(_usdh     != address(0), "TR: zero usdh");
         require(_treasury != address(0), "TR: zero treasury");
-        usdh   = IUSDH(_usdh);
+        usdh     = IUSDH(_usdh);
         treasury = _treasury;
     }
 
@@ -65,28 +56,50 @@ contract TreasuryRouter is Ownable {
         emit TreasuryUpdated(_treasury);
     }
 
-    /// @notice Called by LendingPool as "transferFrom(user, lendingPool, amount)".
-    ///         If `to` == lendingPool, this is a repay/liquidation — intercept
-    ///         and route 100% to treasury. Otherwise forward transparently.
+    /// @notice Called by LendingPool.borrow() — intercept to record principal.
+    function mint(address to, uint256 amount) external {
+        principalDebt[to] += amount;
+        usdh.mint(to, amount);
+    }
+
+    /// @notice Called by LendingPool.repay() via transferFrom.
+    ///         Splits: principal → burn, interest → treasury.
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         if (to == lendingPool && amount > 0) {
-            // Intercept: pull from user into router, send 100% to treasury
+            // Pull USDH from user into router
             usdh.transferFrom(from, address(this), amount);
-            usdh.transfer(treasury, amount);
-            totalFeesCollected += amount;
-            emit ProtocolFeeCollected(amount);
+
+            // Split principal vs fee
+            uint256 principal = principalDebt[from];
+            uint256 principalPortion = amount <= principal ? amount : principal;
+            uint256 feePortion = amount - principalPortion;
+
+            // Update tracked principal
+            if (principalPortion > 0) {
+                principalDebt[from] = principal - principalPortion;
+            }
+
+            // Burn the principal
+            if (principalPortion > 0) {
+                usdh.burn(principalPortion);
+                totalBurned += principalPortion;
+                emit PrincipalBurned(from, principalPortion);
+            }
+
+            // Send fee to treasury
+            if (feePortion > 0) {
+                usdh.transfer(treasury, feePortion);
+                totalFeesCollected += feePortion;
+                emit ProtocolFeeCollected(from, feePortion);
+            }
+
             return true;
         }
         return usdh.transferFrom(from, to, amount);
     }
 
-    /// @notice Called by LendingPool after transferFrom — already handled, no-op.
+    /// @notice Called by LendingPool after transferFrom — already handled.
     function burn(uint256) external {
-        // Revenue already routed to treasury in transferFrom() — nothing to burn
-    }
-
-    /// @notice Forwards mint() to real USDH
-    function mint(address to, uint256 amount) external {
-        usdh.mint(to, amount);
+        // Principal already burned in transferFrom() — no-op
     }
 }
