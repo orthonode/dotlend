@@ -92,7 +92,7 @@ export function RepayAndWithdraw() {
       { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
       { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
       { address: addresses.usdh,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
-      { address: addresses.usdh,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.lendingPool] },
+      { address: addresses.usdh,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.treasuryRouter] },
     ] : [],
     query: { refetchInterval: 15_000 },
   });
@@ -139,11 +139,11 @@ export function RepayAndWithdraw() {
     try {
       const est = await publicClient!.estimateContractGas({
         address: addresses.usdh, abi: ERC20_ABI, functionName: "approve",
-        args: [addresses.lendingPool, maxUint256], account: address,
+        args: [addresses.treasuryRouter, maxUint256], account: address,
       });
       gas = est * 120n / 100n;
     } catch (e) { console.error("Gas estimation failed (approve):", e); }
-    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256], gas });
+    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.treasuryRouter, maxUint256], gas });
   }
 
   async function handleRepay() {
