@@ -97,7 +97,12 @@ Rules: never invent numbers. under 120 words.`;
       });
 
       if (!res.ok || !res.body) {
-        setMessages(prev => [...prev, { role: "assistant", content: "AI Advisor temporarily unavailable." }]);
+        let errMsg = "AI Advisor temporarily unavailable.";
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = `Error: ${errData.error}`;
+        } catch { /* not JSON */ }
+        setMessages(prev => [...prev, { role: "assistant", content: errMsg }]);
         return;
       }
 
