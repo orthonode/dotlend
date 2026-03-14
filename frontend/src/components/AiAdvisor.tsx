@@ -181,6 +181,8 @@ Rules: never invent numbers. under 120 words.`;
           <input
             id="advisor-input"
             name="advisor-input"
+            aria-label="Ask AI advisor"
+            autoComplete="off"
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}

@@ -79,8 +79,8 @@ export function LiquidationMonitor() {
 
       result.sort((a, b) => (a.hf < b.hf ? -1 : a.hf > b.hf ? 1 : 0));
       setPositions(result);
-    } catch (e) {
-      console.error("[LiquidationMonitor] scan failed:", e);
+    } catch {
+      // scan failed — positions remain empty
     } finally {
       setLoading(false);
     }

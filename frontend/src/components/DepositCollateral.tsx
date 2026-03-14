@@ -117,6 +117,8 @@ export function DepositCollateral() {
           <input
             id="deposit-amount"
             name="deposit-amount"
+            aria-label="Deposit amount"
+            autoComplete="off"
             type="number"
             value={amount}
             onChange={e => setAmount(e.target.value)}

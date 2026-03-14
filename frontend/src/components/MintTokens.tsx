@@ -155,6 +155,8 @@ export function MintTokens() {
                     <input
                       id="wrap-amount"
                       name="wrap-amount"
+                      aria-label="Wrap amount"
+                      autoComplete="off"
                       type="number"
                       value={wrapAmount}
                       onChange={(e) => setWrapAmount(e.target.value)}

@@ -124,6 +124,8 @@ export function BorrowUSDH() {
         <input
           id="borrow-amount"
           name="borrow-amount"
+          aria-label="Borrow amount"
+          autoComplete="off"
           type="number"
           value={amount}
           onChange={e => setAmount(e.target.value)}

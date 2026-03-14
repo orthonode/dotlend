@@ -77,8 +77,8 @@ async function fetchSolvency() {
       };
     }
     cachedError = null;
-  } catch (e: any) {
-    cachedError = e.message;
+  } catch (e: unknown) {
+    cachedError = e instanceof Error ? e.message : String(e);
   } finally {
     cachedLoading = false;
     notify();

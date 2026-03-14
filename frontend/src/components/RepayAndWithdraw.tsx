@@ -215,6 +215,7 @@ export function RepayAndWithdraw() {
             </div>
             <input
               id="repay-amount" name="repay-amount"
+              aria-label="Repay amount" autoComplete="off"
               type="number" value={repayAmount} onChange={e => setRepayAmount(e.target.value)}
               placeholder="0.00" disabled={busy}
               className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
@@ -278,6 +279,7 @@ export function RepayAndWithdraw() {
             </div>
             <input
               id="withdraw-amount" name="withdraw-amount"
+              aria-label="Withdraw amount" autoComplete="off"
               type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
               placeholder="0.00" disabled={busy || debt > 0n}
               className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-[#E6007A] disabled:opacity-50"
