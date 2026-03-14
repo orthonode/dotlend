@@ -5,6 +5,7 @@ import "./globals.css";
 import { Providers } from "@/src/components/Providers";
 import { NavBar } from "@/src/components/NavBar";
 import { TxBanner } from "@/src/components/TxBanner";
+import { CookieBanner } from "@/src/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: "DotLend — First Money Market on Polkadot Hub",
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <TxBanner />
           </header>
           <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">{children}</main>
+          <CookieBanner />
         </Providers>
       </body>
     </html>
