@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#050505] text-white">
+      <body className="min-h-screen bg-[#050505] text-white" suppressHydrationWarning>
         <Providers>
           <header className="sticky top-0 z-10 backdrop-blur-xl bg-[#050505]/80 border-b border-white/5">
             <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3">
