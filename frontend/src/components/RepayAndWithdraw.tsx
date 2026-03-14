@@ -117,10 +117,15 @@ export function RepayAndWithdraw() {
     if (isSuccess && txHash) {
       setStatus("success");
       clearOptimistic();
-      // Force immediate refetch so withdraw tab shows updated debt before user switches tabs
       refetch();
       queryClient.invalidateQueries();
       triggerRefetch();
+      // PolkaVM indexing delay — refetch again after 3s to show updated debt
+      setTimeout(() => {
+        refetch();
+        queryClient.invalidateQueries();
+        triggerRefetch();
+      }, 3000);
       setRepayAmount("");
       setRepayAll(false);
       setWithdrawAmount("");
@@ -156,7 +161,8 @@ export function RepayAndWithdraw() {
         functionName: "debtBalance", args: [address!],
       }) as bigint;
       if (freshDebt === 0n) return;
-      amount = freshDebt;
+      // Add 0.1% buffer to cover interest accrued during tx execution
+      amount = freshDebt + (freshDebt / 1000n);
     }
     setOptimistic(0n, -amount);
     setStatus("signing", `Repaying ${Number(formatEther(amount)).toFixed(6)} USDH…`);
