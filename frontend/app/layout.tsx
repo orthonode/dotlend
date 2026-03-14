@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 import { Providers } from "@/src/components/Providers";
@@ -18,9 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="sticky top-0 z-10 backdrop-blur-xl bg-[#050505]/80 border-b border-white/5">
             <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-3">
               <Link href="/" className="flex items-center gap-3 shrink-0">
-                <div className="w-8 h-8 rounded-lg bg-[#E6007A] flex items-center justify-center text-white font-extrabold text-sm">
-                  D
-                </div>
+                <Image src="/logo.png" alt="DotLend" width={32} height={32} className="rounded-lg" />
                 <span className="text-lg font-bold tracking-tight">
                   Dot<span className="text-[#E6007A]">Lend</span>
                 </span>

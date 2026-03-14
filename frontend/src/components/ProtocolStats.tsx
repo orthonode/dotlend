@@ -3,8 +3,8 @@
 // ProtocolStats.tsx
 // Shows live protocol revenue stats — total revenue collected, treasury balance,
 // TVL, borrowers. Reads directly from TreasuryRouter, LendingPool, CollateralVault.
-// Revenue model: 100% of stability fees → treasury. Treasury governance directs
-// funds to DOT buybacks on mainnet (MakerDAO-style).
+// Revenue model: stability fees split on-chain — 50% DOT buybacks, 20% user
+// incentives, 18% system maintenance, 12% team operations.
 
 import { useReadContracts, usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
@@ -243,38 +243,46 @@ export function ProtocolStats() {
       {/* Revenue model explainer */}
       <div className="bg-[#080808] border border-white/5 rounded-lg p-4 text-xs font-mono space-y-3">
         <div className="text-gray-300 font-bold uppercase tracking-widest text-[10px]">
-          Revenue Model — MakerDAO-Style
+          Fee Distribution
         </div>
         <div className="space-y-2 text-gray-500">
           <div className="flex justify-between">
-            <span>Stability fee on all debt</span>
+            <span>Stability fee</span>
             <span className="text-white">{stabilityFeeRate}</span>
           </div>
           <div className="flex justify-between">
-            <span>Revenue to treasury</span>
-            <span className="text-[#E6007A]">100%</span>
+            <span>DOT buybacks</span>
+            <span className="text-[#E6007A]">50%</span>
           </div>
           <div className="flex justify-between">
-            <span>Mainnet use</span>
-            <span className="text-white">DOT/vDOT buybacks</span>
+            <span>User incentives</span>
+            <span className="text-white">20%</span>
+          </div>
+          <div className="flex justify-between">
+            <span>System maintenance</span>
+            <span className="text-white">18%</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Team operations</span>
+            <span className="text-white">12%</span>
           </div>
         </div>
         <div className="border-t border-white/5 pt-3 space-y-1 text-gray-600">
           <div>
-            Treasury governance directs accumulated fees to{" "}
-            <span className="text-[#E6007A]">buy DOT/vDOT on open market</span>{" "}
-            and distribute to stakers — identical to how MakerDAO uses DAI fees
-            to buy and burn MKR.
+            50% of fees{" "}
+            <span className="text-[#E6007A]">buy DOT on Hydration DEX</span>{" "}
+            → stake via Bifrost → vDOT → distributed to governance stakers.
+            Every dollar borrowed creates direct DOT demand.
           </div>
           <div className="mt-2">
             At <span className="text-gray-400">$10M TVL</span>:{" "}
-            <span className="text-[#E6007A]">~$500/yr</span> to treasury
+            <span className="text-[#E6007A]">~$50K/yr</span> total revenue
+            &nbsp;·&nbsp;
+            At <span className="text-gray-400">$40M TVL</span>:{" "}
+            <span className="text-[#E6007A]">~$200K/yr</span>
             &nbsp;·&nbsp;
             At <span className="text-gray-400">$100M TVL</span>:{" "}
-            <span className="text-[#E6007A]">~$5K/yr</span>
-            &nbsp;·&nbsp;
-            At <span className="text-gray-400">$1B TVL</span>:{" "}
-            <span className="text-[#E6007A]">~$50K/yr</span>
+            <span className="text-[#E6007A]">~$500K/yr</span>
           </div>
         </div>
       </div>
