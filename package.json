@@ -31,7 +31,6 @@
     "@noir-lang/noir_js": "^1.0.0-beta.19",
     "@nomicfoundation/hardhat-chai-matchers": "^2.1.2",
     "@nomicfoundation/hardhat-network-helpers": "^1.1.2",
-    "@parity/hardhat-polkadot": "^0.2.7",
     "chai": "^4.5.0"
   }
 }

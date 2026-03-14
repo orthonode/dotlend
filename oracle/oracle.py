@@ -9,8 +9,8 @@ blocked by PolkaVM BN254 precompile gap (EIP-196/197).
 
 Config via .env:
   PRIVATE_KEY       — deployer private key
-  VDOT_PRICE_USD    — override vDOT price in USD (optional, default: fetch from CoinGecko)
-  DOT_PRICE_USD     — override DOT/WPAS price in USD (optional, default: fetch from CoinGecko)
+  VDOT_PRICE_USD    — override vDOT price in USD (optional, default: fetch from DeFiLlama)
+  DOT_PRICE_USD     — override DOT/WPAS price in USD (optional, default: fetch from DeFiLlama)
   WPAS_ADDRESS      — WPAS contract address (leave empty to skip WPAS price posting)
 """
 

@@ -459,10 +459,10 @@ Python process run locally or on a server every 30 minutes. Pushes DOT/USD price
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                       oracle.py  (30-minute cron)                         │
 │                                                                            │
-│  1. GET https://api.coingecko.com/api/v3/simple/price                     │
-│        ?ids=polkadot&vs_currencies=usd                                    │
+│  1. GET https://coins.llama.fi/prices/current/coingecko:polkadot          │
+│        (DeFiLlama — no API key, no geo-blocking)                          │
 │                                                                            │
-│  2. price_usd  = response["polkadot"]["usd"]                              │
+│  2. price_usd  = response["coins"]["coingecko:polkadot"]["price"]        │
 │     price_wei  = int(price_usd * 1e18)    # 18 decimal fixed-point        │
 │                                                                            │
 │  3. web3.eth.contract(PriceOracle_ADDRESS, ABI)                           │
