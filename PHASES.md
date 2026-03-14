@@ -145,9 +145,9 @@ DoraHacks submission confirmed. README has all deployed addresses. Video uploade
 | PriceOracle | 0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173 | [view](https://blockscout-testnet.polkadot.io/address/0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173) |
 | MockvDOT | 0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544 | [view](https://blockscout-testnet.polkadot.io/address/0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544) |
 | MockUSDH | 0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683 | [view](https://blockscout-testnet.polkadot.io/address/0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683) |
-| TreasuryRouter (vDOT) | 0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80 | [view](https://blockscout-testnet.polkadot.io/address/0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80) |
-| CollateralVault (vDOT) | 0x7E700a00290f4B12467361030b274769A10A490B | [view](https://blockscout-testnet.polkadot.io/address/0x7E700a00290f4B12467361030b274769A10A490B) |
-| LendingPool (vDOT) | 0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668 | [view](https://blockscout-testnet.polkadot.io/address/0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668) |
+| TreasuryRouter (vDOT) | 0x1adEe37eefd054927b14503Ff2076aE12Db76B30 | [view](https://blockscout-testnet.polkadot.io/address/0x1adEe37eefd054927b14503Ff2076aE12Db76B30) |
+| CollateralVault (vDOT) | 0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2 | [view](https://blockscout-testnet.polkadot.io/address/0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2) |
+| LendingPool (vDOT) | 0x34B22768B16262aD5b7fC23DD797D80791e4e7e6 | [view](https://blockscout-testnet.polkadot.io/address/0x34B22768B16262aD5b7fC23DD797D80791e4e7e6) |
 | WPAS | 0xc09348291775B55Da40433ba44240c262D87Eb90 | [view](https://blockscout-testnet.polkadot.io/address/0xc09348291775B55Da40433ba44240c262D87Eb90) |
 | TreasuryRouter (WPAS) | 0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a | [view](https://blockscout-testnet.polkadot.io/address/0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a) |
 | CollateralVault (WPAS) | 0x575B8578F000fC554394C63cec8F07Abd0C66C34 | [view](https://blockscout-testnet.polkadot.io/address/0x575B8578F000fC554394C63cec8F07Abd0C66C34) |

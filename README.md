@@ -72,9 +72,9 @@ All 13 contracts deployed and verified on Polkadot Hub TestNet (2 markets: vDOT 
 | PriceOracle | `0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173` | [view](https://blockscout-testnet.polkadot.io/address/0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173) |
 | MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` | [view](https://blockscout-testnet.polkadot.io/address/0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544) |
 | MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` | [view](https://blockscout-testnet.polkadot.io/address/0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683) |
-| TreasuryRouter (vDOT) | `0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80` | [view](https://blockscout-testnet.polkadot.io/address/0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80) |
-| CollateralVault (vDOT) | `0x7E700a00290f4B12467361030b274769A10A490B` | [view](https://blockscout-testnet.polkadot.io/address/0x7E700a00290f4B12467361030b274769A10A490B) |
-| LendingPool (vDOT) | `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668` | [view](https://blockscout-testnet.polkadot.io/address/0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668) |
+| TreasuryRouter (vDOT) | `0x1adEe37eefd054927b14503Ff2076aE12Db76B30` | [view](https://blockscout-testnet.polkadot.io/address/0x1adEe37eefd054927b14503Ff2076aE12Db76B30) |
+| CollateralVault (vDOT) | `0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2` | [view](https://blockscout-testnet.polkadot.io/address/0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2) |
+| LendingPool (vDOT) | `0x34B22768B16262aD5b7fC23DD797D80791e4e7e6` | [view](https://blockscout-testnet.polkadot.io/address/0x34B22768B16262aD5b7fC23DD797D80791e4e7e6) |
 | WPAS | `0xc09348291775B55Da40433ba44240c262D87Eb90` | [view](https://blockscout-testnet.polkadot.io/address/0xc09348291775B55Da40433ba44240c262D87Eb90) |
 | TreasuryRouter (WPAS) | `0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a` | [view](https://blockscout-testnet.polkadot.io/address/0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a) |
 | CollateralVault (WPAS) | `0x575B8578F000fC554394C63cec8F07Abd0C66C34` | [view](https://blockscout-testnet.polkadot.io/address/0x575B8578F000fC554394C63cec8F07Abd0C66C34) |
@@ -124,7 +124,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x199E3E7
 | Stability Fee | 0.5% / year (5 bps) | Minimal cost of capital — vDOT staking yield (~15%) far exceeds it |
 | Liquidation Bonus | 5% | Competitive incentive for liquidators; covered by collateral buffer |
 | Oracle Stale Threshold | 1 hour | Prevents stale price exploitation |
-| Treasury Fee | 100% of stability fees | Split: 50% DOT buybacks, 20% user incentives, 18% system maintenance, 12% team operations |
+| Treasury Fee | 100% of stability fees | **Testnet:** accrued interest (excess over principal) transferred to deployer wallet; principal is burned (MockUSDH). **Mainnet:** Aave/Compound model — principal returns to reserve; only stability fee goes to treasury, split via on-chain governance. |
 
 ---
 
@@ -165,7 +165,7 @@ DotLend is the only active lending protocol on Polkadot Hub EVM. The right produ
        │                                    ▼                                      │
        │                              TreasuryRouter  (fee split)                  │
        │                                    │                                      │
-       │                    50% DOT buyback │ 20% incentives │ 18% maint │ 12% team│
+       │                               treasury wallet                             │
        │                               Treasury Wallet                             │
        │                                                                           │
        └──liquidate(borrower)─────────► LendingPool                                │
@@ -370,7 +370,7 @@ forge test --match-path "test/fuzz/**" -v
 ```
 
 ```
-Hardhat — 102 passing:
+Hardhat — 102 passing, 2 pending:
   PriceOracle     — 14 tests: access control, staleness, price submission, circuit breaker
   CollateralVault — 21 tests: deposit, withdraw, health factor math, LTV enforcement,
                               donation resistance, supply cap
@@ -380,7 +380,7 @@ Hardhat — 102 passing:
   SolvencyProof   — 14 tests: gateway setup, valid/invalid proof, permissionless,
                               wrong input count, stale timestamp
   XCMPrecompile   —  4 tests: precompile exists, weighMessage, treasury set, dispatch count
-                              (require testnet; skipped on local hardhat)
+                              (2 pending: require live testnet; skipped on local hardhat)
 
 Forge fuzz — 6 tests × 512 runs:
   testFuzz_HealthFactorNoOverflow     — formula safe in realistic input range
@@ -443,7 +443,7 @@ dotlend/
 │   ├── PriceOracle.sol          # authorized price feed, staleness guard
 │   ├── CollateralVault.sol      # vDOT deposit, health factor, liquidation seizure
 │   ├── LendingPool.sol          # borrow / repay / liquidate / interest
-│   ├── TreasuryRouter.sol       # fee split: 50% DOT buyback, 20% incentives, 18% maint, 12% team
+│   ├── TreasuryRouter.sol       # intercepts mint/burn/transferFrom; burns principal, routes stability fee to treasury
 │   ├── WPAS.sol                 # Wrapped PAS — WETH9-style native DOT collateral
 │   ├── SolvencyGateway.sol      # ZK proof submission, SolvencyProven event
 │   ├── SolvencyVerifier.sol     # UltraHonk verifier wrapper (mainnet)
@@ -562,7 +562,7 @@ The most interesting OZ interaction in DotLend is the one that **didn't work** a
 
 When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a **strict 24KB initcode size limit** — significantly smaller than Ethereum's 24.576KB limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
 
-The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and splits it: 50% DOT buybacks, 20% user incentives, 18% system maintenance, 12% team operations. When `LendingPool` calls `usdh.burn()`, the router returns a no-op.
+The solution was `TreasuryRouter` — a separate contract that implements the same `IMintBurn` interface as `MockUSDH` and sits between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow and splits it: the principal portion (up to tracked `principalDebt[user]`) is burned (MockUSDH grants the router burn rights on testnet), and the accrued stability fee (the excess above principal) is transferred to the treasury wallet. When `LendingPool` calls `usdh.burn()`, the router returns a no-op (already handled). On mainnet with Hollar (a real stablecoin the router cannot burn), principal routes back to the LendingPool reserve — the Aave/Compound model.
 
 This pattern exists *specifically because* OpenZeppelin's composition model (Ownable + ReentrancyGuard + ERC20 interactions) consumed enough bytecode that the fee logic had to be externalized. It's a real constraint that produced a cleaner architecture — the router pattern is now more testable, more upgradeable, and more auditable than inline fee logic would have been.
 
@@ -705,7 +705,7 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 Snowbridge has $75M+ TVL and zero on-chain downtime. wETH, wBTC, and USDC are already bridgeable to Polkadot Hub. DotLend becomes a full two-sided market: deposit vDOT/wETH/wBTC, borrow USDC. Identical to Aave — but on Polkadot Hub, where nobody has built this yet.
 
 **Treasury flywheel (Phase 4):**
-Stability fees are split on-chain by TreasuryRouter: 50% buys DOT on Hydration DEX via XCM → staked → vDOT → distributed to DOTLEND stakers. 20% funds user incentives (liquidity mining, deposit rewards). 18% covers system maintenance (audits, infrastructure, oracle hosting). 12% sustains team operations (founder salary, hiring, legal). Every dollar borrowed on DotLend creates direct DOT demand while keeping the team funded and the protocol maintained.
+On mainnet, DotLend operates as a lending market (Aave/Compound model): repaid Hollar principal returns to the LendingPool reserve; only the stability fee (0.5%/yr) flows to treasury. The on-chain fee split target: 50% buys DOT on Hydration DEX via XCM → staked → vDOT → distributed to DOTLEND stakers. 20% funds user incentives. 18% covers system maintenance. 12% sustains team operations. Every dollar borrowed creates direct DOT demand while keeping the protocol maintained. Note: testnet currently routes 100% of stability fees to the deployer wallet; the phased split activates with governance on mainnet.
 
 **Hyperbridge ISMP oracle (mainnet):**
 Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOracle.onAccept()` → CollateralVault + LendingPool. No Chainlink. No bridge. 100% Polkadot-native.

@@ -18,14 +18,15 @@ Polkadot has $330M in USDH and vDOT at 76% utilization on Hydration — the supp
 
 DotLend is Polkadot's native money market — an Aave-style liquidity protocol deployed on **Polkadot Hub**. Users deposit **vDOT** (Bifrost's liquid staking token) or **native DOT/PAS** (via WPAS) to earn staking yield, and borrow against it. Right now on testnet, users borrow **USDH** (our mock stablecoin proxy). On mainnet, USDH is replaced by **USDC, wETH, and wBTC via Snowbridge**. No other protocol on Polkadot Hub does this.
 
-The protocol tracks each user's health factor — `(Collateral Value × 0.80) / Debt` — and opens the position to liquidation when it falls below 1.0, with a 5% bonus to incentivize liquidators. Interest accrues continuously at 0.5% per year via a lazy timestamp-based model, keeping gas costs low and the accounting trustless. Stability fees are split on-chain: 50% DOT buybacks, 20% user incentives, 18% maintenance, 12% team.
+The protocol tracks each user's health factor — `(Collateral Value × 0.80) / Debt` — and opens the position to liquidation when it falls below 1.0, with a 5% bonus to incentivize liquidators. Interest accrues continuously at 0.5% per year via a lazy timestamp-based model, keeping gas costs low and the accounting trustless. Stability fees accrue at 0.5%/yr and flow to the treasury wallet. The on-chain fee split (50% DOT buybacks, 20% incentives, 18% maintenance, 12% team) activates with governance on mainnet.
 
 ### Revenue Model — Real Assets for Protocol Growth
 
-All stability fees flow through `TreasuryRouter` which splits them on-chain: 50% DOT buybacks (Hydration DEX), 20% user incentives, 18% system maintenance, 12% team operations. DotLend does not burn stablecoins — burning a stablecoin destroys borrowing capacity for zero benefit. Every fee dollar does real work.
+**Testnet model:** MockUSDH principal is burned on repay (MockUSDH grants `TreasuryRouter` burn rights). Only the accrued stability fee — the interest above principal — is transferred to the treasury wallet.
+
+**Mainnet model (Aave/Compound):** Hollar (USDH) is a real stablecoin — DotLend cannot burn it. Repaid Hollar principal returns to the LendingPool reserve for the next borrower. Only the stability fee goes to treasury. DotLend is a two-sided lending market, not a stablecoin issuer.
 
 On mainnet, treasury governance directs accumulated fees to:
-- **Phase 1 (testnet):** Operations, hackathon prizes, liquidity bootstrapping
 - **Phase 2 (mainnet):** Buy DOT on Hydration DEX via XCM → stake → vDOT → distribute to stakers
 - **Phase 3 (token):** Buy DOTLEND governance token → burn
 
@@ -72,7 +73,7 @@ DotLend uses **OpenZeppelin v4.9.6** as its security foundation across every con
 
 **The TreasuryRouter constraint story:** When building the fee mechanism, the natural pattern was to extend `LendingPool` with fee logic directly. But PolkaVM enforces a strict 24KB initcode size limit. `LendingPool` already inherits from both `Ownable` and `ReentrancyGuard`, and adding fee-splitting logic pushed the compiled PolkaVM bytecode over the limit.
 
-The solution was `TreasuryRouter` — a separate contract implementing the same `IMintBurn` interface as `MockUSDH`, sitting between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts and splits fees: 50% DOT buybacks, 20% user incentives, 18% system maintenance, 12% team operations. This pattern exists *specifically because* OpenZeppelin's composition model consumed enough bytecode that fee logic had to be externalized — producing a cleaner, more testable, more auditable architecture than inline fee logic would have been.
+The solution was `TreasuryRouter` — a separate contract implementing the same `IMintBurn` interface as `MockUSDH`, sitting between `LendingPool` and the real USDH token. When `LendingPool` calls `usdh.transferFrom()` during repayment, it's actually calling the router, which intercepts the flow: the principal portion is burned (MockUSDH grants burn rights on testnet) and the accrued stability fee is transferred to the treasury wallet. On mainnet, principal routes back to the reserve instead. This pattern exists *specifically because* OpenZeppelin's composition model consumed enough bytecode that fee logic had to be externalized — producing a cleaner, more testable, more auditable architecture than inline fee logic would have been.
 
 ---
 
@@ -119,15 +120,16 @@ Every contract was built with PolkaVM constraints as hard requirements. No `SELF
 | PriceOracle | `0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173` |
 | MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` |
 | MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` |
-| TreasuryRouter (vDOT) | `0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80` |
-| CollateralVault (vDOT) | `0x7E700a00290f4B12467361030b274769A10A490B` |
-| LendingPool (vDOT) | `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668` |
+| TreasuryRouter (vDOT) | `0x1adEe37eefd054927b14503Ff2076aE12Db76B30` |
+| CollateralVault (vDOT) | `0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2` |
+| LendingPool (vDOT) | `0x34B22768B16262aD5b7fC23DD797D80791e4e7e6` |
 | WPAS | `0xc09348291775B55Da40433ba44240c262D87Eb90` |
 | TreasuryRouter (WPAS) | `0xcC2Ca486257eED1201FCdc247F9a3120D0E8Be7a` |
 | CollateralVault (WPAS) | `0x575B8578F000fC554394C63cec8F07Abd0C66C34` |
 | LendingPool (WPAS) | `0xF68bDd12a8904fd6bB0CbED5623722517FDd3408` |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
 | SolvencyGateway | `0x199E3E7c1f1382bc389b495B927B0535B390Acd0` |
+| XCMTreasuryDispatch | `0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d` | [view](https://blockscout-testnet.polkadot.io/address/0x3FfEAC3766F05752f8D3Ae8eEd00B57259Eb3c2d) |
 
 ---
 

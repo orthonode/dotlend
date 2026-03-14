@@ -213,7 +213,7 @@ Standard OpenZeppelin v4 ERC-20. `mint()` is restricted to `LendingPool` only. `
 
 ---
 
-#### CollateralVault — `0x7E700a00290f4B12467361030b274769A10A490B`
+#### CollateralVault — `0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2`
 
 Holds all vDOT collateral. Computes health factors. Mediates between user deposits and lending pool debt accounting.
 
@@ -237,7 +237,7 @@ uint256 public constant LIQUIDATION_BONUS = 5;        // 5%
 
 ---
 
-#### LendingPool — `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668`
+#### LendingPool — `0x34B22768B16262aD5b7fC23DD797D80791e4e7e6`
 
 Core protocol logic. Orchestrates borrow, repay, and liquidate. Applies lazy interest accrual per user on each interaction.
 
@@ -837,8 +837,8 @@ const logs = await publicClient.getLogs({
   │  PriceOracle          0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173            │
   │  MockvDOT             0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544            │
   │  MockUSDH           0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683            │
-  │  CollateralVault      0x7E700a00290f4B12467361030b274769A10A490B            │
-  │  LendingPool          0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668            │
+  │  CollateralVault      0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2            │
+  │  LendingPool          0x34B22768B16262aD5b7fC23DD797D80791e4e7e6            │
   │  MockSolvencyVerifier 0xED2676C995BAA392093Ac0b907EA216c2B8C52cc            │
   │  SolvencyGateway      0x199E3E7c1f1382bc389b495B927B0535B390Acd0            │
   └─────────────┬───────────────────────────────────────────────────────────────┘
@@ -987,9 +987,9 @@ The Noir-generated `UltraHonk` verifier contract uses `assembly {}` blocks for B
 | PriceOracle | `0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173` |
 | MockvDOT | `0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544` |
 | MockUSDH | `0x7d605b39a8EeF1aCA3D63bD7A32E2719abA87683` |
-| CollateralVault (vDOT) | `0x7E700a00290f4B12467361030b274769A10A490B` |
-| LendingPool (vDOT) | `0xb56dB40faa6Ee37c86Aa356682DfeCCcE7c8C668` |
-| TreasuryRouter (vDOT) | `0x2Cd79d84A68F9Ba2DeB3e638267A4772f11d8d80` |
+| CollateralVault (vDOT) | `0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2` |
+| LendingPool (vDOT) | `0x34B22768B16262aD5b7fC23DD797D80791e4e7e6` |
+| TreasuryRouter (vDOT) | `0x1adEe37eefd054927b14503Ff2076aE12Db76B30` |
 | MockSolvencyVerifier | `0xED2676C995BAA392093Ac0b907EA216c2B8C52cc` |
 | SolvencyGateway | `0x199E3E7c1f1382bc389b495B927B0535B390Acd0` |
 
