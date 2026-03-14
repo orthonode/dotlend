@@ -71,7 +71,7 @@ export function DepositCollateral() {
   const parsedAmount = amount ? parseEther(amount) : 0n;
   const needsApproval = allowance !== undefined && parsedAmount > 0n && parsedAmount > allowance;
 
-  async function estimateGas(params: Parameters<typeof publicClient.estimateContractGas>[0], fallback: bigint): Promise<bigint> {
+  async function estimateGas(params: Parameters<NonNullable<typeof publicClient>["estimateContractGas"]>[0], fallback: bigint): Promise<bigint> {
     try {
       const est = await publicClient!.estimateContractGas(params);
       return est * 120n / 100n; // +20% buffer
