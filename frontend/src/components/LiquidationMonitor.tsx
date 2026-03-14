@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatEther, parseAbiItem } from "viem";
@@ -34,6 +34,17 @@ export function LiquidationMonitor() {
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
+  // Incremental scan: cache known depositors and last scanned block
+  // so we never re-scan the full chain history on every 15s tick
+  const knownUsersRef = useRef<Set<`0x${string}`>>(new Set());
+  const lastBlockRef  = useRef<bigint>(0n);
+
+  // Reset when market switches
+  useEffect(() => {
+    knownUsersRef.current = new Set();
+    lastBlockRef.current  = 0n;
+  }, [addresses.collateralVault]);
+
   useEffect(() => {
     if (isSuccess) {
       queryClient.invalidateQueries();
@@ -46,14 +57,18 @@ export function LiquidationMonitor() {
     try {
       setLoading(true);
 
+      // Only fetch NEW Deposited events since last scan
+      const toBlock = await client.getBlockNumber();
       const depositLogs = await client.getLogs({
         address: addresses.collateralVault,
         event: parseAbiItem("event Deposited(address indexed user, uint256 amount)"),
-        fromBlock: 0n,
-        toBlock: "latest",
+        fromBlock: lastBlockRef.current,
+        toBlock,
       });
+      depositLogs.forEach(l => { if (l.args.user) knownUsersRef.current.add(l.args.user); });
+      lastBlockRef.current = toBlock + 1n;
 
-      const uniqueUsers = [...new Set(depositLogs.map(l => l.args.user!))];
+      const uniqueUsers = [...knownUsersRef.current];
 
       const vdotPrice = await client.readContract({
         address: addresses.priceOracle,
@@ -79,12 +94,12 @@ export function LiquidationMonitor() {
 
       result.sort((a, b) => (a.hf < b.hf ? -1 : a.hf > b.hf ? 1 : 0));
       setPositions(result);
-    } catch {
-      // scan failed — positions remain empty
+    } catch (e) {
+      console.error("Position scan failed:", e);
     } finally {
       setLoading(false);
     }
-  }, [client]);
+  }, [client, addresses.collateralVault, addresses.priceOracle, addresses.collateral]);
 
   useEffect(() => {
     scanPositions();
@@ -100,7 +115,7 @@ export function LiquidationMonitor() {
         args: [borrower], account: address,
       });
       gas = est * 120n / 100n;
-    } catch { /* use fallback */ }
+    } catch (e) { console.error("Gas estimation failed (liquidate):", e); }
     writeContract({ address: addresses.lendingPool, abi: POOL_ABI_FULL, functionName: "liquidate", args: [borrower], gas });
   }
 
@@ -131,7 +146,7 @@ export function LiquidationMonitor() {
       ) : positions.length === 0 ? (
         <div className="text-center py-8 space-y-1">
           <div className="text-gray-500 text-sm">No active positions found on-chain</div>
-          <div className="text-gray-600 text-xs font-mono">Scanned all Deposited events from block 0</div>
+          <div className="text-gray-600 text-xs font-mono">No depositors found — scanning incrementally</div>
         </div>
       ) : (
         <>
@@ -243,7 +258,7 @@ export function LiquidationMonitor() {
             <div><span className="text-gray-300">Trigger</span> — health factor drops below 1.0 (LTV exceeds 80%). Anyone can call <span className="text-gray-400">liquidate(borrower)</span>.</div>
             <div><span className="text-gray-300">What happens</span> — the liquidator repays the borrower's full USDH debt and receives their {assetSymbol} collateral plus a 5% bonus.</div>
             <div><span className="text-gray-300">Why 80% threshold</span> — collateral is priced at the oracle's last on-chain value. Price feeds update every 30 minutes via the Python oracle; the 80% liquidation threshold gives a buffer against price drops between updates.</div>
-            <div><span className="text-gray-300">This monitor</span> — scans all <span className="text-gray-400">Deposited</span> events from block 0, re-reads every 15 seconds. Health factors are computed client-side using the same formula as <span className="text-gray-400">CollateralVault.sol</span>.</div>
+            <div><span className="text-gray-300">This monitor</span> — incrementally scans <span className="text-gray-400">Deposited</span> events (caches known depositors, only fetches new blocks each tick) and re-reads health factors every 15 seconds. Computed client-side using the same formula as <span className="text-gray-400">CollateralVault.sol</span>.</div>
             <div className="pt-1 border-t border-white/5 text-gray-600">
               Source:{" "}
               <a href="https://github.com/orthonode/dotlend/blob/main/contracts/LendingPool.sol"

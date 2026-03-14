@@ -6,18 +6,7 @@
 import { useEffect, useState } from "react";
 import { createPublicClient, http, parseAbiItem, formatEther } from "viem";
 import { COMMON_ADDRESSES } from "@/src/lib/contracts";
-
-// ── Chain config ─────────────────────────────────────────────────────────────
-
-const POLKADOT_HUB_TESTNET = {
-  id: 420420417,
-  name: "Polkadot Hub TestNet",
-  nativeCurrency: { name: "DOT", symbol: "DOT", decimals: 18 },
-  rpcUrls: { default: { http: ["https://eth-rpc-testnet.polkadot.io"] } },
-  blockExplorers: {
-    default: { name: "Blockscout", url: "https://blockscout-testnet.polkadot.io" },
-  },
-};
+import { polkadotHubTestnet } from "@/src/lib/wagmi";
 
 const SOLVENCY_GATEWAY_ADDRESS = COMMON_ADDRESSES.solvencyGateway;
 
@@ -38,7 +27,7 @@ interface SolvencyData {
 // ── Module-level singleton — ONE fetch shared across all consumers ─────────────
 
 const client = createPublicClient({
-  chain: POLKADOT_HUB_TESTNET,
+  chain: polkadotHubTestnet,
   transport: http(),
 });
 

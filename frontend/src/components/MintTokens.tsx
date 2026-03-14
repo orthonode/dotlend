@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useReadContracts, useWaitForTransactionReceipt, useBalance, usePublicClient } from "wagmi";
 import { parseEther, formatEther } from "viem";
-import { ADDRESSES, MOCK_ABI, WPAS_ABI, EXPLORER } from "@/src/lib/contracts";
+import { MOCK_ABI, WPAS_ABI, EXPLORER } from "@/src/lib/contracts";
 import { useMarket } from "@/src/lib/market-context";
 
 const AMOUNT = parseEther("1000");
@@ -259,18 +259,18 @@ export function MintTokens() {
           <div>
             <span className="text-white font-bold">Option B — Blockscout UI</span>
             <br />
-            Call <span className="font-mono">mint()</span> directly on the contract explorer — no setup needed:
+            Call <span className="font-mono">{marketId === "wpas" ? "deposit()" : "mint()"}</span> directly on the contract explorer — no setup needed:
             <div className="mt-1 flex flex-col gap-1">
               <a
-                href={`https://blockscout-testnet.polkadot.io/address/${ADDRESSES.vdot}?tab=write_contract`}
+                href={`https://blockscout-testnet.polkadot.io/address/${addresses.collateral}?tab=write_contract`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#E6007A] hover:underline"
               >
-                vDOT → Write Contract on Blockscout →
+                {marketId === "wpas" ? "WPAS" : "vDOT"} → Write Contract on Blockscout →
               </a>
               <a
-                href={`https://blockscout-testnet.polkadot.io/address/${ADDRESSES.usdh}?tab=write_contract`}
+                href={`https://blockscout-testnet.polkadot.io/address/${addresses.usdh}?tab=write_contract`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#E6007A] hover:underline"

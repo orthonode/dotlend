@@ -89,7 +89,7 @@ export function BorrowUSDH() {
         args: [parsed], account: address,
       });
       gas = est * 120n / 100n;
-    } catch { /* use fallback */ }
+    } catch (e) { console.error("Gas estimation failed (borrow):", e); }
     writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "borrow", args: [parsed], gas });
   }
 

@@ -75,7 +75,8 @@ export function DepositCollateral() {
     try {
       const est = await publicClient!.estimateContractGas(params);
       return est * 120n / 100n; // +20% buffer
-    } catch {
+    } catch (e) {
+      console.error("Gas estimation failed:", e);
       return fallback;
     }
   }
