@@ -124,7 +124,7 @@ Visible on [Blockscout](https://blockscout-testnet.polkadot.io/address/0x199E3E7
 | Stability Fee | 0.5% / year (5 bps) | Minimal cost of capital — vDOT staking yield (~15%) far exceeds it |
 | Liquidation Bonus | 5% | Competitive incentive for liquidators; covered by collateral buffer |
 | Oracle Stale Threshold | 1 hour | Prevents stale price exploitation |
-| Treasury Fee | 100% of stability fees | **Testnet:** accrued interest (excess over principal) transferred to deployer wallet; principal is burned (MockUSDH). **Mainnet:** Aave/Compound model — principal returns to reserve; only stability fee goes to treasury, split via on-chain governance. |
+| Treasury Fee | 0.5%/yr stability fee | Principal burned on repay (testnet). On mainnet, principal returns to lending reserve. Only accrued 0.5%/yr stability fee goes to treasury. |
 
 ---
 
@@ -696,7 +696,7 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 | **1 — Testnet** | March 2026 | 13 contracts on Polkadot Hub TestNet, 102 tests, 2 collateral markets ✓ |
 | **2 — Grant + Audit** | Q2 2026 | W3F grant application; PAL security audit via subsidy path |
 | **3 — Mainnet + Snowbridge** | Q2–Q3 2026 | Replace USDH with real Snowbridge assets (USDC, wETH, wBTC); Hyperbridge ISMP oracle |
-| **4 — Treasury Flywheel** | Q3 2026 | Fee split live: 50% DOT buybacks, 20% user incentives, 18% maintenance, 12% team |
+| **4 — Treasury Flywheel** | Q3 2026 | On-chain fee routing live; stability fee (0.5%/yr) split parameters set via governance |
 | **5 — Governance Token** | Q4 2026 | DOTLEND token launch; governance over fee parameters and risk settings |
 | **6 — Scale** | Q4 2026 | Velocity Labs DeFi Builders Cohort; target $10M TVL |
 
@@ -704,7 +704,7 @@ DotLend was built with PolkaVM's execution constraints as hard requirements from
 Snowbridge has $75M+ TVL and zero on-chain downtime. wETH, wBTC, and USDC are already bridgeable to Polkadot Hub. DotLend becomes a full two-sided market: deposit vDOT/wETH/wBTC, borrow USDC. Identical to Aave — but on Polkadot Hub, where nobody has built this yet.
 
 **Treasury flywheel (Phase 4):**
-On mainnet, DotLend operates as a lending market (Aave/Compound model): repaid Hollar principal returns to the LendingPool reserve; only the stability fee (0.5%/yr) flows to treasury. The on-chain fee split target: 50% buys DOT on Hydration DEX via XCM → staked → vDOT → distributed to DOTLEND stakers. 20% funds user incentives. 18% covers system maintenance. 12% sustains team operations. Every dollar borrowed creates direct DOT demand while keeping the protocol maintained. Note: testnet currently routes 100% of stability fees to the deployer wallet; the phased split activates with governance on mainnet.
+On mainnet, DotLend operates as a lending market (Aave/Compound model): repaid Hollar principal returns to the LendingPool reserve; only the stability fee (0.5%/yr) flows to treasury. Fee split ratios will be set via on-chain governance at mainnet launch. On testnet, accrued stability fees are routed to the deployer wallet.
 
 **Hyperbridge ISMP oracle (mainnet):**
 Hydration Omnipool publishes vDOT/USD → Hyperbridge ISMP relayer → `PriceOracle.onAccept()` → CollateralVault + LendingPool. No Chainlink. No bridge. 100% Polkadot-native.

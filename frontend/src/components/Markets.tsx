@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useReadContracts } from "wagmi";
+import { formatUnits } from "viem";
+import { COMMON_ADDRESSES, MARKETS, ORACLE_ABI, EXPLORER } from "@/src/lib/contracts";
 
 interface Asset {
   symbol: string;
@@ -99,6 +102,21 @@ const TYPE_LABEL: Record<Asset["type"], string> = {
 export function Markets() {
   const [filter, setFilter] = useState<"all" | "live" | "mainnet">("all");
 
+  const { data: oraclePrices } = useReadContracts({
+    contracts: [
+      { address: COMMON_ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "prices", args: [MARKETS.vdot.collateral] },
+      { address: COMMON_ADDRESSES.priceOracle, abi: ORACLE_ABI, functionName: "prices", args: [MARKETS.wpas.collateral] },
+    ],
+  });
+
+  function fmtPrice(raw: unknown): string {
+    if (typeof raw !== "bigint" || raw === 0n) return "—";
+    return `$${parseFloat(formatUnits(raw, 18)).toFixed(2)}`;
+  }
+
+  const vdotPrice = fmtPrice(oraclePrices?.[0]?.result);
+  const wpasPrice = fmtPrice(oraclePrices?.[1]?.result);
+
   const filtered = ASSETS.filter(a => filter === "all" || a.status === filter);
 
   return (
@@ -114,6 +132,10 @@ export function Markets() {
           <div className="text-xs text-gray-500 mt-1">
             Bifrost liquid staked DOT · 15% staking APY · 70% LTV · Borrow USDH
           </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-xs text-gray-400">Oracle: <span className="text-white font-mono">{vdotPrice}</span></span>
+            <a href={`${EXPLORER}/address/${MARKETS.vdot.lendingPool}`} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#E6007A] hover:underline font-mono">LendingPool ↗</a>
+          </div>
         </div>
         <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -123,6 +145,10 @@ export function Markets() {
           <div className="text-sm font-bold text-white">WPAS Market</div>
           <div className="text-xs text-gray-500 mt-1">
             Wrapped PAS native gas token · 70% LTV · Borrow USDH
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-xs text-gray-400">Oracle: <span className="text-white font-mono">{wpasPrice}</span></span>
+            <a href={`${EXPLORER}/address/${MARKETS.wpas.lendingPool}`} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#E6007A] hover:underline font-mono">LendingPool ↗</a>
           </div>
         </div>
       </div>

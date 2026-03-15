@@ -112,7 +112,7 @@ export function MintTokens() {
             Get Testnet PAS (Faucet) →
           </a>
           <div className="text-[10px] text-gray-600 mt-1.5">
-            Select <span className="text-gray-400">Polkadot testnet (Paseo)</span> → click <span className="text-gray-400">Use preselected chains</span> → select <span className="text-gray-400">Hub (smart contracts)</span>
+            Select <span className="text-gray-400">Polkadot Hub TestNet</span> → click <span className="text-gray-400">Use preselected chains</span> → select <span className="text-gray-400">Hub (smart contracts)</span>
           </div>
         </div>
       </div>

@@ -3,8 +3,8 @@
 // ProtocolStats.tsx
 // Shows live protocol revenue stats — total revenue collected, treasury balance,
 // TVL, borrowers. Reads directly from TreasuryRouter, LendingPool, CollateralVault.
-// Revenue model: stability fees split on-chain — 50% DOT buybacks, 20% user
-// incentives, 18% system maintenance, 12% team operations.
+// Revenue model: stability fee (0.5%/yr) accrues to treasury. Fee routing
+// evolves in phases via on-chain governance.
 
 import { useReadContracts, usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
@@ -251,28 +251,20 @@ export function ProtocolStats() {
             <span className="text-white">{stabilityFeeRate}</span>
           </div>
           <div className="flex justify-between">
-            <span>DOT buybacks</span>
-            <span className="text-[#E6007A]">50%</span>
-          </div>
-          <div className="flex justify-between">
-            <span>User incentives</span>
-            <span className="text-white">20%</span>
-          </div>
-          <div className="flex justify-between">
-            <span>System maintenance</span>
-            <span className="text-white">18%</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Team operations</span>
-            <span className="text-white">12%</span>
+            <span>Principal on repay</span>
+            <span className="text-white">Burned (testnet) · returns to reserve (mainnet)</span>
           </div>
         </div>
         <div className="border-t border-white/5 pt-3 space-y-1 text-gray-600">
           <div>
-            50% of fees{" "}
-            <span className="text-[#E6007A]">buy DOT on Hydration DEX</span>{" "}
-            → stake via Bifrost → vDOT → distributed to governance stakers.
-            Every dollar borrowed creates direct DOT demand.
+            <span className="text-gray-400">Phase 1 (testnet):</span> stability fee → deployer wallet
+          </div>
+          <div>
+            <span className="text-gray-400">Phase 2 (mainnet):</span> stability fee →{" "}
+            <span className="text-[#E6007A]">buy DOT on Hydration via XCM</span>
+          </div>
+          <div>
+            <span className="text-gray-400">Phase 3 (governance token):</span> buy DOTLEND → burn
           </div>
           <div className="mt-2">
             At <span className="text-gray-400">$10M TVL</span>:{" "}
