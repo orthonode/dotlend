@@ -84,7 +84,7 @@ PolkaVM compatibility: No SELFDESTRUCT, no EXTCODECOPY, no assembly, no factory 
 
 ## ZK Solvency Architecture
 
-Complete zero-knowledge solvency proof pipeline built in Noir (UltraHonk). The circuit proves `total_collateral_value >= total_debt` without revealing individual positions. Proof submitted on-chain via SolvencyGateway every 5 minutes on Railway. Covers both vDOT and WPAS collateral vaults..
+Complete zero-knowledge solvency proof pipeline built in Noir (UltraHonk). The circuit proves `total_collateral_value >= total_debt` without revealing individual positions. Proof submitted on-chain via SolvencyGateway every 5 minutes on Railway. Covers both vDOT and WPAS collateral vaults.
 
 **What is real:**
 - Noir circuit — `nargo compile` clean

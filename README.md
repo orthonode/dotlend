@@ -282,14 +282,14 @@ npx hardhat run scripts/generate-solvency-proof.js --network polkadotHubTestnet
 ## Oracle
 
 ### Testnet
-`oracle/oracle.py` — Python script deployed on Railway. The **container runs 24/7**; the script sleeps 30 minutes between price posts. Railway's `restartPolicyType: ALWAYS` auto-restarts the container on any crash.
+`oracle/oracle.py` — Python script deployed on Railway. The **container runs 24/7**; the script sleeps 5 minutes between price posts. Railway's `restartPolicyType: ALWAYS` auto-restarts the container on any crash.
 
 Loop:
 1. Fetch DOT/USD from DeFiLlama (with Bybit, MEXC, Gate.io fallbacks)
 2. Call `PriceOracle.submitPrice(vdot, price_in_wei)` on-chain — vDOT price
 3. If `WPAS_ADDRESS` is set in `.env`: also call `submitPrice(wpas, dot_price_in_wei)` — native PAS collateral price
 4. Submit solvency report to `SolvencyGateway` every 30 minutes
-5. Sleep 30 minutes → repeat
+5. Sleep 5 minutes → repeat
 
 Environment overrides for local testing:
 ```bash
@@ -647,13 +647,13 @@ Full user flow:
 4. **Repay USDH** — use "Full debt" button to clear the entire balance including accrued interest
 5. **Withdraw vDOT** — withdraws collateral once debt is fully cleared
 
-> The oracle posts a fresh price every 30 minutes. All UI values update automatically after every confirmed transaction.
+> The oracle posts a fresh price every 5 minutes. All UI values update automatically after every confirmed transaction.
 
 ---
 
 ## Oracle Setup (Manual Price Refresh)
 
-The oracle runs automatically on Railway every 30 minutes. To submit a price manually:
+The oracle runs automatically on Railway every 5 minutes. To submit a price manually:
 
 ```bash
 # Submit $2.45 vDOT price to PriceOracle on-chain
