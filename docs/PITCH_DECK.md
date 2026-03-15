@@ -101,7 +101,7 @@ The math is simple on purpose. I wanted something anyone could verify with a cal
 | Smart contracts deployed | **13** across 2 independent markets |
 | Tests passing | **102 Hardhat tests** — 0 failures |
 | TreasuryRouter | **Live** — every stability fee gets split and routed on-chain |
-| Oracle | Python script posting vDOT + DOT prices every 30 minutes via DeFiLlama |
+| Oracle | Python script posting vDOT + DOT prices every 5 minutes via DeFiLlama |
 | ZK Solvency | SOLVENT — proof published on-chain every cycle |
 | Full user flow | Deposit → Borrow → Repay → Withdraw → Liquidate — all confirmed |
 
@@ -266,7 +266,7 @@ Building this wasn't smooth. PolkaVM looks like EVM from the outside, but inside
 
 **No BN254 precompiles.** The real ZK verifier (UltraHonk) needs elliptic curve pairing that PolkaVM doesn't have yet. I built the full pipeline — Noir circuit, proof generation, verification gateway — and deployed with a mock verifier while being completely transparent about it.
 
-**Oracle timing.** There's no Chainlink on Polkadot Hub. I wrote a Python oracle that fetches live prices from DeFiLlama (free, no API key, no geo-blocking) and posts them on-chain every 30 minutes. The PriceOracle contract has a circuit breaker — if a submitted price deviates more than 20% from the last known price, it gets rejected. This prevents flash crashes or oracle manipulation from immediately affecting liquidations.
+**Oracle timing.** There's no Chainlink on Polkadot Hub. I wrote a Python oracle that fetches live prices from DeFiLlama (free, no API key, no geo-blocking) and posts them on-chain every 5 minutes. The PriceOracle contract has a circuit breaker — if a submitted price deviates more than 20% from the last known price, it gets rejected. This prevents flash crashes or oracle manipulation from immediately affecting liquidations.
 
 Every one of these constraints forced a design decision. The protocol is better for it.
 
@@ -329,7 +329,7 @@ That's $200K/year in revenue at a 0.5% stability fee. Enough to fund a small tea
 - Live frontend at nexucore.xyz
 - TreasuryRouter deployed (principal burn on testnet; mainnet governance split: 50/20/18/12%)
 - ZK solvency pipeline (Noir + mock verifier, full pipeline ready)
-- Oracle posting live prices from DeFiLlama every 30 minutes
+- Oracle posting live prices from DeFiLlama every 5 minutes
 - Full crisis simulation: price crash → liquidation → confirmed on-chain
 - AI risk advisor: A–F borrower risk grade, price drop simulator, liquidation alert banner, mock AML screening, transparency card — all from live on-chain data, zero new contract calls
 

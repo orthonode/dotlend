@@ -86,7 +86,7 @@ DotLend is a non-custodial money market protocol deployed on Polkadot Hub (EVM-c
 ║   └──────────────────────────────────────────────────────────────────────────┘           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
           ▲                                          ▲
-          │ submitPrice every 30 min                 │ publishSolvencyProof every 30m
+          │ submitPrice every 5 min                  │ publishSolvencyProof every 30m
           │                                          │
    ┌──────┴──────────────┐              ┌────────────┴────────────────────────────────┐
    │   oracle.py         │              │   Railway Cron Job                           │
@@ -453,7 +453,7 @@ Liquidator      Frontend            LendingPool      CollateralVault   MockUSDH 
 
 ### 4.1 Testnet Oracle (oracle.py)
 
-Python process run locally or on a server every 30 minutes. Pushes DOT/USD price to `PriceOracle` on-chain.
+Python process run locally or on a server every 5 minutes. Pushes DOT/USD price to `PriceOracle` on-chain.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -852,7 +852,7 @@ const logs = await publicClient.getLogs({
   │  MockSolvencyVerifier 0xED2676C995BAA392093Ac0b907EA216c2B8C52cc            │
   │  SolvencyGateway      0x199E3E7c1f1382bc389b495B927B0535B390Acd0            │
   └─────────────┬───────────────────────────────────────────────────────────────┘
-                │ submitPrice (EOA tx, 30 min)    │ publishSolvencyProof (6h)
+                │ submitPrice (EOA tx, 5 min)     │ publishSolvencyProof (30 min)
                 │                                 │
   ┌─────────────┴──────────────┐   ┌──────────────┴──────────────────────────────┐
   │  oracle.py                  │   │  Railway Cron Job                            │

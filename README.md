@@ -643,7 +643,7 @@ Go to **[nexucore.xyz](https://nexucore.xyz)** and connect your MetaMask wallet 
 Full user flow:
 1. **Deposit vDOT** — approve + deposit as collateral (CollateralVault)
 2. **Borrow USDH** — borrow up to 70% of your collateral USD value
-3. **Monitor health factor** — watch it move as vDOT price updates every 30 min
+3. **Monitor health factor** — watch it move as vDOT price updates every 5 min
 4. **Repay USDH** — use "Full debt" button to clear the entire balance including accrued interest
 5. **Withdraw vDOT** — withdraws collateral once debt is fully cleared
 

@@ -669,7 +669,7 @@ DeFiLlama API
       │  HTTP GET /simple/price?ids=polkadot&vs_currencies=usd
       │
       ▼
-oracle/oracle.py  (Python, runs every 30 minutes)
+oracle/oracle.py  (Python, runs every 5 minutes)
       │
       │  price_scaled = int(dot_price * 1e18)
       │

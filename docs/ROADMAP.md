@@ -43,7 +43,7 @@
 
 - [x] All 5 contracts deployed to **Polkadot Hub TestNet** (Chain ID 420420417)
 - [x] PriceOracle seeded with vDOT = $8.50
-- [x] oracle/oracle.py — posts vDOT price every 30 min (DeFiLlama + env override)
+- [x] oracle/oracle.py — posts vDOT price every 5 min (DeFiLlama + env override)
 - [x] scripts/simulate-crisis.js — price crash $8.50→$6.00, HF 1.214→0.857, liquidation ✓
 - [x] scripts/interact.js — deposit→borrow→repay→withdraw flow verified
 
