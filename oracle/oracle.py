@@ -31,12 +31,13 @@ load_dotenv()
 
 RPC_URL   = "https://eth-rpc-testnet.polkadot.io"
 CHAIN_ID  = 420420417
-INTERVAL  = 30 * 60        # 30 minutes between oracle ticks
+INTERVAL  = 5 * 60         # 5 minutes between oracle ticks
 SOLVENCY_INTERVAL = 30 * 60  # 30 minutes between solvency proofs
 
 PRICE_ORACLE_ADDRESS     = Web3.to_checksum_address(os.getenv("PRICE_ORACLE_ADDRESS", "0x1282F6B59869a57Fd2a1D7a5BC8535bB7B15D173"))
 VDOT_ADDRESS             = Web3.to_checksum_address(os.getenv("VDOT_ADDRESS", "0xfc1ACa9EDF5DA2eBEA5CE1320fb40A74Ac996544"))
 COLLATERAL_VAULT_ADDRESS = Web3.to_checksum_address(os.getenv("COLLATERAL_VAULT_ADDRESS", "0xF94eBe7F8d8F922B7FBBFb4BE080EB71a69415A2"))
+WPAS_VAULT_ADDRESS = Web3.to_checksum_address(os.getenv("WPAS_VAULT_ADDRESS", "0x575B8578F000fC554394C63cec8F07Abd0C66C34"))
 SOLVENCY_GATEWAY_ADDRESS = Web3.to_checksum_address(os.getenv("SOLVENCY_GATEWAY_ADDRESS", "0x199E3E7c1f1382bc389b495B927B0535B390Acd0"))
 
 # WPAS contract address — set via WPAS_ADDRESS in .env
@@ -328,41 +329,44 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
     nonce = w3.eth.get_transaction_count(account.address, "pending")
     max_fee, priority_fee = get_eip1559_fees(w3)
 
-    if needs_bypass:
-        # Widen to 100%
-        tx_widen = oracle_contract.functions.setMaxDeviationBps(10000).build_transaction({
+    try:
+        if needs_bypass:
+            tx_widen = oracle_contract.functions.setMaxDeviationBps(10000).build_transaction({
+                "chainId": CHAIN_ID, "from": account.address,
+                "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
+            })
+            signed = w3.eth.account.sign_transaction(tx_widen, private_key)
+            tx_hash = send_signed(w3, signed)
+            w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+            log.info(f"{prefix}Circuit breaker widened to 100%")
+            nonce += 1
+
+        tx = oracle_contract.functions.submitPrice(token, price_wei).build_transaction({
             "chainId": CHAIN_ID, "from": account.address,
             "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
         })
-        signed = w3.eth.account.sign_transaction(tx_widen, private_key)
+        signed = w3.eth.account.sign_transaction(tx, private_key)
         tx_hash = send_signed(w3, signed)
-        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-        log.info(f"{prefix}Circuit breaker widened to 100%")
-        nonce += 1
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        status = "OK" if receipt["status"] == 1 else "FAIL"
+        log.info(f"{prefix}Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {status}")
+        log.info(f"{prefix}Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
 
-    # Submit the actual price
-    tx = oracle_contract.functions.submitPrice(token, price_wei).build_transaction({
-        "chainId": CHAIN_ID, "from": account.address,
-        "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
-    })
-    signed = w3.eth.account.sign_transaction(tx, private_key)
-    tx_hash = send_signed(w3, signed)
-    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-    status = "OK" if receipt["status"] == 1 else "FAIL"
-    log.info(f"{prefix}Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {status}")
-    log.info(f"{prefix}Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
-
-    if needs_bypass:
-        # Restore original limit
-        nonce += 1
-        tx_restore = oracle_contract.functions.setMaxDeviationBps(max_dev).build_transaction({
-            "chainId": CHAIN_ID, "from": account.address,
-            "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
-        })
-        signed = w3.eth.account.sign_transaction(tx_restore, private_key)
-        tx_hash = send_signed(w3, signed)
-        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-        log.info(f"{prefix}Circuit breaker restored to {max_dev} bps")
+    finally:
+        if needs_bypass:
+            try:
+                nonce = w3.eth.get_transaction_count(account.address)
+                max_fee, priority_fee = get_eip1559_fees(w3)
+                tx_restore = oracle_contract.functions.setMaxDeviationBps(max_dev).build_transaction({
+                    "chainId": CHAIN_ID, "from": account.address,
+                    "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
+                })
+                signed = w3.eth.account.sign_transaction(tx_restore, private_key)
+                tx_hash = send_signed(w3, signed)
+                w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+                log.info(f"{prefix}Circuit breaker restored to {max_dev} bps")
+            except Exception as e:
+                log.error(f"{prefix}Failed to restore circuit breaker: {e}")
 
     return receipt
 
@@ -376,12 +380,18 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
     verifier is blocked by PolkaVM BN254 precompile gap (EIP-196/197).
     """
     log.info("── Solvency proof ──────────────────────────")
+    wpas_vault = w3.eth.contract(address=WPAS_VAULT_ADDRESS, abi=COLLATERAL_VAULT_ABI)
 
     # Collect all unique depositor addresses from Deposited events
     try:
         deposited_events = vault_contract.events.Deposited.get_logs(fromBlock=0, toBlock="latest")
-        unique_users = list({e["args"]["user"] for e in deposited_events})
-        log.info(f"[solvency] Found {len(unique_users)} unique depositor(s)")
+        wpas_events = []
+        try:
+            wpas_events = wpas_vault.events.Deposited.get_logs(fromBlock=0, toBlock="latest")
+        except Exception as e:
+            log.warning(f"[solvency] Could not fetch WPAS depositor events: {e}")
+        unique_users = list({e["args"]["user"] for e in deposited_events + wpas_events})
+        log.info(f"[solvency] Found {len(unique_users)} unique depositor(s) across vDOT + WPAS vaults")
     except Exception as e:
         log.warning(f"[solvency] Could not fetch depositor events: {e}. Using heartbeat.")
         unique_users = []
@@ -393,6 +403,13 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
         try:
             coll = vault_contract.functions.collateralBalance(user).call()
             debt = vault_contract.functions.debtBalance(user).call()
+            try:
+                wpas_coll = wpas_vault.functions.collateralBalance(user).call()
+                wpas_debt = wpas_vault.functions.debtBalance(user).call()
+                coll += wpas_coll
+                debt += wpas_debt
+            except Exception:
+                pass
             if coll > 0:
                 try:
                     vdot_price = w3.eth.contract(
@@ -479,6 +496,7 @@ def main():
 
     iteration = 0
     while True:
+        tick_start = time.time()
         iteration += 1
         log.info(f"── Tick #{iteration} ────────────────────────────")
 
@@ -510,8 +528,10 @@ def main():
             except Exception as e:
                 log.error(f"Solvency proof failed: {e}")
 
-        log.info(f"Sleeping {INTERVAL // 60} minutes...")
-        time.sleep(INTERVAL)
+        elapsed = time.time() - tick_start
+        sleep_time = max(0, INTERVAL - elapsed)
+        log.info(f"Tick took {elapsed:.0f}s. Sleeping {sleep_time:.0f}s...")
+        time.sleep(sleep_time)
 
 
 if __name__ == "__main__":
