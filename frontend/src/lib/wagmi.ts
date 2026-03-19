@@ -15,6 +15,7 @@ export const polkadotHubTestnet = {
 
 export const config = createConfig({
   chains: [polkadotHubTestnet],
+  ssr: true, // defer wallet reconnect until after hydration — prevents React error #418
   connectors: [
     injected(),
     walletConnect({
@@ -22,8 +23,8 @@ export const config = createConfig({
       metadata: {
         name: "DotLend",
         description: "Non-custodial money market on Polkadot Hub",
-        url: "https://nexucore.xyz",
-        icons: ["https://nexucore.xyz/favicon.ico"],
+        url: "https://www.nexucore.xyz",
+        icons: ["https://www.nexucore.xyz/favicon.ico"],
       },
     }),
   ],
