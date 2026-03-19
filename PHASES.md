@@ -68,7 +68,7 @@ Crisis simulation live on Polkadot Hub TestNet:
 - **Chain:** Polkadot Hub TestNet | Chain ID: 420420417
 - **RPC:** https://eth-rpc-testnet.polkadot.io
 - **Explorer:** https://blockscout-testnet.polkadot.io
-- **Token:** WND (deployer needs WND on Polkadot Hub TestNet)
+- **Token:** DOT (deployer needs DOT on Polkadot Hub TestNet)
 - **Hardhat network:** `--network polkadotHub`
 
 ### Done Criteria

@@ -457,7 +457,7 @@ Python process run locally or on a server every 5 minutes. Pushes DOT/USD price 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                       oracle.py  (30-minute cron)                         │
+│                       oracle.py  (5-minute interval)                      │
 │                                                                            │
 │  1. GET https://coins.llama.fi/prices/current/coingecko:polkadot          │
 │        (DeFiLlama — no API key, no geo-blocking)                          │
@@ -693,7 +693,7 @@ vDOT/USD venue in the Polkadot ecosystem ($330M TVL in USDH).
 
 | Layer | Technology | Version |
 |---|---|---|
-| Framework | Next.js (App Router) | 16.1.6 |
+| Framework | Next.js (App Router) | 16.2.0 |
 | Wallet | wagmi | v2 |
 | EVM client | viem | v2 |
 | Data fetching | @tanstack/react-query | latest |
@@ -718,7 +718,7 @@ app/
         │     useReadContract(CollateralVault, "collateralBalance")
         │     useReadContract(CollateralVault, "debtBalance")
         │     useReadContract(CollateralVault, "getHealthFactor")
-        │     useReadContract(PriceOracle,     "getLatestPrice")
+        │     useReadContract(PriceOracle,     "prices")
         │     → Health factor bar (green > 1.5, yellow 1.2-1.5, red < 1.2)
         │
         ├── DepositCollateral.tsx
@@ -857,7 +857,7 @@ const logs = await publicClient.getLogs({
   ┌─────────────┴──────────────┐   ┌──────────────┴──────────────────────────────┐
   │  oracle.py                  │   │  Railway Cron Job                            │
   │  Local Python process       │   │  railway.json: { "cron": "0 */6 * * *" }    │
-  │  30-min interval            │   │  generate-solvency-proof.js                  │
+  │  5-min interval             │   │  generate-solvency-proof.js                  │
   │  DeFiLlama → submitPrice    │   │  Node.js + @noir-lang/noir_js               │
   └─────────────────────────────┘   └─────────────────────────────────────────────┘
 

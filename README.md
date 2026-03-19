@@ -158,7 +158,7 @@ DotLend is the only active lending protocol on Polkadot Hub EVM. The right produ
        │                              mint()│  │accrueInterest()  │submitPrice()   │
        │                                    │  │                  │                │
        │                                MockUSDH          oracle.py             │
-       │                                                    (every 30m)            │
+       │                                                    (every 5m)             │
        ├──repay(USDH)───────────────► LendingPool                                │
        │                                    │                                      │
        │                            transferFrom() / burn()                        │
@@ -464,7 +464,7 @@ dotlend/
 │   ├── generate-solvency-proof.js  # ZK proof pipeline (Railway cron)
 │   └── wire-solvency-verifier.js   # one-time verifier wiring
 ├── oracle/
-│   ├── oracle.py                # Python price feed (30-min interval; posts vDOT + WPAS)
+│   ├── oracle.py                # Python price feed (5-min interval; posts vDOT + WPAS)
 │   └── requirements.txt
 ├── test/
 │   ├── PriceOracle.test.js

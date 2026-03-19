@@ -319,20 +319,11 @@ The function is public and can be called by anyone — useful for liquidators wh
 
 Interest increases the debt balance stored in `CollateralVault`. When the borrower eventually repays, the full accrued debt (principal + stability fee) is transferred to `LendingPool`, which routes it through `TreasuryRouter`. The router intercepts the repayment and directs it to the protocol treasury rather than burning it.
 
-**Fee Split (TreasuryRouter):**
+**TreasuryRouter — Testnet vs. Mainnet:**
 
-```
-User repays (principal + accrued stability fee)
-         ↓
-TreasuryRouter intercepts repayment
-         ↓
-50%  → DOT Buybacks (Hydration DEX via XCM → stake → vDOT → ecosystem flywheel)
-20%  → User Incentives (liquidity mining, early depositor rewards)
-18%  → System Development & Maintenance (audits, infrastructure, oracle costs)
-12%  → Team Operations (founder salary, hiring, legal)
-```
+**Testnet (current):** MockUSDH grants mint/burn rights. On repay, `TreasuryRouter` tracks principal per user, burns the principal (MockUSDH has no real liquidity pool), and routes only the accrued 0.5%/yr stability fee to the deployer treasury wallet.
 
-This split is designed to be sustainable. A protocol where the team takes nothing is not a protocol that survives long enough to reach mainnet. The 12% team allocation is modest, transparent, and ensures continuity. The 50% DOT buyback creates direct demand for DOT — every dollar borrowed on DotLend eventually becomes DOT ecosystem value.
+**Mainnet (Aave/Compound model):** Real Hollar cannot be burned. Repaid principal returns to the LendingPool reserve for the next borrower. Only the stability fee is routed to treasury. Governance will direct treasury fees toward DOT buybacks on Hydration via XCM, user incentives, infrastructure costs, and team operations — exact percentages to be set by on-chain governance once the protocol reaches mainnet.
 
 ---
 
@@ -793,7 +784,7 @@ npx hardhat compile --network westendAssetHub
 | Liquidation Threshold | 80% | Standard for liquid, correlated assets |
 | Stability Fee | 5 bps (0.5%/year) | Below vDOT staking yield; positive carry maintained |
 | Liquidation Bonus | 5% | Sufficient incentive; not so large as to over-punish borrowers |
-| Oracle Stale Threshold | 3600s (1 hour) | 2x oracle refresh interval; fail-closed on stale data |
+| Oracle Stale Threshold | 3600s (1 hour) | 12x oracle refresh interval; fail-closed on stale data |
 | Max Borrow (formula) | collateralUSD * 70 / 100 | Enforced at borrow time |
 | Interest Precision | FEE_PRECISION = 10000 | Basis point resolution |
 | Collateral Precision | 1e18 | Standard ERC-20 wei precision |

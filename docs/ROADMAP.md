@@ -62,7 +62,7 @@
 - [x] test/SolvencyProof.test.js — 14 tests passing
 - [x] railway.json — Railway cron (every 30min, auto-submit proof)
 - [x] frontend/src/components/SolvencyStatus.tsx — live SOLVENT badge widget
-- [x] 76 total tests green (62 + 14)
+- [x] 102 total tests green
 
 **RESULT:** ✅ `npx hardhat test` → **76 green, 0 failures**. Noir circuit compiles.
 
