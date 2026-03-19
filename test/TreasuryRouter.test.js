@@ -184,16 +184,6 @@ describe("TreasuryRouter", function () {
     });
   });
 
-  describe("burn — no-op", function () {
-    it("burn() does nothing", async function () {
-      const { router, usdh } = await loadFixture(deployFixture);
-      const supplyBefore = await usdh.totalSupply();
-      await router.burn(ethers.parseEther("1000"));
-      const supplyAfter = await usdh.totalSupply();
-      expect(supplyAfter).to.equal(supplyBefore);
-    });
-  });
-
   describe("passthrough", function () {
     it("forwards non-pool transferFrom transparently", async function () {
       const { router, usdh, user, liquidator } = await loadFixture(borrowedFixture);

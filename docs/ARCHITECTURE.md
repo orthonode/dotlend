@@ -381,7 +381,7 @@ User            Frontend           LendingPool           CollateralVault    Mock
  │                  │                   │  (user, pool, amount) │                │
  │                  │                   │────────────────────────────────────►  │
  │                  │                   │                       │                │
- │                  │                   │  usdh.burn(amount)    │                │
+ │                  │                   │  usdh.burnDebt(user, amt) │                │
  │                  │                   │────────────────────────────────────►  │
  │                  │                   │                       │                │
  │                  │                   │  vault.setDebt        │                │
@@ -428,7 +428,7 @@ Liquidator      Frontend            LendingPool      CollateralVault   MockUSDH 
     │               │                    │ usdh.transferFrom                │            │
     │               │                    │ (liquidator, pool, debt)         │            │
     │               │                    │────────────────────────────────►  │            │
-    │               │                    │ usdh.burn(debt)   │               │            │
+    │               │                    │ usdh.burnDebt(borrower, debt) │               │
     │               │                    │────────────────────────────────►  │            │
     │               │                    │ vault.setDebt(borrower, 0)        │            │
     │               │                    │──────────────────►                │            │

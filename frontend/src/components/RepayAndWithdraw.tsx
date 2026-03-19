@@ -147,7 +147,11 @@ export function RepayAndWithdraw() {
         args: [addresses.treasuryRouter, maxUint256], account: address,
       });
       gas = est * 120n / 100n;
-    } catch (e) { console.error("Gas estimation failed (approve):", e); }
+    } catch (e) {
+      console.error("Gas estimation failed (approve):", e);
+      setStatus("error");
+      return;
+    }
     writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.treasuryRouter, maxUint256], gas });
   }
 
@@ -173,7 +177,11 @@ export function RepayAndWithdraw() {
         args: [amount], account: address,
       });
       gas = est * 120n / 100n;
-    } catch (e) { console.error("Gas estimation failed (repay):", e); }
+    } catch (e) {
+      console.error("Gas estimation failed (repay):", e);
+      setStatus("error");
+      return;
+    }
     writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [amount], gas });
   }
 
@@ -187,7 +195,11 @@ export function RepayAndWithdraw() {
         args: [parsedWithdraw], account: address,
       });
       gas = est * 120n / 100n;
-    } catch (e) { console.error("Gas estimation failed (withdraw):", e); }
+    } catch (e) {
+      console.error("Gas estimation failed (withdraw):", e);
+      setStatus("error");
+      return;
+    }
     writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw], gas });
   }
 

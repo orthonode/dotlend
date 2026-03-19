@@ -23,4 +23,10 @@ contract MockUSDH is ERC20, ERC20Burnable, Ownable {
     function decimals() public pure override returns (uint8) {
         return _DECIMALS;
     }
+
+    /// @notice Mock function to satisfy the new IMintBurn interface for LendingPool
+    /// @dev In the mock, we don't track principal vs interest, we just burn the USDH
+    function burnDebt(address /*borrower*/, uint256 amount) external {
+        burn(amount);
+    }
 }

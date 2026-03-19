@@ -53,26 +53,30 @@ export function MintTokens() {
 
     if (token === "wpas") {
       const value = parseEther(wrapAmount || "0");
-      let gas = 100_000n;
       try {
         const est = await publicClient!.estimateContractGas({
           address: addresses.collateral, abi: WPAS_ABI, functionName: "deposit",
           value, account: address,
         });
-        gas = est * 120n / 100n;
-      } catch { /* use fallback */ }
-      writeContract({ address: addresses.collateral, abi: WPAS_ABI, functionName: "deposit", value, gas });
+        const gas = est * 120n / 100n;
+        writeContract({ address: addresses.collateral, abi: WPAS_ABI, functionName: "deposit", value, gas });
+      } catch (e) {
+        console.error("Gas estimation failed (wpas deposit):", e);
+        setMinting(null);
+      }
     } else {
       const tokenAddress = token === "vdot" ? addresses.collateral : addresses.usdh;
-      let gas = 100_000n;
       try {
         const est = await publicClient!.estimateContractGas({
           address: tokenAddress, abi: MOCK_ABI, functionName: "mint",
           args: [address, AMOUNT], account: address,
         });
-        gas = est * 120n / 100n;
-      } catch { /* use fallback */ }
-      writeContract({ address: tokenAddress, abi: MOCK_ABI, functionName: "mint", args: [address, AMOUNT], gas });
+        const gas = est * 120n / 100n;
+        writeContract({ address: tokenAddress, abi: MOCK_ABI, functionName: "mint", args: [address, AMOUNT], gas });
+      } catch (e) {
+        console.error("Gas estimation failed (mock mint):", e);
+        setMinting(null);
+      }
     }
   }
 

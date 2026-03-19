@@ -108,15 +108,17 @@ export function LiquidationMonitor() {
   }, [scanPositions, refetchCount]);
 
   async function handleLiquidate(borrower: `0x${string}`) {
-    let gas = 300_000n;
     try {
       const est = await client!.estimateContractGas({
         address: addresses.lendingPool, abi: POOL_ABI_FULL, functionName: "liquidate",
         args: [borrower], account: address,
       });
-      gas = est * 120n / 100n;
-    } catch (e) { console.error("Gas estimation failed (liquidate):", e); }
-    writeContract({ address: addresses.lendingPool, abi: POOL_ABI_FULL, functionName: "liquidate", args: [borrower], gas });
+      const gas = est * 120n / 100n;
+      writeContract({ address: addresses.lendingPool, abi: POOL_ABI_FULL, functionName: "liquidate", args: [borrower], gas });
+    } catch (e) {
+      console.error("Gas estimation failed (liquidate):", e);
+      // In a real app we might set an error state here. 
+    }
   }
 
   function hfColor(hf: bigint) {

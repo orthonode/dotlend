@@ -19,8 +19,8 @@ interface IPriceOracle {
 
 interface IMintBurn {
     function mint(address to, uint256 amount) external;
-    function burn(uint256 amount) external;
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function burnDebt(address borrower, uint256 amount) external;
 }
 
 
@@ -138,7 +138,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         lastAccrualTime[msg.sender] = block.timestamp;
 
         usdh.transferFrom(msg.sender, address(this), repayAmount);
-        usdh.burn(repayAmount);
+        usdh.burnDebt(msg.sender, repayAmount);
 
         emit Repaid(msg.sender, repayAmount);
     }
@@ -168,7 +168,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         totalDebt = totalDebt >= debt ? totalDebt - debt : 0;
 
         usdh.transferFrom(msg.sender, address(this), debt);
-        usdh.burn(debt);
+        usdh.burnDebt(borrower, debt);
         vault.seizeCollateral(borrower, collateralToSeize, msg.sender);
 
         emit Liquidated(borrower, msg.sender, debt, collateralToSeize);

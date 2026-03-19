@@ -62,44 +62,35 @@ contract TreasuryRouter is Ownable {
         usdh.mint(to, amount);
     }
 
-    /// @notice Called by LendingPool.repay() via transferFrom.
     ///         Splits: principal → burn, interest → treasury.
     function transferFrom(address from, address to, uint256 amount) external returns (bool) {
         if (to == lendingPool && amount > 0) {
-            // Pull USDH from user into router
-            usdh.transferFrom(from, address(this), amount);
-
-            // Split principal vs fee
-            uint256 principal = principalDebt[from];
-            uint256 principalPortion = amount <= principal ? amount : principal;
-            uint256 feePortion = amount - principalPortion;
-
-            // Update tracked principal
-            if (principalPortion > 0) {
-                principalDebt[from] = principal - principalPortion;
-            }
-
-            // Burn the principal
-            if (principalPortion > 0) {
-                usdh.burn(principalPortion);
-                totalBurned += principalPortion;
-                emit PrincipalBurned(from, principalPortion);
-            }
-
-            // Send fee to treasury
-            if (feePortion > 0) {
-                usdh.transfer(treasury, feePortion);
-                totalFeesCollected += feePortion;
-                emit ProtocolFeeCollected(from, feePortion);
-            }
-
-            return true;
+            // Pull USDH from user into router temporarily
+            return usdh.transferFrom(from, address(this), amount);
         }
         return usdh.transferFrom(from, to, amount);
     }
 
-    /// @notice Called by LendingPool after transferFrom — already handled.
-    function burn(uint256) external {
-        // Principal already burned in transferFrom() — no-op
+    /// @notice Called by LendingPool after transferFrom.
+    ///         Burns the principal from the tracked user and routes fee.
+    function burnDebt(address borrower, uint256 amount) external {
+        require(msg.sender == lendingPool, "TR: only pool");
+        
+        uint256 principal = principalDebt[borrower];
+        uint256 principalPortion = amount <= principal ? amount : principal;
+        uint256 feePortion = amount - principalPortion;
+
+        if (principalPortion > 0) {
+            principalDebt[borrower] -= principalPortion;
+            usdh.burn(principalPortion);
+            totalBurned += principalPortion;
+            emit PrincipalBurned(borrower, principalPortion);
+        }
+
+        if (feePortion > 0) {
+            usdh.transfer(treasury, feePortion);
+            totalFeesCollected += feePortion;
+            emit ProtocolFeeCollected(borrower, feePortion);
+        }
     }
 }
