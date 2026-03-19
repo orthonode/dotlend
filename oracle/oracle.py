@@ -136,7 +136,7 @@ log = logging.getLogger("dotlend-oracle")
 # ── EIP-1559 fee helper ───────────────────────────────────────────────────────
 # Polkadot Hub TestNet is EIP-1559. Legacy gasPrice txs fail with
 # "Priority is too low: (1 vs 1)". Use maxFeePerGas / maxPriorityFeePerGas.
-MIN_FEE = 1_000_000_000  # 1 gwei floor
+MIN_FEE = 2_000_000_000  # 2 gwei floor — ensures replacement always beats existing 1-gwei mempool txs
 
 def get_eip1559_fees(w3):
     """Return (maxFeePerGas, maxPriorityFeePerGas) with a 1 gwei floor."""
@@ -163,6 +163,72 @@ def send_signed(w3, signed):
     if raw is None:
         raise AttributeError(f"Cannot find raw transaction bytes on SignedTransaction object. Attrs: {dir(signed)}")
     return w3.eth.send_raw_transaction(raw)
+
+# ── Stuck-nonce cancellation ──────────────────────────────────────────────────
+
+def cancel_stuck_nonce(w3, account, private_key, stuck_nonce):
+    """
+    Submit a zero-value self-transfer at stuck_nonce with 2× gas to evict it.
+    Frees the nonce in seconds instead of waiting 20+ minutes for organic inclusion.
+    """
+    try:
+        _, priority_fee = get_eip1559_fees(w3)
+        cancel_priority = max(int(priority_fee * 2), 2 * MIN_FEE)
+        cancel_max_fee  = cancel_priority * 2
+        cancel_tx = {
+            "chainId": CHAIN_ID,
+            "from":    account.address,
+            "to":      account.address,
+            "value":   0,
+            "nonce":   stuck_nonce,
+            "maxFeePerGas":         cancel_max_fee,
+            "maxPriorityFeePerGas": cancel_priority,
+            "gas": 21_000,
+        }
+        signed   = w3.eth.account.sign_transaction(cancel_tx, private_key)
+        tx_hash  = send_signed(w3, signed)
+        log.warning(f"Cancellation tx for nonce {stuck_nonce}: {tx_hash.hex()}")
+        w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        log.info(f"Nonce {stuck_nonce} cancelled")
+    except Exception as e:
+        log.error(f"Failed to cancel stuck nonce {stuck_nonce}: {e}")
+
+
+def send_with_retry(w3, account, private_key, tx, label="", max_retries=3):
+    """
+    Send a transaction with automatic fee bumping on 1014 (Priority too low) rejection.
+    On wait timeout, cancel the stuck nonce before raising so the next tick is clean.
+    Returns receipt.
+    """
+    prefix     = f"[{label}] " if label else ""
+    nonce      = tx["nonce"]
+    max_fee    = tx["maxFeePerGas"]
+    priority   = tx["maxPriorityFeePerGas"]
+
+    for attempt in range(max_retries):
+        if attempt > 0:
+            priority = int(priority * 1.25)
+            max_fee  = int(max_fee  * 1.25)
+            tx = {**tx, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority}
+            log.warning(f"{prefix}Bumping gas (attempt {attempt + 1}): priority={priority / 1e9:.2f} gwei")
+
+        signed = w3.eth.account.sign_transaction(tx, private_key)
+        try:
+            tx_hash = send_signed(w3, signed)
+        except Exception as e:
+            if attempt < max_retries - 1 and ("1014" in str(e) or "Priority is too low" in str(e)):
+                continue
+            raise
+
+        try:
+            return w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        except Exception:
+            log.warning(f"{prefix}Tx {tx_hash.hex()} not confirmed in 120s — cancelling nonce {nonce}")
+            cancel_stuck_nonce(w3, account, private_key, nonce)
+            raise
+
+    raise RuntimeError(f"{prefix}Failed after {max_retries} attempts")
+
 
 # ── Price source ──────────────────────────────────────────────────────────────
 
@@ -335,9 +401,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
                 "chainId": CHAIN_ID, "from": account.address,
                 "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
             })
-            signed = w3.eth.account.sign_transaction(tx_widen, private_key)
-            tx_hash = send_signed(w3, signed)
-            w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+            send_with_retry(w3, account, private_key, tx_widen, label=label)
             log.info(f"{prefix}Circuit breaker widened to 100%")
             nonce += 1
 
@@ -345,12 +409,10 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
             "chainId": CHAIN_ID, "from": account.address,
             "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
         })
-        signed = w3.eth.account.sign_transaction(tx, private_key)
-        tx_hash = send_signed(w3, signed)
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+        receipt = send_with_retry(w3, account, private_key, tx, label=label)
         status = "OK" if receipt["status"] == 1 else "FAIL"
-        log.info(f"{prefix}Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | status: {status}")
-        log.info(f"{prefix}Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
+        log.info(f"{prefix}Tx: {receipt['transactionHash'].hex()} | block: {receipt['blockNumber']} | status: {status}")
+        log.info(f"{prefix}Explorer: https://blockscout-testnet.polkadot.io/tx/{receipt['transactionHash'].hex()}")
 
     finally:
         if needs_bypass:
@@ -361,9 +423,7 @@ def submit_price_with_breaker_bypass(w3, account, private_key, oracle_contract, 
                     "chainId": CHAIN_ID, "from": account.address,
                     "nonce": nonce, "maxFeePerGas": max_fee, "maxPriorityFeePerGas": priority_fee, "gas": 100_000,
                 })
-                signed = w3.eth.account.sign_transaction(tx_restore, private_key)
-                tx_hash = send_signed(w3, signed)
-                w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+                send_with_retry(w3, account, private_key, tx_restore, label=label)
                 log.info(f"{prefix}Circuit breaker restored to {max_dev} bps")
             except Exception as e:
                 log.error(f"{prefix}Failed to restore circuit breaker: {e}")
@@ -452,13 +512,10 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
             "gas": 200_000,
         })
 
-        signed = w3.eth.account.sign_transaction(tx, private_key)
-        tx_hash = send_signed(w3, signed)  # ← version-agnostic
-        receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-
+        receipt = send_with_retry(w3, account, private_key, tx, label="solvency")
         status = "OK" if receipt["status"] == 1 else "FAIL"
-        log.info(f"[solvency] Proof submitted | Tx: {tx_hash.hex()} | block: {receipt['blockNumber']} | {status}")
-        log.info(f"[solvency] Explorer: https://blockscout-testnet.polkadot.io/tx/{tx_hash.hex()}")
+        log.info(f"[solvency] Proof submitted | Tx: {receipt['transactionHash'].hex()} | block: {receipt['blockNumber']} | {status}")
+        log.info(f"[solvency] Explorer: https://blockscout-testnet.polkadot.io/tx/{receipt['transactionHash'].hex()}")
     except Exception as e:
         log.error(f"[solvency] Submission failed: {e}")
 
