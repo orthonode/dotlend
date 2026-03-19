@@ -518,6 +518,7 @@ def submit_solvency_proof(w3, account, private_key, vault_contract, gateway_cont
         log.info(f"[solvency] Explorer: https://blockscout-testnet.polkadot.io/tx/{receipt['transactionHash'].hex()}")
     except Exception as e:
         log.error(f"[solvency] Submission failed: {e}")
+        raise  # propagate so main() does not update last_solvency_time — causes retry next tick
 
 
 # ── Oracle loop ───────────────────────────────────────────────────────────────
