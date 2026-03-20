@@ -166,7 +166,14 @@ export function RepayAndWithdraw() {
       }) as bigint;
       if (freshDebt === 0n) return;
       // Add 0.1% buffer to cover interest accrued during tx execution
-      amount = freshDebt + (freshDebt / 1000n);
+      const amountWithBuffer = freshDebt + (freshDebt / 1000n);
+      
+      const freshBal = await publicClient!.readContract({
+        address: addresses.usdh, abi: ERC20_ABI,
+        functionName: "balanceOf", args: [address!],
+      }) as bigint;
+      
+      amount = amountWithBuffer > freshBal ? freshBal : amountWithBuffer;
     }
     setOptimistic(0n, -amount);
     setStatus("signing", `Repaying ${Number(formatEther(amount)).toFixed(6)} USDH…`);
