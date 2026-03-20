@@ -75,12 +75,11 @@ export function DepositCollateral() {
     setStep("approve");
     setStatus("signing", `Approving ${assetSymbol}…`);
     try {
-      const est = await publicClient!.estimateContractGas({
+      await publicClient!.estimateContractGas({
         address: addresses.collateral, abi: ERC20_ABI, functionName: "approve",
         args: [addresses.collateralVault, parsedAmount], account: address,
       });
-      const gas = est * 120n / 100n;
-      writeContract({ address: addresses.collateral, abi: ERC20_ABI, functionName: "approve", args: [addresses.collateralVault, parsedAmount], gas });
+      writeContract({ address: addresses.collateral, abi: ERC20_ABI, functionName: "approve", args: [addresses.collateralVault, parsedAmount] });
     } catch (e) {
       console.error("Gas estimation failed (approve):", e);
       setStatus("error");
@@ -92,12 +91,11 @@ export function DepositCollateral() {
     setOptimistic(parsedAmount, 0n);
     setStatus("signing", `Depositing ${Number(amount).toFixed(2)} ${assetSymbol}…`);
     try {
-      const est = await publicClient!.estimateContractGas({
+      await publicClient!.estimateContractGas({
         address: addresses.collateralVault, abi: VAULT_ABI, functionName: "deposit",
         args: [parsedAmount], account: address,
       });
-      const gas = est * 120n / 100n;
-      writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "deposit", args: [parsedAmount], gas });
+      writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "deposit", args: [parsedAmount] });
     } catch (e) {
       console.error("Gas estimation failed (deposit):", e);
       setStatus("error");

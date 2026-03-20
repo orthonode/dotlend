@@ -92,7 +92,7 @@ export function RepayAndWithdraw() {
       { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "debtBalance",       args: [address] },
       { address: addresses.collateralVault, abi: VAULT_ABI, functionName: "collateralBalance", args: [address] },
       { address: addresses.usdh,          abi: ERC20_ABI, functionName: "balanceOf",         args: [address] },
-      { address: addresses.usdh,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.treasuryRouter] },
+      { address: addresses.usdh,          abi: ERC20_ABI, functionName: "allowance",         args: [address, addresses.lendingPool] },
     ] : [],
     query: { refetchInterval: 15_000 },
   });
@@ -140,19 +140,19 @@ export function RepayAndWithdraw() {
 
   async function handleApprove() {
     setStatus("signing", "Approving USDH…");
-    let gas = 100_000n;
+    
     try {
-      const est = await publicClient!.estimateContractGas({
+      await publicClient!.estimateContractGas({
         address: addresses.usdh, abi: ERC20_ABI, functionName: "approve",
-        args: [addresses.treasuryRouter, maxUint256], account: address,
+        args: [addresses.lendingPool, maxUint256], account: address,
       });
-      gas = est * 120n / 100n;
+      
     } catch (e) {
       console.error("Gas estimation failed (approve):", e);
       setStatus("error");
       return;
     }
-    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.treasuryRouter, maxUint256], gas });
+    writeContract({ address: addresses.usdh, abi: ERC20_ABI, functionName: "approve", args: [addresses.lendingPool, maxUint256] });
   }
 
   async function handleRepay() {
@@ -170,37 +170,37 @@ export function RepayAndWithdraw() {
     }
     setOptimistic(0n, -amount);
     setStatus("signing", `Repaying ${Number(formatEther(amount)).toFixed(6)} USDH…`);
-    let gas = 200_000n;
+    
     try {
-      const est = await publicClient!.estimateContractGas({
+      await publicClient!.estimateContractGas({
         address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay",
         args: [amount], account: address,
       });
-      gas = est * 120n / 100n;
+      
     } catch (e) {
       console.error("Gas estimation failed (repay):", e);
       setStatus("error");
       return;
     }
-    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [amount], gas });
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "repay", args: [amount] });
   }
 
   async function handleWithdraw() {
     setOptimistic(-parsedWithdraw, 0n);
     setStatus("signing", `Withdrawing ${Number(withdrawAmount).toFixed(4)} ${assetSymbol}…`);
-    let gas = 200_000n;
+    
     try {
-      const est = await publicClient!.estimateContractGas({
+      await publicClient!.estimateContractGas({
         address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw",
         args: [parsedWithdraw], account: address,
       });
-      gas = est * 120n / 100n;
+      
     } catch (e) {
       console.error("Gas estimation failed (withdraw):", e);
       setStatus("error");
       return;
     }
-    writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw], gas });
+    writeContract({ address: addresses.collateralVault, abi: VAULT_ABI, functionName: "withdraw", args: [parsedWithdraw] });
   }
 
   if (!address) {

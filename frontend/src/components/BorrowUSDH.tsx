@@ -82,19 +82,19 @@ export function BorrowUSDH() {
     const parsed = parseEther(amount);
     setOptimistic(0n, parsed);
     setStatus("signing", `Borrowing ${Number(amount).toFixed(2)} USDH…`);
-    let gas = 200_000n;
+    
     try {
-      const est = await publicClient!.estimateContractGas({
+      await publicClient!.estimateContractGas({
         address: addresses.lendingPool, abi: POOL_ABI, functionName: "borrow",
         args: [parsed], account: address,
       });
-      gas = est * 120n / 100n;
     } catch (e) {
       console.error("Gas estimation failed (borrow):", e);
       setStatus("error");
       return;
     }
-    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "borrow", args: [parsed], gas });
+    
+    writeContract({ address: addresses.lendingPool, abi: POOL_ABI, functionName: "borrow", args: [parsed] });
   }
 
   if (!address) {
