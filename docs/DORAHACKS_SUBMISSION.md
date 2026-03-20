@@ -8,7 +8,8 @@ Aave: $20B TVL. Morpho: $3B TVL. Compound: $3B TVL. Polkadot: **$0**. Not zero m
 
 ## 🎥 Live Demo
 
-► [Watch Demo on YouTube](https://youtu.be/WYxeeyrQLWc)
+► [Full Walkthrough (22 min)](https://youtu.be/1zx_H9QyJIU)
+► [Short Demo](https://youtu.be/Oj9luiA8mJM)
 ► [Try it live: nexucore.xyz](https://nexucore.xyz)
 
 Full deposit → borrow → repay → liquidation flow running on Polkadot Hub TestNet today.

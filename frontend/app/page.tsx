@@ -53,7 +53,8 @@ export default function Home() {
         <div className="flex justify-center flex-wrap gap-4 mt-3">
           <a href={`https://blockscout-testnet.polkadot.io/address/${MARKETS.vdot.lendingPool}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A] transition">vDOT Pool</a>
           <a href={`https://blockscout-testnet.polkadot.io/address/${MARKETS.wpas.lendingPool}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A] transition">WPAS Pool</a>
-          <a href="https://youtu.be/nCcKqU8otWM" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A] transition">Demo</a>
+          <a href="https://youtu.be/Oj9luiA8mJM" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A] transition">Demo</a>
+          <a href="https://youtu.be/1zx_H9QyJIU" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A] transition">Full Walkthrough (22 min)</a>
           <a href="https://github.com/orthonode/dotlend" target="_blank" rel="noopener noreferrer" className="hover:text-[#E6007A] transition">GitHub</a>
         </div>
       </footer>
